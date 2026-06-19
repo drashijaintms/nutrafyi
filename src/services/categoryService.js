@@ -29,7 +29,20 @@ export const addCategory = async (categoryData) => {
   }
 };
 
-// UPDATE CATEGORY
+
+export const getCategory = async (id) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/${id}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
 export const updateCategory = async (
   id,
   categoryData
@@ -42,11 +55,10 @@ export const updateCategory = async (
 
     return response.data;
   } catch (error) {
-    console.error("Error updating category:", error);
+    console.error(error);
     throw error;
   }
 };
-
 // DELETE CATEGORY
 export const deleteCategory = async (id) => {
   try {

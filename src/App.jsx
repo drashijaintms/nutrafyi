@@ -7,6 +7,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import AddProduct from "./pages/admin/AddProduct";
 import Categories from "./pages/admin/Categories";
+import AddCategory from "./pages/admin/AddCategory";
+import EditCategory from "./pages/admin/EditCategory";
 import Header from "./components/Header";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -44,6 +46,8 @@ function App() {
   <Route path="/admin/products" element={<AdminProducts />}/>
   <Route path="/admin/products/add" element={<AddProduct />}/>
   <Route path="/admin/categories" element={<Categories />}/>
+  <Route path="/admin/categories/add" element={<AddCategory />} />
+  <Route path="/admin/categories/edit/:id" element={<EditCategory />}/>
 </Route>
 
   </Routes>

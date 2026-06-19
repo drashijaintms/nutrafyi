@@ -1,18 +1,36 @@
 import { useEffect, useState } from "react";
-import { getProducts } from "../../services/productService";
+import { getProducts, deleteProduct,} from "../../services/productService";
 import { Link } from "react-router-dom";
+import { FaEdit, FaTrash } from "react-icons/fa";
 function Products() {
   const [products, setProducts] = useState([]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const data = await getProducts();
-      setProducts(data);
-    };
+  const fetchProducts = async () => {
+    const data = await getProducts();
+    setProducts(data);
+  };
 
+  useEffect(() => {
     fetchProducts();
   }, []);
+const handleDelete = async (id) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this product?"
+  );
 
+  if (!confirmDelete) return;
+
+  try {
+    await deleteProduct(id);
+
+    await fetchProducts();
+
+    alert("Product Deleted Successfully");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete product");
+  }
+};
   return (
     <div>
       
@@ -57,7 +75,9 @@ function Products() {
               <th className="p-3 text-left">
                 Price
               </th>
-
+<th className="p-3 text-left">
+  Actions
+</th>
             </tr>
           </thead>
 
@@ -79,6 +99,34 @@ function Products() {
                 <td className="p-3">
                   {product.price}
                 </td>
+                <td className="p-3">
+  <div className="flex items-center gap-4">
+
+    <button
+      className="
+        text-blue-600
+        hover:text-blue-800
+        text-lg
+      "
+      title="Edit Product"
+    >
+      <FaEdit />
+    </button>
+
+<button
+  onClick={() => handleDelete(product._id)}
+  className="
+    text-red-600
+    hover:text-red-800
+    text-lg
+  "
+  title="Delete Product"
+>
+  <FaTrash />
+</button>
+
+  </div>
+</td>
               </tr>
             ))}
 
