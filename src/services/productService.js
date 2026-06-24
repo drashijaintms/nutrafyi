@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/products";
+const API_URL = "/api/products";
 
 // GET ALL PRODUCTS
 export const getProducts = async () => {
@@ -27,7 +27,23 @@ export const getProduct = async (slug) => {
     return null;
   }
 };
+// GET PRODUCT BY ID
+export const getProductById = async (id) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/id/${id}`
+    );
 
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching product:",
+      error
+    );
+
+    return null;
+  }
+};
 // ADD PRODUCT
 export const addProduct = async (productData) => {
   try {

@@ -7,4 +7,22 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    port: 5176,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/admin': {
+        target: 'http://localhost:5173',
+        changeOrigin: true,
+      },
+    },
+  },
 })

@@ -8,6 +8,16 @@ import { getProducts } from "../services/productService";
 import { productImages } from "../data/productImages";
 import headingLeaf from "../assets/heading-leaf.png";
 
+const resolveProductImage = (img, slug) => {
+  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+    return img;
+  }
+  return productImages[img] || productImages[slug] || img;
+};
+
+const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 0;
+
+
 
 function CategoryDetail() {
   const { slug } = useParams();
@@ -40,19 +50,11 @@ const filteredProducts = categoryProducts.filter((product) =>
 const sortedProducts = [...filteredProducts];
 
 if (sortBy === "price-low") {
-  sortedProducts.sort(
-    (a, b) =>
-      parseFloat(a.price.replace("$", "")) -
-      parseFloat(b.price.replace("$", ""))
-  );
+  sortedProducts.sort((a, b) => toNum(a.regularPrice || a.price) - toNum(b.regularPrice || b.price));
 }
 
 if (sortBy === "price-high") {
-  sortedProducts.sort(
-    (a, b) =>
-      parseFloat(b.price.replace("$", "")) -
-      parseFloat(a.price.replace("$", ""))
-  );
+  sortedProducts.sort((a, b) => toNum(b.regularPrice || b.price) - toNum(a.regularPrice || a.price));
 }
 
 if (sortBy === "a-z") {
@@ -166,11 +168,15 @@ if (!category) {
                 {sortedProducts.length > 0 ? (
   sortedProducts.map((product) => (
     <ProductCard
-      key={product.id}
-      image={productImages[product.image]}
+      key={product._id}
+      image={resolveProductImage(product.image, product.slug)}
       name={product.title}
-      price={product.price}
+      price={`$${toNum(product.regularPrice || product.price).toFixed(2)}`}
       slug={product.slug}
+      isBestSeller={product.isBestSeller}
+      badge={product.badge}
+      rating={product.rating}
+      reviews={product.reviews}
     />
   ))
 ) : (

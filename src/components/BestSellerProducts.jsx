@@ -3,6 +3,17 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getProducts } from "../services/productService";
 import { productImages } from "../data/productImages";
+
+const resolveProductImage = (img, slug) => {
+  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+    return img;
+  }
+  return productImages[img] || productImages[slug] || img;
+};
+
+// Strip any currency symbol and return a clean number
+const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 0;
+
 function BestSellerProducts() {
   const [products, setProducts] = useState([]);
   useEffect(() => {
@@ -101,7 +112,7 @@ key={product._id}
               {/* Image */}
               <div className="h-[175px] flex items-center justify-center px-4 pt-4">
                 <img
-                  src={productImages[product.image]}
+                  src={resolveProductImage(product.image, product.slug)}
                   alt={product.title}
                   className="
                     max-h-[145px]
@@ -131,7 +142,7 @@ key={product._id}
                 </h3>
 
                 <div className="font-bold text-[18px] mt-3 mb-4">
-                  {product.price}
+                  ${toNum(product.regularPrice || product.price).toFixed(2)}
                 </div>
 
                 <button

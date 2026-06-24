@@ -13,6 +13,12 @@ const categorySchema = new mongoose.Schema(
       unique: true,
     },
 
+    parentCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
+    },
+
     image: {
       type: String,
       default: "",
@@ -21,6 +27,11 @@ const categorySchema = new mongoose.Schema(
     description: {
       type: String,
       default: "",
+    },
+
+    order: {
+      type: Number,
+      default: 0,
     },
 
     count: {

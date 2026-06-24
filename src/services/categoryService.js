@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/categories";
+const API_URL = "/api/categories";
 
 // GET ALL CATEGORIES
 export const getCategories = async () => {

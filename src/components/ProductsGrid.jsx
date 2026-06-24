@@ -3,6 +3,17 @@ import headingLeaf from "../assets/heading-leaf.png";
 import ProductCard from "./ProductCard";
 import { getProducts } from "../services/productService";
 import { productImages } from "../data/productImages";
+
+const resolveProductImage = (img, slug) => {
+  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+    return img;
+  }
+  return productImages[img] || productImages[slug] || img;
+};
+
+// Strip any currency symbol and return a clean number string
+const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 0;
+
 function ProductsGrid() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,19 +42,11 @@ const filteredProducts = products.filter((product) =>
 const sortedProducts = [...filteredProducts];
 
 if (sortBy === "low-high") {
-  sortedProducts.sort(
-    (a, b) =>
-      parseFloat(a.price.replace("$", "")) -
-      parseFloat(b.price.replace("$", ""))
-  );
+  sortedProducts.sort((a, b) => toNum(a.regularPrice || a.price) - toNum(b.regularPrice || b.price));
 }
 
 if (sortBy === "high-low") {
-  sortedProducts.sort(
-    (a, b) =>
-      parseFloat(b.price.replace("$", "")) -
-      parseFloat(a.price.replace("$", ""))
-  );
+  sortedProducts.sort((a, b) => toNum(b.regularPrice || b.price) - toNum(a.regularPrice || a.price));
 }
 
 if (sortBy === "newest") {
@@ -100,10 +103,14 @@ if (sortBy === "newest") {
             sortedProducts.map((product) => (
               <ProductCard
   key={product._id}
-  image={productImages[product.slug]}
+  image={resolveProductImage(product.image, product.slug)}
   name={product.title}
-  price={product.price}
+  price={`$${toNum(product.regularPrice || product.price).toFixed(2)}`}
   slug={product.slug}
+  isBestSeller={product.isBestSeller}
+  badge={product.badge}
+  rating={product.rating}
+  reviews={product.reviews}
 />
             ))
           ) : (

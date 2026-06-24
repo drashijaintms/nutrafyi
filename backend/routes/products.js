@@ -1,103 +1,50 @@
 const express = require("express");
 const router = express.Router();
-
 const Product = require("../models/Product");
+const {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  bulkActions,
+} = require("../controllers/productController");
+const { protect } = require("../middleware/auth");
 
-// GET ALL PRODUCTS
+// Public routes (for customer-facing storefront)
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find();
-
+    // If query parameters are sent (like search/page), use the advanced getProducts controller
+    if (Object.keys(req.query).length > 0) {
+      return getProducts(req, res);
+    }
+    // Otherwise fallback to return all products for existing storefront compatibility
+    const products = await Product.find({ status: { $ne: "Draft" } });
     res.json(products);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
 
-// GET SINGLE PRODUCT BY SLUG
+router.get("/id/:id", getProductById);
+
 router.get("/:slug", async (req, res) => {
   try {
-    const product = await Product.findOne({
-      slug: req.params.slug,
-    });
-
+    const product = await Product.findOne({ slug: req.params.slug });
     if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-      });
+      return res.status(404).json({ message: "Product not found" });
     }
-
     res.json(product);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
 
-// ADD PRODUCT
-router.post("/", async (req, res) => {
-  try {
-    const product = new Product(req.body);
-
-    const savedProduct = await product.save();
-
-    res.status(201).json(savedProduct);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
-
-// UPDATE PRODUCT
-router.put("/:id", async (req, res) => {
-  try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-      }
-    );
-
-    if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-      });
-    }
-
-    res.json(product);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
-
-// DELETE PRODUCT
-router.delete("/:id", async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(
-      req.params.id
-    );
-
-    if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-      });
-    }
-
-    res.json({
-      message: "Product deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
+// Admin Protected routes
+router.get("/admin/all", protect, getProducts);
+router.post("/", protect, createProduct);
+router.put("/:id", protect, updateProduct);
+router.delete("/:id", protect, deleteProduct);
+router.post("/bulk", protect, bulkActions);
 
 module.exports = router;

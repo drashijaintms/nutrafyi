@@ -1,14 +1,24 @@
 const express = require("express");
 const router = express.Router();
-
 const Category = require("../models/Category");
 const Product = require("../models/Product");
+const { protect } = require("../middleware/auth");
+const { logAdminActivity } = require("../middleware/activityLogger");
 
-// GET ALL CATEGORIES
-// GET ALL CATEGORIES
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
+};
+
+// GET ALL CATEGORIES (nested formatting and sorting)
 router.get("/", async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find().sort({ order: 1 });
 
     const categoriesWithCount = await Promise.all(
       categories.map(async (category) => {
@@ -30,12 +40,40 @@ router.get("/", async (req, res) => {
     });
   }
 });
-// ADD CATEGORY
-router.post("/", async (req, res) => {
-  try {
-    const category = new Category(req.body);
 
+// GET SINGLE CATEGORY
+router.get("/:id", async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found",
+      });
+    }
+    res.json(category);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+// ADD CATEGORY (Admin protected)
+router.post("/", protect, async (req, res) => {
+  try {
+    const categoryData = { ...req.body };
+    if (!categoryData.slug && categoryData.title) {
+      categoryData.slug = slugify(categoryData.title);
+    }
+
+    const category = new Category(categoryData);
     const savedCategory = await category.save();
+
+    await logAdminActivity(
+      req.admin._id,
+      "Create Category",
+      `Created category: "${savedCategory.title}"`
+    );
 
     res.status(201).json(savedCategory);
   } catch (error) {
@@ -44,37 +82,30 @@ router.post("/", async (req, res) => {
     });
   }
 });
-// GET SINGLE CATEGORY
-router.get("/:id", async (req, res) => {
+
+// UPDATE CATEGORY (Admin protected)
+router.put("/:id", protect, async (req, res) => {
   try {
-    const category = await Category.findById(
-      req.params.id
+    const categoryData = { ...req.body };
+    if (categoryData.title && !categoryData.slug) {
+      categoryData.slug = slugify(categoryData.title);
+    }
+
+    const category = await Category.findByIdAndUpdate(
+      req.params.id,
+      categoryData,
+      { new: true }
     );
 
     if (!category) {
-      return res.status(404).json({
-        message: "Category not found",
-      });
+      return res.status(404).json({ message: "Category not found" });
     }
 
-    res.json(category);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
-// UPDATE CATEGORY
-router.put("/:id", async (req, res) => {
-  try {
-    const category =
-      await Category.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-          new: true,
-        }
-      );
+    await logAdminActivity(
+      req.admin._id,
+      "Update Category",
+      `Updated category: "${category.title}"`
+    );
 
     res.json(category);
   } catch (error) {
@@ -84,11 +115,20 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE CATEGORY
-router.delete("/:id", async (req, res) => {
+// DELETE CATEGORY (Admin protected)
+router.delete("/:id", protect, async (req, res) => {
   try {
-    await Category.findByIdAndDelete(
-      req.params.id
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    await Category.findByIdAndDelete(req.params.id);
+
+    await logAdminActivity(
+      req.admin._id,
+      "Delete Category",
+      `Deleted category: "${category.title}"`
     );
 
     res.json({

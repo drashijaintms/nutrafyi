@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { getCategories } from "../services/categoryService";
 import { categoryImages } from "../data/categoryImages";
 
+const resolveCategoryImage = (img, slug) => {
+  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+    return img;
+  }
+  return categoryImages[img] || categoryImages[slug] || img;
+};
+
 function CategoryGrid() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +98,7 @@ function CategoryGrid() {
             categories.map((category) => (
               <CategoryCard
                 key={category._id}
-                image={categoryImages[category.image]}
+                image={resolveCategoryImage(category.image, category.slug)}
                 title={category.title}
                 description={category.description}
                 slug={category.slug}
