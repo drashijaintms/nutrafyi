@@ -1,5 +1,6 @@
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 
 import Header from "./components/Header";
@@ -15,28 +16,38 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import BlogDetail from './pages/BlogDetail';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
-  <Routes>
+      <ScrollToTop />
+      <Routes>
 
-    {/* Website Routes */}
-    <Route element={<MainLayout />}>
-      <Route path="/" element={<Home />} />
-      <Route path="/category" element={<Category />} />
-      <Route path="/category/:slug" element={<CategoryDetail />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/product/:slug" element={<ProductDetail />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:slug" element={<BlogDetail />} />
-    </Route>
+        {/* Website Routes */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/category" element={<Category />} />
+          <Route path="/category/:slug" element={<CategoryDetail />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/product/:slug" element={<ProductDetail />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
+        </Route>
 
-
-
-  </Routes>
-</BrowserRouter>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

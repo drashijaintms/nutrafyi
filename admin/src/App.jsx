@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -21,9 +21,20 @@ import CMSPages from "./pages/CMSPages";
 import CMSBlogs from "./pages/CMSBlogs";
 import Settings from "./pages/Settings";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter basename="/admin">
+      <ScrollToTop />
       {/* Toast Alert popups */}
       <Toaster
         position="top-right"
