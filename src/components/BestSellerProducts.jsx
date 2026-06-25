@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getProducts } from "../services/productService";
 import { productImages } from "../data/productImages";
+import { useCurrency } from "../context/CurrencyContext";
 
 const resolveProductImage = (img, slug) => {
   if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
@@ -15,19 +16,64 @@ const resolveProductImage = (img, slug) => {
 const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 0;
 
 function BestSellerProducts() {
+  const { formatPrice, hasActiveSale } = useCurrency();
   const [products, setProducts] = useState([]);
-  useEffect(() => {
-  const fetchProducts = async () => {
-    const data = await getProducts();
-    setProducts(data);
+  const [toast, setToast] = useState({ show: false, message: "" });
+
+  const handleAddToCart = (e, prod) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const cartJson = localStorage.getItem("cart_items");
+    let items = cartJson ? JSON.parse(cartJson) : [];
+    
+    const priceVal = parseFloat(String(prod.salePrice || prod.regularPrice || prod.price || "0").replace(/[^\d.]/g, "")) || 0;
+    const imageVal = resolveProductImage(prod.image, prod.slug) || "";
+
+    const existing = items.find(item => item.slug === prod.slug);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      items.push({
+        id: prod.slug,
+        name: prod.title,
+        price: priceVal,
+        qty: 1,
+        image: imageVal,
+        slug: prod.slug,
+        currencyOverrides: prod.currencyOverrides || {}
+      });
+    }
+    
+    localStorage.setItem("cart_items", JSON.stringify(items));
+    window.dispatchEvent(new Event("cart_updated"));
+
+    setToast({ show: true, message: `Added "${prod.title}" to Cart!` });
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 3000);
   };
 
-  fetchProducts();
-}, []);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getProducts();
+      setProducts(data);
+    };
+    fetchProducts();
+  }, []);
+
   const bestSellerProducts = products.filter(
-  (product) => product.isBestSeller
-);
-   return (
+    (product) => product.isBestSeller
+  );
+  const handleBuyNow = (e, prod) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (prod.externalUrl) {
+      window.location.href = prod.externalUrl;
+    }
+  };
+
+  return (
     <section className="py-16 bg-[#f4f2e8]">
       <div className="max-w-[1180px] mx-auto px-4">
 
@@ -142,37 +188,58 @@ key={product._id}
                 </h3>
 
                 {/* Pricing Block */}
-                {product.salePrice && product.regularPrice && toNum(product.salePrice) > 0 && toNum(product.salePrice) !== toNum(product.regularPrice) ? (
+                {hasActiveSale(product) ? (
                   <div className="flex items-baseline justify-center gap-2 mt-3 mb-4">
                     <span className="font-bold text-[18px] text-[#dc2626]">
-                      ${toNum(product.salePrice).toFixed(2)}
+                      {formatPrice(product.salePrice, product.currencyOverrides)}
                     </span>
                     <span className="text-[13px] line-through text-slate-400 font-semibold">
-                      ${toNum(product.regularPrice).toFixed(2)}
+                      {formatPrice(product.regularPrice || product.price, product.currencyOverrides, true)}
                     </span>
                   </div>
                 ) : (
                   <div className="font-bold text-[18px] mt-3 mb-4 text-slate-850">
-                    ${toNum(product.regularPrice || product.price).toFixed(2)}
+                    {formatPrice(product.regularPrice || product.price, product.currencyOverrides)}
                   </div>
                 )}
 
-                <button
-                  className="
-                    bg-[#147a3f]
-                    hover:bg-[#106933]
-                    text-white
-                    text-[12px]
-                    font-bold
-                    uppercase
-                    px-6
-                    py-[10px]
-                    rounded-[3px]
-                    transition
-                  "
-                >
-                  ADD TO CART
-                </button>
+                {product.productType === "External" ? (
+                  <button
+                    onClick={(e) => handleBuyNow(e, product)}
+                    className="
+                      bg-[#d76611]
+                      hover:bg-[#b5530b]
+                      text-white
+                      text-[12px]
+                      font-bold
+                      uppercase
+                      px-6
+                      py-[10px]
+                      rounded-[3px]
+                      transition
+                    "
+                  >
+                    {product.buttonText || "BUY NOW"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => handleAddToCart(e, product)}
+                    className="
+                      bg-[#147a3f]
+                      hover:bg-[#106933]
+                      text-white
+                      text-[12px]
+                      font-bold
+                      uppercase
+                      px-6
+                      py-[10px]
+                      rounded-[3px]
+                      transition
+                    "
+                  >
+                    ADD TO CART
+                  </button>
+                )}
 
               </div>
 
@@ -180,6 +247,13 @@ key={product._id}
           ))}
 
         </div>
+
+        {toast.show && (
+          <div className="fixed bottom-8 right-8 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+            <span className="text-xs font-bold uppercase tracking-wider">{toast.message}</span>
+          </div>
+        )}
 
       </div>
     </section>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import BreadcrumbBar from "../components/BreadcrumbBar";
 import CategorySidebar from "../components/CategorySidebar";
 import ProductCard from "../components/ProductCard";
@@ -17,37 +17,97 @@ const resolveProductImage = (img, slug) => {
 
 const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 0;
 
-
-
 function CategoryDetail() {
   const { slug } = useParams();
   const [sortBy, setSortBy] = useState("best-selling");
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
-  const fetchProducts = async () => {
-    const data = await getProducts();
-    setProducts(data);
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const category = categories.find(
+    (item) => item.slug === slug
+  );
+
+  const categoryProducts = products.filter(
+    (product) => product.category === slug
+  );
+
+  const selectedForms = searchParams.get("form")
+    ? searchParams.get("form").split(",")
+    : [];
+
+  const selectedDietary = searchParams.get("dietary")
+    ? searchParams.get("dietary").split(",")
+    : [];
+
+  const maxPrice = searchParams.get("maxPrice")
+    ? parseInt(searchParams.get("maxPrice"), 10)
+    : 100;
+
+  const getProductItemForm = (product) => {
+    const spec = product.specifications?.find((s) => s.label === "ITEM FORM");
+    if (!spec) return "";
+    const val = spec.value.toLowerCase();
+    if (val.includes("capsule")) return "Capsules";
+    if (val.includes("tablet")) return "Tablets";
+    if (val.includes("powder")) return "Powder";
+    if (val.includes("gummi") || val.includes("gummy")) return "Gummies";
+    if (val.includes("liquid")) return "Liquid";
+    return spec.value;
   };
 
-  fetchProducts();
-}, []);
-const category = categories.find(
-  (item) => item.slug === slug
-);
+  const getProductDietType = (product) => {
+    const spec = product.specifications?.find((s) => s.label === "DIET TYPE");
+    if (!spec) return "";
+    const val = spec.value.toLowerCase();
+    if (val.includes("vegetarian")) return "Vegetarian";
+    if (val.includes("vegan")) return "Vegan";
+    if (val.includes("gluten")) return "Gluten Free";
+    if (val.includes("non-gmo") || val.includes("nongmo") || val.includes("non gmo")) return "Non-GMO";
+    if (val.includes("sugar")) return "Sugar Free";
+    return spec.value;
+  };
 
+  const filteredProducts = categoryProducts.filter((product) => {
+    // 1. Search term filter
+    const matchesSearch = product.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
 
-const categoryProducts = products.filter(
-  (product) => product.category === slug
-);
+    // 2. Form filter
+    if (selectedForms.length > 0) {
+      const form = getProductItemForm(product);
+      if (!selectedForms.includes(form)) return false;
+    }
 
-const filteredProducts = categoryProducts.filter((product) =>
-  product.title
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase())
-);
+    // 3. Dietary preference filter
+    if (selectedDietary.length > 0) {
+      const diet = getProductDietType(product);
+      if (!selectedDietary.includes(diet)) return false;
+    }
 
-const sortedProducts = [...filteredProducts];
+    // 4. Max price filter
+    const priceNum = toNum(product.regularPrice || product.price);
+    if (priceNum > maxPrice) return false;
+
+    return true;
+  });
+
+  const sortedProducts = [...filteredProducts];
 
 if (sortBy === "price-low") {
   sortedProducts.sort((a, b) => toNum(a.regularPrice || a.price) - toNum(b.regularPrice || b.price));
@@ -169,6 +229,7 @@ if (!category) {
   sortedProducts.map((product) => (
     <ProductCard
       key={product._id}
+      id={product._id}
       image={resolveProductImage(product.image, product.slug)}
       name={product.title}
       price={product.price}
@@ -179,6 +240,10 @@ if (!category) {
       badge={product.badge}
       rating={product.rating}
       reviews={product.reviews}
+      currencyOverrides={product.currencyOverrides}
+      productType={product.productType}
+      externalUrl={product.externalUrl}
+      buttonText={product.buttonText}
     />
   ))
 ) : (

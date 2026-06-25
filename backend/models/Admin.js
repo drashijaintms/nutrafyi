@@ -20,8 +20,25 @@ const adminSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "superadmin"],
+      enum: ["superadmin", "admin", "editor", "viewer"],
       default: "admin",
+    },
+    permissions: {
+      products: { type: Boolean, default: true },
+      categories: { type: Boolean, default: true },
+      brands: { type: Boolean, default: true },
+      orders: { type: Boolean, default: true },
+      customers: { type: Boolean, default: true },
+      users_view: { type: Boolean, default: true },
+      users_create: { type: Boolean, default: true },
+      users_edit: { type: Boolean, default: true },
+      users_delete: { type: Boolean, default: true },
+      coupons: { type: Boolean, default: true },
+      reviews: { type: Boolean, default: true },
+      inventory: { type: Boolean, default: true },
+      pages: { type: Boolean, default: true },
+      blogs: { type: Boolean, default: true },
+      settings: { type: Boolean, default: true }
     },
     refreshToken: {
       type: String,

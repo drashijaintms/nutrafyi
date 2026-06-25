@@ -32,6 +32,8 @@ const orderSchema = new mongoose.Schema(
           type: Map,
           of: String,
         }, // e.g. { Color: "Red", Size: "M" }
+        image: { type: String, default: "" },
+        slug: { type: String, default: "" },
       },
     ],
     shippingDetails: {
@@ -63,6 +65,8 @@ const orderSchema = new mongoose.Schema(
       shipping: { type: Number, default: 0 },
       total: { type: Number, required: true },
     },
+    currency: { type: String, default: "USD" },
+    currencySymbol: { type: String, default: "$" },
     status: {
       type: String,
       enum: [
@@ -90,14 +94,13 @@ const orderSchema = new mongoose.Schema(
 );
 
 // Auto-populate timestamps in status history if empty on first save
-orderSchema.pre("save", function (next) {
+orderSchema.pre("save", function () {
   if (this.isNew && this.statusHistory.length === 0) {
     this.statusHistory.push({
       status: this.status,
       note: "Order created successfully.",
     });
   }
-  next();
 });
 
 module.exports = mongoose.model("Order", orderSchema);

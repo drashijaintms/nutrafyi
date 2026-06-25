@@ -42,7 +42,7 @@ export default function Dashboard() {
     );
   }
 
-  const { summary = {}, charts = {}, recentOrders = [], recentActivities = [] } = data || {};
+  const { summary = {}, charts = {}, recentOrders = [], recentActivities = [], topProducts = [], topCategories = [] } = data || {};
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
@@ -63,6 +63,7 @@ export default function Dashboard() {
           color="emerald"
           change="+8.4%"
           changeType="positive"
+          to="/orders"
         />
         <StatsCard
           title="Total Orders"
@@ -71,6 +72,7 @@ export default function Dashboard() {
           color="indigo"
           change="+4.2%"
           changeType="positive"
+          to="/orders"
         />
         <StatsCard
           title="Total Customers"
@@ -79,12 +81,14 @@ export default function Dashboard() {
           color="sky"
           change="+12.1%"
           changeType="positive"
+          to="/customers"
         />
         <StatsCard
           title="Total Products"
           value={summary.totalProducts || 0}
           icon={ShoppingBag}
           color="violet"
+          to="/products"
         />
       </div>
 
@@ -150,6 +154,77 @@ export default function Dashboard() {
             ) : (
               <div className="h-full flex items-center justify-center text-slate-400 text-sm">
                 No orders data available
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Top Selling Products & Categories */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Products */}
+        <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6 lg:col-span-2">
+          <h3 className="text-sm font-bold text-slate-700 mb-4">Top Selling Products</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <th className="pb-3">Product</th>
+                  <th className="pb-3 text-center">Units Sold</th>
+                  <th className="pb-3 text-right">Revenue</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 text-sm text-slate-650">
+                {topProducts && topProducts.length > 0 ? (
+                  topProducts.map((prod) => (
+                    <tr key={prod._id} className="hover:bg-slate-50/50">
+                      <td className="py-3 flex items-center gap-3">
+                        {prod.image ? (
+                          <img
+                            src={prod.image}
+                            alt=""
+                            className="w-10 h-10 object-contain rounded-lg border border-slate-100 p-0.5 shrink-0 bg-white"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs uppercase shrink-0 border border-slate-100">
+                            No Img
+                          </div>
+                        )}
+                        <span className="font-bold text-slate-800 line-clamp-1">{prod.title || "Unknown Product"}</span>
+                      </td>
+                      <td className="py-3 text-center font-semibold text-slate-800">{prod.totalQty}</td>
+                      <td className="py-3 text-right font-bold text-emerald-600">${(prod.totalSales || 0).toFixed(2)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="py-8 text-center text-slate-400">
+                      No sales data available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top Categories */}
+        <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6">
+          <h3 className="text-sm font-bold text-slate-700 mb-4">Top Selling Categories</h3>
+          <div className="space-y-4">
+            {topCategories && topCategories.length > 0 ? (
+              topCategories.map((cat, idx) => (
+                <div key={idx} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                  <div>
+                    <h4 className="font-bold text-slate-850 text-sm capitalize">{cat._id}</h4>
+                    <span className="text-xs text-slate-400">{cat.totalQty} units sold</span>
+                  </div>
+                  <span className="font-bold text-slate-800 text-sm">${(cat.totalSales || 0).toFixed(2)}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-slate-400 py-12 text-sm">
+                No category sales records.
               </div>
             )}
           </div>

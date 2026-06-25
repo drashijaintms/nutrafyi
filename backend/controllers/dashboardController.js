@@ -102,6 +102,54 @@ const getStats = async (req, res) => {
     allActivities.sort((a, b) => b.timestamp - a.timestamp);
     const recentActivities = allActivities.slice(0, 10);
 
+    // 7. Maximum selling products & categories
+    const topProducts = await Order.aggregate([
+      { $match: { status: { $nin: ["Cancelled", "Refunded"] } } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.product",
+          title: { $first: "$items.title" },
+          slug: { $first: "$items.slug" },
+          image: { $first: "$items.image" },
+          totalQty: { $sum: "$items.quantity" },
+          totalSales: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+        }
+      },
+      { $sort: { totalQty: -1 } },
+      { $limit: 5 }
+    ]);
+
+    const topCategories = await Order.aggregate([
+      { $match: { status: { $nin: ["Cancelled", "Refunded"] } } },
+      { $unwind: "$items" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.product",
+          foreignField: "_id",
+          as: "productDoc"
+        }
+      },
+      { $unwind: { path: "$productDoc", preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: {
+            $cond: {
+              if: { $or: [{ $eq: ["$productDoc.categoryName", ""] }, { $not: ["$productDoc.categoryName"] }] },
+              then: "Uncategorized",
+              else: "$productDoc.categoryName"
+            }
+          },
+          categorySlug: { $first: "$productDoc.category" },
+          totalQty: { $sum: "$items.quantity" },
+          totalSales: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+        }
+      },
+      { $sort: { totalQty: -1 } },
+      { $limit: 5 }
+    ]);
+
     res.json({
       summary: {
         totalRevenue,
@@ -128,6 +176,8 @@ const getStats = async (req, res) => {
       recentCustomers,
       recentReviews,
       recentActivities,
+      topProducts,
+      topCategories,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

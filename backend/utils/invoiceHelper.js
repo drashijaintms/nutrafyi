@@ -52,6 +52,8 @@ const generateInvoicePDF = (order, writeStream) => {
   // Draw line under table header
   doc.moveTo(50, tableTop + 15).lineTo(540, tableTop + 15).stroke();
 
+  const curSym = order.currencySymbol || "$";
+
   doc.font("Helvetica");
   let currentY = tableTop + 25;
 
@@ -59,9 +61,9 @@ const generateInvoicePDF = (order, writeStream) => {
     // Wrap text if needed
     doc.text(item.title, 50, currentY, { width: 190 });
     doc.text(item.sku || "N/A", 250, currentY);
-    doc.text(`$${item.price.toFixed(2)}`, 350, currentY, { width: 60, align: "right" });
+    doc.text(`${curSym}${item.price.toFixed(2)}`, 350, currentY, { width: 60, align: "right" });
     doc.text(item.quantity.toString(), 420, currentY, { width: 40, align: "right" });
-    doc.text(`$${(item.price * item.quantity).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
+    doc.text(`${curSym}${(item.price * item.quantity).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
 
     currentY += 25;
   });
@@ -74,21 +76,21 @@ const generateInvoicePDF = (order, writeStream) => {
   doc.font("Helvetica-Bold");
 
   doc.text("Subtotal:", 350, currentY, { width: 100, align: "right" });
-  doc.font("Helvetica").text(`$${(amount.subtotal || 0).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
+  doc.font("Helvetica").text(`${curSym}${(amount.subtotal || 0).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
   currentY += 20;
 
   if (amount.discount > 0) {
     doc.font("Helvetica-Bold").text("Discount:", 350, currentY, { width: 100, align: "right" });
-    doc.font("Helvetica").text(`-$${(amount.discount || 0).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
+    doc.font("Helvetica").text(`-${curSym}${(amount.discount || 0).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
     currentY += 20;
   }
 
   doc.font("Helvetica-Bold").text("Shipping:", 350, currentY, { width: 100, align: "right" });
-  doc.font("Helvetica").text(`$${(amount.shipping || 0).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
+  doc.font("Helvetica").text(`${curSym}${(amount.shipping || 0).toFixed(2)}`, 480, currentY, { width: 60, align: "right" });
   currentY += 20;
 
   doc.font("Helvetica-Bold").text("Total Due:", 350, currentY, { width: 100, align: "right" });
-  doc.fontSize(12).font("Helvetica-Bold").text(`$${(amount.total || 0).toFixed(2)}`, 480, currentY - 2, { width: 60, align: "right" });
+  doc.fontSize(12).font("Helvetica-Bold").text(`${curSym}${(amount.total || 0).toFixed(2)}`, 480, currentY - 2, { width: 60, align: "right" });
 
   // --- FOOTER ---
   doc.fontSize(10).font("Helvetica")

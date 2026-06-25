@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import headingLeaf from "../assets/heading-leaf.png";
 import ProductCard from "./ProductCard";
 import { getProducts } from "../services/productService";
@@ -17,8 +18,10 @@ const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 
 function ProductsGrid() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-const [searchTerm, setSearchTerm] = useState("");
-const [sortBy, setSortBy] = useState("best-selling");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("best-selling");
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -34,24 +37,82 @@ const [sortBy, setSortBy] = useState("best-selling");
 
     fetchProducts();
   }, []);
-const filteredProducts = products.filter((product) =>
-  product.title
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase())
-);
-const sortedProducts = [...filteredProducts];
 
-if (sortBy === "low-high") {
-  sortedProducts.sort((a, b) => toNum(a.regularPrice || a.price) - toNum(b.regularPrice || b.price));
-}
+  const selectedForms = searchParams.get("form")
+    ? searchParams.get("form").split(",")
+    : [];
 
-if (sortBy === "high-low") {
-  sortedProducts.sort((a, b) => toNum(b.regularPrice || b.price) - toNum(a.regularPrice || a.price));
-}
+  const selectedDietary = searchParams.get("dietary")
+    ? searchParams.get("dietary").split(",")
+    : [];
 
-if (sortBy === "newest") {
-  sortedProducts.reverse();
-}
+  const maxPrice = searchParams.get("maxPrice")
+    ? parseInt(searchParams.get("maxPrice"), 10)
+    : 100;
+
+  const getProductItemForm = (product) => {
+    const spec = product.specifications?.find((s) => s.label === "ITEM FORM");
+    if (!spec) return "";
+    const val = spec.value.toLowerCase();
+    if (val.includes("capsule")) return "Capsules";
+    if (val.includes("tablet")) return "Tablets";
+    if (val.includes("powder")) return "Powder";
+    if (val.includes("gummi") || val.includes("gummy")) return "Gummies";
+    if (val.includes("liquid")) return "Liquid";
+    return spec.value;
+  };
+
+  const getProductDietType = (product) => {
+    const spec = product.specifications?.find((s) => s.label === "DIET TYPE");
+    if (!spec) return "";
+    const val = spec.value.toLowerCase();
+    if (val.includes("vegetarian")) return "Vegetarian";
+    if (val.includes("vegan")) return "Vegan";
+    if (val.includes("gluten")) return "Gluten Free";
+    if (val.includes("non-gmo") || val.includes("nongmo") || val.includes("non gmo")) return "Non-GMO";
+    if (val.includes("sugar")) return "Sugar Free";
+    return spec.value;
+  };
+
+  const filteredProducts = products.filter((product) => {
+    // 1. Search term filter
+    const matchesSearch = product.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+
+    // 2. Form filter
+    if (selectedForms.length > 0) {
+      const form = getProductItemForm(product);
+      if (!selectedForms.includes(form)) return false;
+    }
+
+    // 3. Dietary preference filter
+    if (selectedDietary.length > 0) {
+      const diet = getProductDietType(product);
+      if (!selectedDietary.includes(diet)) return false;
+    }
+
+    // 4. Max price filter
+    const priceNum = toNum(product.regularPrice || product.price);
+    if (priceNum > maxPrice) return false;
+
+    return true;
+  });
+
+  const sortedProducts = [...filteredProducts];
+
+  if (sortBy === "low-high") {
+    sortedProducts.sort((a, b) => toNum(a.regularPrice || a.price) - toNum(b.regularPrice || b.price));
+  }
+
+  if (sortBy === "high-low") {
+    sortedProducts.sort((a, b) => toNum(b.regularPrice || b.price) - toNum(a.regularPrice || a.price));
+  }
+
+  if (sortBy === "newest") {
+    sortedProducts.reverse();
+  }
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
@@ -99,10 +160,11 @@ if (sortBy === "newest") {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.length > 0 ? (
+          {sortedProducts.length > 0 ? (
             sortedProducts.map((product) => (
               <ProductCard
                 key={product._id}
+                id={product._id}
                 image={resolveProductImage(product.image, product.slug)}
                 name={product.title}
                 price={product.price}
@@ -113,6 +175,10 @@ if (sortBy === "newest") {
                 badge={product.badge}
                 rating={product.rating}
                 reviews={product.reviews}
+                currencyOverrides={product.currencyOverrides}
+                productType={product.productType}
+                externalUrl={product.externalUrl}
+                buttonText={product.buttonText}
               />
             ))
           ) : (

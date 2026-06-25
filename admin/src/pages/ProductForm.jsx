@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import API from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { ArrowLeft, Save, Plus, Trash, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash, Image as ImageIcon, Edit } from "lucide-react";
 import { resolveProductImage } from "../utils/resolveImage";
 
 import RichTextEditor from "../components/RichTextEditor";
@@ -44,6 +44,36 @@ export default function ProductForm() {
   const [digitalFile, setDigitalFile] = useState("");
   const [status, setStatus] = useState("Published");
   const [showSaleSchedule, setShowSaleSchedule] = useState(false);
+
+  const [availableForms, setAvailableForms] = useState([
+    "Capsules", "Tablets", "Powder", "Gummies", "Liquid", "Serum"
+  ]);
+  const [availableDietTypes, setAvailableDietTypes] = useState([
+    "Vegetarian", "Vegan", "Gluten Free", "Non-GMO", "Sugar Free", "Cruelty Free"
+  ]);
+
+  const [itemForm, setItemForm] = useState("");
+  const [dietType, setDietType] = useState("");
+  const [specifications, setSpecifications] = useState([]);
+  const [currencyOverrides, setCurrencyOverrides] = useState({
+    INR: { price: "", regularPrice: "", salePrice: "" },
+    EUR: { price: "", regularPrice: "", salePrice: "" }
+  });
+
+  const handleCurrencyOverrideChange = (currency, field, value) => {
+    setCurrencyOverrides((prev) => {
+      const updatedCurrency = { ...prev[currency], [field]: value };
+      if (field === "regularPrice") {
+        updatedCurrency.price = value;
+      } else if (field === "price") {
+        updatedCurrency.regularPrice = value;
+      }
+      return {
+        ...prev,
+        [currency]: updatedCurrency
+      };
+    });
+  };
 
   // Inventory & Stock management
   const [manageStock, setManageStock] = useState(false);
@@ -218,6 +248,10 @@ export default function ProductForm() {
       setPrice(productData.price || "");
       setRegularPrice(productData.regularPrice || "");
       setSalePrice(productData.salePrice || "");
+      setCurrencyOverrides(productData.currencyOverrides || {
+        INR: { price: "", regularPrice: "", salePrice: "" },
+        EUR: { price: "", regularPrice: "", salePrice: "" }
+      });
       if (productData.saleStart) {
         setSaleStart(productData.saleStart.split("T")[0]);
         setShowSaleSchedule(true);
@@ -264,17 +298,127 @@ export default function ProductForm() {
       setExternalUrl(productData.externalUrl || "");
       setButtonText(productData.buttonText || "");
       setDigitalFile(productData.digitalFile || "");
-      setStatus(productData.status || "Published");
-      setAttributes(productData.attributes || []);
-      setVariations(productData.variations || []);
-      if (productData.seo) {
-        setMetaTitle(productData.seo.metaTitle || "");
-        setMetaDescription(productData.seo.metaDescription || "");
-        setMetaKeywords(productData.seo.metaKeywords?.join(", ") || "");
-        setCanonicalUrl(productData.seo.canonicalUrl || "");
+        setStatus(productData.status || "Published");
+        setAttributes(productData.attributes || []);
+        setVariations(productData.variations || []);
+        if (productData.seo) {
+          setMetaTitle(productData.seo.metaTitle || "");
+          setMetaDescription(productData.seo.metaDescription || "");
+          setMetaKeywords(productData.seo.metaKeywords?.join(", ") || "");
+          setCanonicalUrl(productData.seo.canonicalUrl || "");
+        }
+        setSpecifications(productData.specifications || []);
+        const formSpec = productData.specifications?.find((s) => s.label === "ITEM FORM");
+        setItemForm(formSpec ? formSpec.value : "");
+        
+        const dietSpec = productData.specifications?.find((s) => s.label === "DIET TYPE");
+        setDietType(dietSpec ? dietSpec.value : "");
       }
+    }, [productData]);
+
+  useEffect(() => {
+    if (allProducts && allProducts.length > 0) {
+      const formsFromProducts = new Set();
+      const dietFromProducts = new Set();
+      
+      allProducts.forEach((p) => {
+        p.specifications?.forEach((s) => {
+          if (s.label === "ITEM FORM" && s.value) {
+            formsFromProducts.add(s.value);
+          }
+          if (s.label === "DIET TYPE" && s.value) {
+            dietFromProducts.add(s.value);
+          }
+        });
+      });
+      
+      setAvailableForms((prev) => {
+        const combined = new Set([...prev, ...formsFromProducts]);
+        return Array.from(combined).sort();
+      });
+      
+      setAvailableDietTypes((prev) => {
+        const combined = new Set([...prev, ...dietFromProducts]);
+        return Array.from(combined).sort();
+      });
     }
-  }, [productData]);
+  }, [allProducts]);
+
+  const handleFormSelect = (val) => {
+    if (val === "ADD_NEW") {
+      const newVal = window.prompt("Enter new Item Form value (e.g. Softgels, Liquid, Capsules):");
+      if (newVal && newVal.trim()) {
+        const trimmed = newVal.trim();
+        if (!availableForms.includes(trimmed)) {
+          setAvailableForms((prev) => [...prev, trimmed].sort());
+        }
+        setItemForm(trimmed);
+      } else {
+        setItemForm("");
+      }
+    } else {
+      setItemForm(val);
+    }
+  };
+
+  const handleEditForm = () => {
+    if (!itemForm) return;
+    const newVal = window.prompt(`Edit Item Form value "${itemForm}" to:`, itemForm);
+    if (newVal && newVal.trim()) {
+      const trimmed = newVal.trim();
+      setAvailableForms((prev) => {
+        const filtered = prev.filter(f => f !== itemForm);
+        return [...filtered, trimmed].sort();
+      });
+      setItemForm(trimmed);
+    }
+  };
+
+  const handleDeleteForm = () => {
+    if (!itemForm) return;
+    if (window.confirm(`Are you sure you want to delete form option "${itemForm}"?`)) {
+      setAvailableForms((prev) => prev.filter(f => f !== itemForm));
+      setItemForm("");
+    }
+  };
+
+  const handleDietarySelect = (val) => {
+    if (val === "ADD_NEW") {
+      const newVal = window.prompt("Enter new Dietary Preference value (e.g. Keto, Halal, Kosher):");
+      if (newVal && newVal.trim()) {
+        const trimmed = newVal.trim();
+        if (!availableDietTypes.includes(trimmed)) {
+          setAvailableDietTypes((prev) => [...prev, trimmed].sort());
+        }
+        setDietType(trimmed);
+      } else {
+        setDietType("");
+      }
+    } else {
+      setDietType(val);
+    }
+  };
+
+  const handleEditDietary = () => {
+    if (!dietType) return;
+    const newVal = window.prompt(`Edit Dietary Preference value "${dietType}" to:`, dietType);
+    if (newVal && newVal.trim()) {
+      const trimmed = newVal.trim();
+      setAvailableDietTypes((prev) => {
+        const filtered = prev.filter(d => d !== dietType);
+        return [...filtered, trimmed].sort();
+      });
+      setDietType(trimmed);
+    }
+  };
+
+  const handleDeleteDietary = () => {
+    if (!dietType) return;
+    if (window.confirm(`Are you sure you want to delete dietary preference option "${dietType}"?`)) {
+      setAvailableDietTypes((prev) => prev.filter(d => d !== dietType));
+      setDietType("");
+    }
+  };
 
   // Mutation
   const saveMutation = useMutation({
@@ -384,8 +528,32 @@ export default function ProductForm() {
     const cleanPrice        = stripCurrency(price || regularPrice);
     const cleanRegularPrice = stripCurrency(regularPrice || price);
     const cleanSalePrice    = stripCurrency(salePrice);
+    
+    const cleanCurrencyOverrides = {
+      INR: {
+        price: stripCurrency(currencyOverrides?.INR?.price || currencyOverrides?.INR?.regularPrice),
+        regularPrice: stripCurrency(currencyOverrides?.INR?.regularPrice || currencyOverrides?.INR?.price),
+        salePrice: stripCurrency(currencyOverrides?.INR?.salePrice)
+      },
+      EUR: {
+        price: stripCurrency(currencyOverrides?.EUR?.price || currencyOverrides?.EUR?.regularPrice),
+        regularPrice: stripCurrency(currencyOverrides?.EUR?.regularPrice || currencyOverrides?.EUR?.price),
+        salePrice: stripCurrency(currencyOverrides?.EUR?.salePrice)
+      }
+    };
 
     const categoryName = categories.find((c) => c.slug === category)?.title || "";
+
+    const otherSpecs = specifications.filter(
+      (s) => s.label !== "BRAND" && s.label !== "ITEM FORM" && s.label !== "DIET TYPE"
+    );
+    const brandName = brands.find((b) => b.slug === brand)?.name || brand;
+    const finalSpecs = [
+      ...otherSpecs,
+      ...(brand ? [{ label: "BRAND", value: brandName }] : []),
+      ...(itemForm ? [{ label: "ITEM FORM", value: itemForm }] : []),
+      ...(dietType ? [{ label: "DIET TYPE", value: dietType }] : [])
+    ];
 
     const payload = {
       title,
@@ -393,6 +561,7 @@ export default function ProductForm() {
       price:        cleanPrice,
       regularPrice: cleanRegularPrice,
       salePrice:    cleanSalePrice,
+      currencyOverrides: cleanCurrencyOverrides,
       saleStart: saleStart || null,
       saleEnd: saleEnd || null,
       description,
@@ -429,6 +598,7 @@ export default function ProductForm() {
       status,
       attributes,
       variations,
+      specifications: finalSpecs,
       seo: {
         metaTitle,
         metaDescription,
@@ -556,7 +726,92 @@ saveMutation.mutate(payload);
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  Item Form
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={itemForm}
+                    onChange={(e) => handleFormSelect(e.target.value)}
+                    className="flex-1 text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                  >
+                    <option value="">Select Form</option>
+                    {availableForms.map((f) => (
+                      <option key={f} value={f}>
+                        {f}
+                      </option>
+                    ))}
+                    <option value="ADD_NEW" className="font-bold text-indigo-600">+ Add New Form Option</option>
+                  </select>
+                  {itemForm && (
+                    <div className="flex gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleEditForm}
+                        className="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-500 transition-all flex items-center justify-center"
+                        title="Edit current Form"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeleteForm}
+                        className="p-3 rounded-xl border border-rose-100 bg-white hover:bg-rose-50 hover:border-rose-250 text-rose-500 transition-all flex items-center justify-center"
+                        title="Delete current Form"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  Dietary Preference
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={dietType}
+                    onChange={(e) => handleDietarySelect(e.target.value)}
+                    className="flex-1 text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                  >
+                    <option value="">Select Diet Type</option>
+                    {availableDietTypes.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                    <option value="ADD_NEW" className="font-bold text-indigo-600">+ Add New Diet Type</option>
+                  </select>
+                  {dietType && (
+                    <div className="flex gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleEditDietary}
+                        className="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-500 transition-all flex items-center justify-center"
+                        title="Edit current Diet Type"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeleteDietary}
+                        className="p-3 rounded-xl border border-rose-100 bg-white hover:bg-rose-50 hover:border-rose-250 text-rose-500 transition-all flex items-center justify-center"
+                        title="Delete current Diet Type"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
+
 
 
           {/* 3. WooCommerce Product Data Box */}
@@ -731,7 +986,7 @@ saveMutation.mutate(payload);
                                   type="date"
                                   value={saleStart}
                                   onChange={(e) => setSaleStart(e.target.value)}
-                                  className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
+                                  className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-hidden"
                                 />
                               </div>
                               <div>
@@ -742,12 +997,85 @@ saveMutation.mutate(payload);
                                   type="date"
                                   value={saleEnd}
                                   onChange={(e) => setSaleEnd(e.target.value)}
-                                  className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
+                                  className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-hidden"
                                 />
                               </div>
                             </div>
                           </div>
                         )}
+
+                        {/* Currency Overrides Section */}
+                        <div className="bg-slate-50/40 p-5 rounded-2xl border border-slate-100 space-y-5">
+                          <div>
+                            <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                              Indian Rupee (INR) Overrides
+                            </h5>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Custom override price for INR currency (leave blank to use conversion rate)</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">
+                                  Regular Price (₹)
+                                </label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={currencyOverrides?.INR?.regularPrice || ""}
+                                  onChange={(e) => handleCurrencyOverrideChange("INR", "regularPrice", e.target.value)}
+                                  placeholder="e.g. 5999"
+                                  className="w-full text-sm px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">
+                                  Sale Price (₹)
+                                </label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={currencyOverrides?.INR?.salePrice || ""}
+                                  onChange={(e) => handleCurrencyOverrideChange("INR", "salePrice", e.target.value)}
+                                  placeholder="e.g. 4999"
+                                  className="w-full text-sm px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="border-t border-slate-100 pt-4">
+                            <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                              Euro (EUR) Overrides
+                            </h5>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Custom override price for EUR currency (leave blank to use conversion rate)</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">
+                                  Regular Price (€)
+                                </label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={currencyOverrides?.EUR?.regularPrice || ""}
+                                  onChange={(e) => handleCurrencyOverrideChange("EUR", "regularPrice", e.target.value)}
+                                  placeholder="e.g. 69"
+                                  className="w-full text-sm px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">
+                                  Sale Price (€)
+                                </label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={currencyOverrides?.EUR?.salePrice || ""}
+                                  onChange={(e) => handleCurrencyOverrideChange("EUR", "salePrice", e.target.value)}
+                                  placeholder="e.g. 49"
+                                  className="w-full text-sm px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
 

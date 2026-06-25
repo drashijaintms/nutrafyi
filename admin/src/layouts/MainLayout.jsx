@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutSuccess } from "../redux/authSlice";
 import API from "../services/api";
+import { toast } from "react-hot-toast";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -26,6 +27,7 @@ export default function MainLayout({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -34,38 +36,59 @@ export default function MainLayout({ children }) {
 
   const menuItems = [
     { label: "Dashboard", path: "/", icon: LayoutDashboard },
-    { label: "Products", path: "/products", icon: ShoppingBag },
-    { label: "Categories", path: "/categories", icon: FolderTree },
-    { label: "Brands", path: "/brands", icon: Tag },
-    { label: "Orders", path: "/orders", icon: ShoppingCart },
-    { label: "Customers", path: "/customers", icon: Users },
-    { label: "Coupons", path: "/coupons", icon: Tag },
-    { label: "Reviews", path: "/reviews", icon: MessageSquare },
-    { label: "Inventory", path: "/inventory", icon: PackageCheck },
-    { label: "CMS Pages", path: "/pages", icon: FileText },
-    { label: "CMS Blogs", path: "/blogs", icon: FileText },
-    { label: "Settings", path: "/settings", icon: SettingsIcon },
+    { label: "Products", path: "/products", icon: ShoppingBag, resource: "products" },
+    { label: "Categories", path: "/categories", icon: FolderTree, resource: "categories" },
+    { label: "Brands", path: "/brands", icon: Tag, resource: "brands" },
+    { label: "Orders", path: "/orders", icon: ShoppingCart, resource: "orders" },
+    { label: "Customers", path: "/customers", icon: Users, resource: "users_view" },
+    { label: "Coupons", path: "/coupons", icon: Tag, resource: "coupons" },
+    { label: "Reviews", path: "/reviews", icon: MessageSquare, resource: "reviews" },
+    { label: "Inventory", path: "/inventory", icon: PackageCheck, resource: "inventory" },
+    { label: "CMS Pages", path: "/pages", icon: FileText, resource: "pages" },
+    { label: "CMS Blogs", path: "/blogs", icon: FileText, resource: "blogs" },
+    { label: "Settings", path: "/settings", icon: SettingsIcon, resource: "settings" },
   ];
+
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (!item.resource) return true;
+    if (!admin) return false;
+    if (admin.role === "superadmin") return true;
+    return admin.permissions && admin.permissions[item.resource] === true;
+  });
+
+  if (admin && admin.role === "superadmin") {
+    filteredMenuItems.push({ label: "Administrators", path: "/admins", icon: Users });
+  }
 
   const fetchNotifications = async () => {
     try {
-      // Mocking/fetching notifications
-      // In a real database we could fetch `/api/notifications`
-      // Let's seed a few fake alerts if no database route yet, to populate UI
-      setNotifications([
-        { id: "1", title: "New Order Recieved", message: "Order #ORD-82937 worth $120.00", read: false },
-        { id: "2", title: "Low Stock Alert", message: "Vitamin C capsules is below threshold", read: false },
-        { id: "3", title: "New Review Received", message: "Customer John left 5 stars review", read: true },
-      ]);
-      setUnreadCount(2);
+      const res = await API.get("/notifications");
+      const newNotifications = res.data.notifications || [];
+      const newUnreadCount = res.data.unreadCount || 0;
+
+      if (!isFirstLoad && newUnreadCount > unreadCount) {
+        const latest = newNotifications.find(n => !n.read);
+        if (latest) {
+          toast.success(`${latest.title}: ${latest.message}`, {
+            icon: "🔔",
+            duration: 5000,
+          });
+        }
+      }
+      setIsFirstLoad(false);
+
+      setNotifications(newNotifications);
+      setUnreadCount(newUnreadCount);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch notifications:", err);
     }
   };
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
+  }, [unreadCount, isFirstLoad]);
 
   const handleLogout = async () => {
     try {
@@ -75,9 +98,29 @@ export default function MainLayout({ children }) {
     navigate("/login");
   };
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadCount(0);
+  const markAllRead = async () => {
+    try {
+      await API.put("/notifications/mark-read");
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleNotificationClick = async (n) => {
+    try {
+      if (!n.read) {
+        await API.put(`/notifications/${n._id}/read`);
+        fetchNotifications();
+      }
+      setShowNotifications(false);
+      if (n.link) {
+        navigate(n.link);
+      }
+    } catch (err) {
+      console.error("Failed to handle notification click:", err);
+    }
   };
 
   return (
@@ -101,7 +144,7 @@ export default function MainLayout({ children }) {
         </div>
 
         <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-4rem)]">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
             return (
@@ -143,7 +186,7 @@ export default function MainLayout({ children }) {
               <Menu className="w-6 h-6" />
             </button>
             <h2 className="text-base font-bold text-slate-800 hidden md:block">
-              {menuItems.find((item) => item.path === location.pathname)?.label || "E-Commerce"}
+              {filteredMenuItems.find((item) => item.path === location.pathname)?.label || "E-Commerce"}
             </h2>
           </div>
 
@@ -173,12 +216,22 @@ export default function MainLayout({ children }) {
                     )}
                   </div>
                   <div className="divide-y divide-slate-50 max-h-64 overflow-y-auto">
-                    {notifications.map((n) => (
-                      <div key={n.id} className={`p-4 hover:bg-slate-50 transition-colors ${!n.read ? "bg-indigo-50/20" : ""}`}>
-                        <p className="text-sm font-bold text-slate-800">{n.title}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{n.message}</p>
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-xs text-slate-400 italic">
+                        No notifications yet
                       </div>
-                    ))}
+                    ) : (
+                      notifications.map((n, idx) => (
+                        <div
+                          key={n._id || idx}
+                          onClick={() => handleNotificationClick(n)}
+                          className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer ${!n.read ? "bg-indigo-50/20 font-medium" : ""}`}
+                        >
+                          <p className="text-sm font-bold text-slate-800">{n.title}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{n.message}</p>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}

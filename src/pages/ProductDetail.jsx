@@ -1,12 +1,13 @@
 import "./ProductDetail.css";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getProduct, getProducts } from "../services/productService";
 import { productImages } from "../data/productImages";
 import BreadcrumbBar from "../components/BreadcrumbBar";
 import Testimonials from "../components/Testimonials";
 import NewsletterSection from "../components/NewsletterSection";
 import { ShieldCheck, Truck, RotateCcw, Award, Star, ChevronRight, Package, Heart, Share2 } from "lucide-react";
+import { useCurrency } from "../context/CurrencyContext";
 
 const resolveImage = (img, slug) => {
   if (!img) return null;
@@ -100,31 +101,28 @@ function StarRating({ rating = 0, reviews = 0 }) {
 // ────────────────────────────────────────────────
 // Price Block
 // ────────────────────────────────────────────────
-function PriceBlock({ regularPrice, salePrice, price }) {
-  const regClean = cleanPrice(regularPrice);
-  const saleClean = cleanPrice(salePrice);
-  const priceClean = cleanPrice(price);
-
-  const hasSale = saleClean && regClean && saleClean !== regClean;
+function PriceBlock({ regularPrice, salePrice, price, currencyOverrides }) {
+  const { formatPrice, hasActiveSale, getNumericPrice } = useCurrency();
+  const mockProductObj = { price, regularPrice, salePrice, currencyOverrides };
+  const hasSale = hasActiveSale(mockProductObj);
 
   if (hasSale) {
-    const reg = parseFloat(regClean);
-    const sale = parseFloat(saleClean);
+    const reg = getNumericPrice(regularPrice, currencyOverrides, true);
+    const sale = getNumericPrice(salePrice, currencyOverrides);
     const discount = reg > 0 ? Math.round(((reg - sale) / reg) * 100) : 0;
 
     return (
       <div className="pd-price-block">
-        <span className="pd-price-sale">${saleClean}</span>
-        <span className="pd-price-original">${regClean}</span>
+        <span className="pd-price-sale">{formatPrice(salePrice, currencyOverrides)}</span>
+        <span className="pd-price-original">{formatPrice(regularPrice, currencyOverrides, true)}</span>
         {discount > 0 && <span className="pd-price-discount">-{discount}%</span>}
       </div>
     );
   }
 
-  const displayPrice = regClean || priceClean;
   return (
     <div className="pd-price-block">
-      <span className="pd-price-main">{displayPrice ? `$${displayPrice}` : "Price not set"}</span>
+      <span className="pd-price-main">{formatPrice(regularPrice || price, currencyOverrides)}</span>
     </div>
   );
 }
@@ -194,8 +192,9 @@ function VariationSelector({ attributes, variations, onSelect }) {
 // Related Product Card
 // ────────────────────────────────────────────────
 function RelatedCard({ product }) {
+  const { formatPrice, hasActiveSale } = useCurrency();
+  const hasSale = hasActiveSale(product);
   const img = resolveImage(product.image, product.slug);
-  const hasSale = product.salePrice && product.regularPrice && product.salePrice !== product.regularPrice;
 
   return (
     <Link to={`/product/${product.slug}`} className="pd-related-card">
@@ -213,11 +212,11 @@ function RelatedCard({ product }) {
         <div className="pd-related-price">
           {hasSale ? (
             <>
-              <span className="pd-related-sale">${cleanPrice(product.salePrice)}</span>
-              <span className="pd-related-original">${cleanPrice(product.regularPrice)}</span>
+              <span className="pd-related-sale">{formatPrice(product.salePrice, product.currencyOverrides)}</span>
+              <span className="pd-related-original">{formatPrice(product.regularPrice || product.price, product.currencyOverrides, true)}</span>
             </>
           ) : (
-            <span className="pd-related-main">${cleanPrice(product.regularPrice || product.price)}</span>
+            <span className="pd-related-main">{formatPrice(product.regularPrice || product.price, product.currencyOverrides)}</span>
           )}
         </div>
       </div>
@@ -357,8 +356,135 @@ function TrustBadges() {
 // Purchase Sidebar
 // ────────────────────────────────────────────────
 function PurchaseSidebar({ product, selectedVariation }) {
+  const { formatPrice, hasActiveSale, getNumericPrice } = useCurrency();
+  const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const [wishlist, setWishlist] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "" });
+
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (!product || !product._id) return;
+      const token = localStorage.getItem("token");
+      let wishList = [];
+      const wishJson = localStorage.getItem("wishlist_ids");
+      
+      if (wishJson) {
+        wishList = JSON.parse(wishJson);
+      } else if (token) {
+        try {
+          const res = await fetch("/api/user/profile", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.customer && data.customer.wishlist) {
+              const ids = data.customer.wishlist.map(w => w._id || w);
+              localStorage.setItem("wishlist_ids", JSON.stringify(ids));
+              wishList = ids;
+            }
+          }
+        } catch (err) {
+          console.error("Self-heal wishlist fetch error:", err);
+        }
+      }
+      setWishlist(wishList.includes(product._id));
+    };
+
+    checkWishlist();
+
+    window.addEventListener("wishlist_updated", checkWishlist);
+    window.addEventListener("user_logged_in", checkWishlist);
+    window.addEventListener("user_logged_out", checkWishlist);
+    
+    return () => {
+      window.removeEventListener("wishlist_updated", checkWishlist);
+      window.removeEventListener("user_logged_in", checkWishlist);
+      window.removeEventListener("user_logged_out", checkWishlist);
+    };
+  }, [product]);
+
+  const handleToggleWishlist = async () => {
+    if (!product || !product._id) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/user/wishlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId: product._id })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update wishlist");
+      }
+
+      localStorage.setItem("wishlist_ids", JSON.stringify(data.wishlist));
+      window.dispatchEvent(new Event("wishlist_updated"));
+
+      triggerToast(wishlist ? "Removed from Wishlist!" : "Added to Wishlist!");
+
+    } catch (err) {
+      console.error("Wishlist error:", err);
+      triggerToast(err.message || "Error updating wishlist");
+    }
+  };
+
+  const triggerToast = (msg) => {
+    setToast({ show: true, message: msg });
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 3000);
+  };
+
+  const handleAddToCart = () => {
+    const cartJson = localStorage.getItem("cart_items");
+    let items = cartJson ? JSON.parse(cartJson) : [];
+    
+    const itemId = selectedVariation ? `${product._id}-${selectedVariation.sku}` : product._id;
+    const name = selectedVariation 
+      ? `${product.title} (${Object.entries(selectedVariation.combination || {}).map(([k,v]) => `${k}: ${v}`).join(", ")})` 
+      : product.title;
+    
+    const rawPrice = selectedVariation
+      ? selectedVariation.salePrice || selectedVariation.price
+      : product.salePrice || product.regularPrice || product.price;
+    const priceVal = getNumericPrice(rawPrice, product.currencyOverrides);
+    const imageVal = resolveImage(product.image, product.slug) || "";
+
+    const existing = items.find(item => item.id === itemId);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      items.push({
+        id: itemId,
+        name,
+        price: priceVal,
+        qty,
+        image: imageVal,
+        slug: product.slug,
+        currencyOverrides: product.currencyOverrides || {}
+      });
+    }
+    
+    localStorage.setItem("cart_items", JSON.stringify(items));
+    window.dispatchEvent(new Event("cart_updated"));
+    triggerToast(`Added to Cart! (Quantity: ${qty})`);
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+    navigate("/checkout");
+  };
 
   const isOOS = product.stockStatus === "Out of Stock";
   const isSoldIndividually = product.soldIndividually;
@@ -371,12 +497,8 @@ function PurchaseSidebar({ product, selectedVariation }) {
     ? selectedVariation.price
     : product.regularPrice;
 
-  const displayPrice = cleanPrice(rawPrice);
-  const displayRegular = cleanPrice(rawRegular);
-
-  const hasSale = selectedVariation
-    ? cleanPrice(selectedVariation.salePrice) && cleanPrice(selectedVariation.salePrice) !== cleanPrice(selectedVariation.price)
-    : cleanPrice(product.salePrice) && cleanPrice(product.regularPrice) && cleanPrice(product.salePrice) !== cleanPrice(product.regularPrice);
+  const mockProductObj = { price: rawRegular, regularPrice: rawRegular, salePrice: rawPrice, currencyOverrides: product.currencyOverrides };
+  const hasSale = hasActiveSale(mockProductObj);
 
   const stockQty = selectedVariation ? selectedVariation.stock : product.stockQuantity;
 
@@ -384,10 +506,10 @@ function PurchaseSidebar({ product, selectedVariation }) {
     <div className="pd-purchase">
       {/* Price */}
       <div className="pd-purchase-price">
-        {displayPrice ? (
+        {rawPrice ? (
           <>
-            <span className="pd-purchase-current">${displayPrice}</span>
-            {hasSale && displayRegular && <span className="pd-purchase-original">${displayRegular}</span>}
+            <span className="pd-purchase-current">{formatPrice(rawPrice, product.currencyOverrides)}</span>
+            {hasSale && rawRegular && <span className="pd-purchase-original">{formatPrice(rawRegular, product.currencyOverrides, true)}</span>}
           </>
         ) : (
           <span className="pd-purchase-na">Price not available</span>
@@ -445,18 +567,26 @@ function PurchaseSidebar({ product, selectedVariation }) {
       {isExternal ? (
         <a
           href={product.externalUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          target="_self"
           className="pd-btn-primary"
+          style={{ display: "block", textAlign: "center" }}
         >
           {product.buttonText || "Buy Now"}
         </a>
       ) : (
         <>
-          <button className="pd-btn-primary" disabled={isOOS}>
+          <button
+            className="pd-btn-primary"
+            disabled={isOOS}
+            onClick={handleAddToCart}
+          >
             {isOOS ? "Out of Stock" : "Add to Cart"}
           </button>
-          <button className="pd-btn-secondary" disabled={isOOS}>
+          <button
+            className="pd-btn-secondary"
+            disabled={isOOS}
+            onClick={handleBuyNow}
+          >
             Buy Now
           </button>
         </>
@@ -466,16 +596,29 @@ function PurchaseSidebar({ product, selectedVariation }) {
       <div className="pd-actions-row">
         <button
           className={`pd-action-btn${wishlist ? " active" : ""}`}
-          onClick={() => setWishlist(!wishlist)}
+          onClick={handleToggleWishlist}
         >
           <Heart size={16} fill={wishlist ? "#ef4444" : "none"} color={wishlist ? "#ef4444" : "currentColor"} />
           {wishlist ? "Wishlisted" : "Wishlist"}
         </button>
-        <button className="pd-action-btn">
+        <button
+          className="pd-action-btn"
+          onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+            triggerToast("Product link copied!");
+          }}
+        >
           <Share2 size={16} />
           Share
         </button>
       </div>
+
+      {toast.show && (
+        <div className="fixed bottom-8 right-8 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+          <span className="text-xs font-bold uppercase tracking-wider">{toast.message}</span>
+        </div>
+      )}
 
       <TrustBadges />
 
@@ -598,6 +741,7 @@ export default function ProductDetail() {
                   regularPrice={product.regularPrice}
                   salePrice={product.salePrice}
                   price={product.price}
+                  currencyOverrides={product.currencyOverrides}
                 />
 
                 {/* Short description */}

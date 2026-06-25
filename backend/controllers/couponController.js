@@ -102,9 +102,60 @@ const deleteCoupon = async (req, res) => {
   }
 };
 
+// @desc    Validate a coupon code (public)
+// @route   GET /api/coupons/validate/:code
+// @access  Public
+const validateCoupon = async (req, res) => {
+  try {
+    const { code } = req.params;
+    const subtotal = parseFloat(req.query.subtotal) || 0;
+
+    const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+    if (!coupon) {
+      return res.status(404).json({ message: "Coupon not found" });
+    }
+
+    if (!coupon.isActive) {
+      return res.status(400).json({ message: "Coupon is inactive" });
+    }
+
+    const now = new Date();
+    if (now < new Date(coupon.startDate)) {
+      return res.status(400).json({ message: "Coupon is not active yet" });
+    }
+    if (now > new Date(coupon.endDate)) {
+      return res.status(400).json({ message: "Coupon has expired" });
+    }
+
+    if (coupon.usageLimit !== null && coupon.usageCount >= coupon.usageLimit) {
+      return res.status(400).json({ message: "Coupon usage limit reached" });
+    }
+
+    if (subtotal < coupon.minOrderAmount) {
+      return res.status(400).json({ 
+        message: `Minimum spend of $${coupon.minOrderAmount.toFixed(2)} required for this coupon` 
+      });
+    }
+
+    res.json({
+      success: true,
+      coupon: {
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountAmount: coupon.discountAmount,
+        minOrderAmount: coupon.minOrderAmount,
+        maxDiscount: coupon.maxDiscount,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getCoupons,
   createCoupon,
   updateCoupon,
   deleteCoupon,
+  validateCoupon,
 };

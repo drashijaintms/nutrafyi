@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import API from "../services/api";
 import DataTable from "../components/DataTable";
 import { Eye, FileDown } from "lucide-react";
+import { downloadInvoice } from "../utils/invoiceDownloader";
 
 export default function Orders() {
   const [search, setSearch] = useState("");
@@ -51,7 +52,7 @@ export default function Orders() {
     },
     {
       header: "Amount",
-      render: (row) => <span className="font-semibold text-slate-800">${row.amount.total.toFixed(2)}</span>,
+      render: (row) => <span className="font-semibold text-slate-800">{row.currencySymbol || "$"}{row.amount.total.toFixed(2)}</span>,
     },
     {
       header: "Payment Status",
@@ -98,13 +99,12 @@ export default function Orders() {
           >
             <Eye className="w-4 h-4" />
           </Link>
-          <a
-            href={`/api/orders/${row._id}/invoice`}
-            download
+          <button
+            onClick={() => downloadInvoice(row._id, row.orderId)}
             className="p-1.5 rounded-lg border border-slate-100 bg-white text-slate-500 hover:bg-slate-50 hover:border-slate-200 transition-all"
           >
             <FileDown className="w-4 h-4" />
-          </a>
+          </button>
         </div>
       ),
     },

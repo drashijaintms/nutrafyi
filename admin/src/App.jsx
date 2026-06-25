@@ -20,6 +20,7 @@ import Inventory from "./pages/Inventory";
 import CMSPages from "./pages/CMSPages";
 import CMSBlogs from "./pages/CMSBlogs";
 import Settings from "./pages/Settings";
+import Admins from "./pages/Admins";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -64,7 +65,7 @@ export default function App() {
         <Route
           path="/products"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="products">
               <Products />
             </ProtectedRoute>
           }
@@ -72,7 +73,7 @@ export default function App() {
         <Route
           path="/products/new"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="products">
               <ProductForm />
             </ProtectedRoute>
           }
@@ -80,7 +81,7 @@ export default function App() {
         <Route
           path="/products/edit/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="products">
               <ProductForm />
             </ProtectedRoute>
           }
@@ -88,7 +89,7 @@ export default function App() {
         <Route
           path="/categories"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="categories">
               <Categories />
             </ProtectedRoute>
           }
@@ -96,7 +97,7 @@ export default function App() {
         <Route
           path="/brands"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="brands">
               <Brands />
             </ProtectedRoute>
           }
@@ -104,7 +105,7 @@ export default function App() {
         <Route
           path="/orders"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="orders">
               <Orders />
             </ProtectedRoute>
           }
@@ -112,7 +113,7 @@ export default function App() {
         <Route
           path="/orders/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="orders">
               <OrderDetails />
             </ProtectedRoute>
           }
@@ -120,7 +121,7 @@ export default function App() {
         <Route
           path="/customers"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="users_view">
               <Customers />
             </ProtectedRoute>
           }
@@ -128,7 +129,7 @@ export default function App() {
         <Route
           path="/customers/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="users_view">
               <CustomerDetails />
             </ProtectedRoute>
           }
@@ -136,7 +137,7 @@ export default function App() {
         <Route
           path="/coupons"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="coupons">
               <Coupons />
             </ProtectedRoute>
           }
@@ -144,7 +145,7 @@ export default function App() {
         <Route
           path="/reviews"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="reviews">
               <Reviews />
             </ProtectedRoute>
           }
@@ -152,7 +153,7 @@ export default function App() {
         <Route
           path="/inventory"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="inventory">
               <Inventory />
             </ProtectedRoute>
           }
@@ -160,7 +161,7 @@ export default function App() {
         <Route
           path="/pages"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="pages">
               <CMSPages />
             </ProtectedRoute>
           }
@@ -168,7 +169,7 @@ export default function App() {
         <Route
           path="/blogs"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="blogs">
               <CMSBlogs />
             </ProtectedRoute>
           }
@@ -176,8 +177,16 @@ export default function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute resource="settings">
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admins"
+          element={
+            <ProtectedRoute resource="admins">
+              <Admins />
             </ProtectedRoute>
           }
         />

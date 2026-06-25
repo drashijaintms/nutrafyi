@@ -63,7 +63,83 @@ const getCustomerById = async (req, res) => {
   }
 };
 
+// @desc    Create new customer
+// @route   POST /api/customers
+// @access  Private
+const createCustomer = async (req, res) => {
+  const { name, email, phone, addresses } = req.body;
+  if (!name || !email) {
+    return res.status(400).json({ message: "Name and email are required" });
+  }
+  try {
+    const existing = await Customer.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: "Customer with this email already exists" });
+    }
+    const customer = new Customer({
+      name,
+      email,
+      phone,
+      addresses: addresses || []
+    });
+    const saved = await customer.save();
+    res.status(201).json(saved);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update customer
+// @route   PUT /api/customers/:id
+// @access  Private
+const updateCustomer = async (req, res) => {
+  const { name, email, phone, addresses } = req.body;
+  try {
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    if (email && email.toLowerCase() !== customer.email) {
+      const existing = await Customer.findOne({ email: email.toLowerCase() });
+      if (existing) {
+        return res.status(400).json({ message: "Email is already in use" });
+      }
+      customer.email = email;
+    }
+
+    if (name) customer.name = name;
+    if (phone !== undefined) customer.phone = phone;
+    if (addresses) customer.addresses = addresses;
+
+    const updated = await customer.save();
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete customer
+// @route   DELETE /api/customers/:id
+// @access  Private
+const deleteCustomer = async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    await Customer.findByIdAndDelete(req.params.id);
+    res.json({ message: "Customer deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getCustomers,
   getCustomerById,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer,
 };

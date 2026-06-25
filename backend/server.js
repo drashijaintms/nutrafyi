@@ -18,6 +18,9 @@ const settingRoutes = require("./routes/settings");
 const reportRoutes = require("./routes/reports");
 const inventoryRoutes = require("./routes/inventory");
 const uploadRoutes = require("./routes/uploads");
+const adminUserRoutes = require("./routes/admins");
+const notificationRoutes = require("./routes/notifications");
+const storefrontUserRoutes = require("./routes/users");
 
 dotenv.config();
 
@@ -48,6 +51,9 @@ app.use("/api/settings", settingRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/admins", adminUserRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/user", storefrontUserRoutes);
 
 // Serve admin panel static files
 app.use("/admin", express.static(path.join(__dirname, "../admin/dist")));

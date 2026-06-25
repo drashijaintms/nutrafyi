@@ -2,6 +2,7 @@ import headingLeaf from "../assets/heading-leaf.png";
 import CategoryCard from "./CategoryCard";
 import { useEffect, useState } from "react";
 import { getCategories } from "../services/categoryService";
+import { getProducts } from "../services/productService";
 import { categoryImages } from "../data/categoryImages";
 
 const resolveCategoryImage = (img, slug) => {
@@ -13,22 +14,28 @@ const resolveCategoryImage = (img, slug) => {
 
 function CategoryGrid() {
   const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getCategories();
-        setCategories(Array.isArray(data) ? data : []);
+        const [catsData, prodsData] = await Promise.all([
+          getCategories(),
+          getProducts(),
+        ]);
+        setCategories(Array.isArray(catsData) ? catsData : []);
+        setProducts(Array.isArray(prodsData) ? prodsData : []);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching categories and products:", error);
         setCategories([]);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
 
   return (
@@ -95,15 +102,21 @@ function CategoryGrid() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {categories.length > 0 ? (
-            categories.map((category) => (
-              <CategoryCard
-                key={category._id}
-                image={resolveCategoryImage(category.image, category.slug)}
-                title={category.title}
-                description={category.description}
-                slug={category.slug}
-              />
-            ))
+            categories.map((category) => {
+              const count = products.filter(
+                (p) => p.category === category.slug
+              ).length;
+              return (
+                <CategoryCard
+                  key={category._id}
+                  image={resolveCategoryImage(category.image, category.slug)}
+                  title={category.title}
+                  description={category.description}
+                  slug={category.slug}
+                  productCount={count}
+                />
+              );
+            })
           ) : (
             <div className="col-span-full text-center py-10">
               No categories found.

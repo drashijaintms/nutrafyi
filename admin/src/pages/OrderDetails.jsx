@@ -5,6 +5,8 @@ import API from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import { ArrowLeft, Printer, FileDown, Clock, ShieldAlert } from "lucide-react";
+import { resolveProductImage } from "../utils/resolveImage";
+import { downloadInvoice } from "../utils/invoiceDownloader";
 
 export default function OrderDetails() {
   const { id } = useParams();
@@ -56,6 +58,7 @@ export default function OrderDetails() {
 
   const billing = order.billingDetails || {};
   const shipping = order.shippingDetails || {};
+  const curSym = order.currencySymbol || "$";
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto printable">
@@ -81,13 +84,12 @@ export default function OrderDetails() {
           >
             <Printer className="w-4 h-4" /> Print Order
           </button>
-          <a
-            href={`/api/orders/${order._id}/invoice`}
-            download
+          <button
+            onClick={() => downloadInvoice(order._id, order.orderId)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all flex items-center gap-1.5"
           >
             <FileDown className="w-4 h-4" /> Download Invoice
-          </a>
+          </button>
         </div>
       </div>
 
@@ -103,7 +105,15 @@ export default function OrderDetails() {
                 <div key={idx} className="py-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-100 shrink-0 overflow-hidden flex items-center justify-center font-bold text-slate-400 text-xs">
-                      Product
+                      {item.image ? (
+                        <img
+                          src={resolveProductImage(item.image, item.slug)}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        "Product"
+                      )}
                     </div>
                     <div>
                       <span className="font-bold text-slate-800 text-sm block">{item.title}</span>
@@ -118,32 +128,32 @@ export default function OrderDetails() {
                     </div>
                   </div>
                   <div className="text-right text-sm">
-                    <span className="font-semibold text-slate-800">${item.price.toFixed(2)}</span>
+                    <span className="font-semibold text-slate-800">{curSym}{item.price.toFixed(2)}</span>
                     <span className="block text-xs text-slate-400 mt-0.5">Qty: {item.quantity}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Totals */}
+             {/* Totals */}
             <div className="border-t border-slate-100 pt-4 flex flex-col items-end gap-2 text-sm">
               <div className="flex justify-between w-64 text-slate-500">
                 <span>Subtotal:</span>
-                <span className="font-semibold text-slate-700">${order.amount.subtotal.toFixed(2)}</span>
+                <span className="font-semibold text-slate-700">{curSym}{order.amount.subtotal.toFixed(2)}</span>
               </div>
               {order.amount.discount > 0 && (
                 <div className="flex justify-between w-64 text-rose-500">
                   <span>Discount:</span>
-                  <span className="font-semibold">-${order.amount.discount.toFixed(2)}</span>
+                  <span className="font-semibold">-{curSym}{order.amount.discount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between w-64 text-slate-500">
                 <span>Shipping:</span>
-                <span className="font-semibold text-slate-700">${order.amount.shipping.toFixed(2)}</span>
+                <span className="font-semibold text-slate-700">{curSym}{order.amount.shipping.toFixed(2)}</span>
               </div>
               <div className="flex justify-between w-64 text-slate-800 font-bold border-t border-slate-100 pt-2 text-base">
                 <span>Total Amount:</span>
-                <span>${order.amount.total.toFixed(2)}</span>
+                <span>{curSym}{order.amount.total.toFixed(2)}</span>
               </div>
             </div>
           </div>

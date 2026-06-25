@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function StatsCard({
   title,
@@ -7,6 +8,7 @@ export default function StatsCard({
   color = "indigo",
   change = null,
   changeType = "positive",
+  to = null,
 }) {
   const colorSchemes = {
     indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
@@ -17,8 +19,8 @@ export default function StatsCard({
     violet: "bg-violet-50 text-violet-600 border-violet-100",
   };
 
-  return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between transition-all hover:shadow-md duration-200">
+  const CardContent = () => (
+    <>
       <div>
         <p className="text-sm font-medium text-slate-400 mb-1">{title}</p>
         <h3 className="text-2xl font-bold text-slate-800 tracking-tight">{value}</h3>
@@ -40,6 +42,22 @@ export default function StatsCard({
       <div className={`p-4 rounded-xl border ${colorSchemes[color] || colorSchemes.indigo}`}>
         {Icon && <Icon className="w-6 h-6" />}
       </div>
+    </>
+  );
+
+  const containerClasses = "bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between transition-all hover:shadow-md duration-200 cursor-pointer block hover:border-slate-200";
+
+  if (to) {
+    return (
+      <Link to={to} className={containerClasses}>
+        <CardContent />
+      </Link>
+    );
+  }
+
+  return (
+    <div className={containerClasses}>
+      <CardContent />
     </div>
   );
 }

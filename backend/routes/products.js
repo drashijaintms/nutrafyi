@@ -9,7 +9,7 @@ const {
   deleteProduct,
   bulkActions,
 } = require("../controllers/productController");
-const { protect } = require("../middleware/auth");
+const { protect, checkPermission } = require("../middleware/auth");
 
 // Public routes (for customer-facing storefront)
 router.get("/", async (req, res) => {
@@ -41,10 +41,10 @@ router.get("/:slug", async (req, res) => {
 });
 
 // Admin Protected routes
-router.get("/admin/all", protect, getProducts);
-router.post("/", protect, createProduct);
-router.put("/:id", protect, updateProduct);
-router.delete("/:id", protect, deleteProduct);
-router.post("/bulk", protect, bulkActions);
+router.get("/admin/all", protect, checkPermission("products"), getProducts);
+router.post("/", protect, checkPermission("products"), createProduct);
+router.put("/:id", protect, checkPermission("products"), updateProduct);
+router.delete("/:id", protect, checkPermission("products"), deleteProduct);
+router.post("/bulk", protect, checkPermission("products"), bulkActions);
 
 module.exports = router;

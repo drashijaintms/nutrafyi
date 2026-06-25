@@ -28,6 +28,7 @@ const authSlice = createSlice({
         name: action.payload.name,
         email: action.payload.email,
         role: action.payload.role,
+        permissions: action.payload.permissions,
       };
       state.token = action.payload.accessToken;
       state.isAuthenticated = true;

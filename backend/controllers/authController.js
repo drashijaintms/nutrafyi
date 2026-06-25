@@ -54,6 +54,7 @@ const login = async (req, res) => {
         name: admin.name,
         email: admin.email,
         role: admin.role,
+        permissions: admin.permissions,
         accessToken,
         refreshToken: rememberMe ? refreshToken : undefined, // client can store if rememberMe
       });

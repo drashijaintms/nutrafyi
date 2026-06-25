@@ -11,6 +11,18 @@ const ProductSchema = new mongoose.Schema(
     salePrice: { type: String, default: "" },
     saleStart: { type: Date, default: null },
     saleEnd: { type: Date, default: null },
+    currencyOverrides: {
+      INR: {
+        price: { type: String, default: "" },
+        regularPrice: { type: String, default: "" },
+        salePrice: { type: String, default: "" }
+      },
+      EUR: {
+        price: { type: String, default: "" },
+        regularPrice: { type: String, default: "" },
+        salePrice: { type: String, default: "" }
+      }
+    },
 
     category: { type: String, default: "" }, // Category slug
     categoryName: { type: String, default: "" },

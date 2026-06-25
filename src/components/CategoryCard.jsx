@@ -1,14 +1,12 @@
 import { Link } from "react-router-dom";
-import { products } from "../data/products";
+
 function CategoryCard({
   image,
   title,
   description,
   slug,
+  productCount = 0,
 }) {
-  const productCount = products.filter(
-  (product) => product.category === slug
-).length;
   return (
    <Link
   to={`/category/${slug}`}
