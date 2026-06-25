@@ -558,32 +558,6 @@ saveMutation.mutate(payload);
             </div>
           </div>
 
-          {/* 2. Descriptions Block */}
-          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs space-y-5 animate-in fade-in duration-100">
-            <h3 className="text-sm font-bold text-slate-705 uppercase tracking-wider border-b border-slate-50 pb-2">
-              Descriptions
-            </h3>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                Product Short Description
-              </label>
-              <RichTextEditor
-                value={shortDescription}
-                onChange={setShortDescription}
-                placeholder="Summary overview of product features..."
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                Product Full Description
-              </label>
-              <RichTextEditor
-                value={description}
-                onChange={setDescription}
-                placeholder="Full specifications, ingredient list, usage instructions..."
-              />
-            </div>
-          </div>
 
           {/* 3. WooCommerce Product Data Box */}
           <div className="bg-white border border-slate-150 rounded-2xl shadow-xs overflow-hidden">
@@ -1384,6 +1358,33 @@ saveMutation.mutate(payload);
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* 2. Descriptions Block */}
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs space-y-5 animate-in fade-in duration-100">
+            <h3 className="text-sm font-bold text-slate-705 uppercase tracking-wider border-b border-slate-50 pb-2">
+              Descriptions
+            </h3>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Product Short Description
+              </label>
+              <RichTextEditor
+                value={shortDescription}
+                onChange={setShortDescription}
+                placeholder="Summary overview of product features..."
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Product Full Description
+              </label>
+              <RichTextEditor
+                value={description}
+                onChange={setDescription}
+                placeholder="Full specifications, ingredient list, usage instructions..."
+              />
             </div>
           </div>
 
