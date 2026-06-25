@@ -102,16 +102,18 @@ if (sortBy === "newest") {
           {products.length > 0 ? (
             sortedProducts.map((product) => (
               <ProductCard
-  key={product._id}
-  image={resolveProductImage(product.image, product.slug)}
-  name={product.title}
-  price={`$${toNum(product.regularPrice || product.price).toFixed(2)}`}
-  slug={product.slug}
-  isBestSeller={product.isBestSeller}
-  badge={product.badge}
-  rating={product.rating}
-  reviews={product.reviews}
-/>
+                key={product._id}
+                image={resolveProductImage(product.image, product.slug)}
+                name={product.title}
+                price={product.price}
+                regularPrice={product.regularPrice}
+                salePrice={product.salePrice}
+                slug={product.slug}
+                isBestSeller={product.isBestSeller}
+                badge={product.badge}
+                rating={product.rating}
+                reviews={product.reviews}
+              />
             ))
           ) : (
             <div className="col-span-full text-center py-10">

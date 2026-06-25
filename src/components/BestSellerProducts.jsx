@@ -103,8 +103,8 @@ key={product._id}
               )}
 
               {/* Sale Badge */}
-              {product.badge === "Sale" && (
-                <span className="absolute top-0 left-0 z-10 bg-black text-white text-[10px] font-medium px-3 py-1 rounded-br-md">
+              {(product.badge === "Sale" || (product.salePrice && product.regularPrice && toNum(product.salePrice) > 0 && toNum(product.salePrice) !== toNum(product.regularPrice))) && (
+                <span className={`absolute top-0 z-10 bg-[#e53e3e] text-white text-[10px] font-bold px-3 py-1 rounded-br-md uppercase tracking-wider shadow-md ${product.isBestSeller ? "left-[75px]" : "left-0"}`}>
                   Sale
                 </span>
               )}
@@ -141,9 +141,21 @@ key={product._id}
                   {product.title}
                 </h3>
 
-                <div className="font-bold text-[18px] mt-3 mb-4">
-                  ${toNum(product.regularPrice || product.price).toFixed(2)}
-                </div>
+                {/* Pricing Block */}
+                {product.salePrice && product.regularPrice && toNum(product.salePrice) > 0 && toNum(product.salePrice) !== toNum(product.regularPrice) ? (
+                  <div className="flex items-baseline justify-center gap-2 mt-3 mb-4">
+                    <span className="font-bold text-[18px] text-[#dc2626]">
+                      ${toNum(product.salePrice).toFixed(2)}
+                    </span>
+                    <span className="text-[13px] line-through text-slate-400 font-semibold">
+                      ${toNum(product.regularPrice).toFixed(2)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="font-bold text-[18px] mt-3 mb-4 text-slate-850">
+                    ${toNum(product.regularPrice || product.price).toFixed(2)}
+                  </div>
+                )}
 
                 <button
                   className="

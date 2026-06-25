@@ -171,7 +171,9 @@ if (!category) {
       key={product._id}
       image={resolveProductImage(product.image, product.slug)}
       name={product.title}
-      price={`$${toNum(product.regularPrice || product.price).toFixed(2)}`}
+      price={product.price}
+      regularPrice={product.regularPrice}
+      salePrice={product.salePrice}
       slug={product.slug}
       isBestSeller={product.isBestSeller}
       badge={product.badge}

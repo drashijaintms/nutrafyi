@@ -30,16 +30,18 @@ function ProductRecommendations({
       >
         {products.map((product, index) => (
           <ProductCard
-  key={product.slug}
-  image={product.image}
-  name={product.name}
-  price={product.price}
-  slug={product.slug}
-  isBestSeller={product.isBestSeller}
-  badge={product.badge}
-  rating={product.rating}
-  reviews={product.reviews}
-/>
+            key={product.slug}
+            image={product.image}
+            name={product.name || product.title}
+            price={product.price}
+            regularPrice={product.regularPrice}
+            salePrice={product.salePrice}
+            slug={product.slug}
+            isBestSeller={product.isBestSeller}
+            badge={product.badge}
+            rating={product.rating}
+            reviews={product.reviews}
+          />
         ))}
       </div>
 
