@@ -177,8 +177,91 @@
     left: 0;
     border-left-color: var(--border);
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
 }
+
+/* Blog Rich Content Styling */
+.blog-rich-content {
+  font-family: inherit;
+  color: #334155;
+}
+
+.blog-rich-content p {
+  font-size: 17px;
+  line-height: 1.85;
+  margin-bottom: 24px;
+  color: #475569; /* slate-600 */
+}
+
+.blog-rich-content h3 {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #0e3b20; /* dark green */
+  margin-top: 40px;
+  margin-bottom: 16px;
+  line-height: 1.35;
+}
+
+.blog-rich-content blockquote, 
+.blog-rich-content .custom-callout {
+  border-left: 4px solid #147a3f !important;
+  background-color: #f7faf6 !important;
+  padding: 24px !important;
+  border-radius: 0 16px 16px 0 !important;
+  margin: 32px 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.blog-rich-content blockquote p,
+.blog-rich-content .custom-callout p {
+  color: #334155 !important;
+  font-style: italic !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  line-height: 1.75 !important;
+  margin-bottom: 0 !important;
+}
+
+.blog-rich-content ul {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 24px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.blog-rich-content ul li {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  font-size: 17px !important;
+  line-height: 1.65;
+  color: #334155 !important;
+}
+
+.blog-rich-content ul li strong {
+  color: #0f172a !important; /* slate-900 */
+}
+
+.blog-rich-content ol {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 24px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.blog-rich-content ol li {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  font-size: 17px !important;
+  line-height: 1.65;
+  color: #334155 !important;
+}
+

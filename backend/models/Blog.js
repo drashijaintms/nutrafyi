@@ -97,6 +97,18 @@ const blogSchema = new mongoose.Schema(
     deletedAt: {
       type: Date,
     },
+    // Custom CTA Callout Box
+    ctaBox: {
+      show: { type: Boolean, default: false },
+      text: { type: String, default: "" },
+    },
+    // FAQs Accordion List
+    faqs: [
+      {
+        question: { type: String, required: true },
+        answer: { type: String, required: true },
+      }
+    ],
   },
   {
     timestamps: true,

@@ -103,6 +103,11 @@ export default function CMSBlogs() {
   // Schema Markup States
   const [schemaOverride, setSchemaOverride] = useState("");
 
+  // CTA & FAQs Settings
+  const [showCtaBox, setShowCtaBox] = useState(false);
+  const [ctaBoxText, setCtaBoxText] = useState("");
+  const [faqs, setFaqs] = useState([]);
+
   // Fetch Blogs
   const { data: blogs = [], isLoading } = useQuery({
     queryKey: ["cmsBlogs"],
@@ -225,6 +230,9 @@ export default function CMSBlogs() {
     setTwitterDescription("");
     setTwitterCardType("Summary Large Image");
     setSchemaOverride("");
+    setShowCtaBox(false);
+    setCtaBoxText("");
+    setFaqs([]);
   };
 
   // Custom text editor selection formatter
@@ -275,7 +283,7 @@ export default function CMSBlogs() {
             selector: "#blog-editor-textarea",
             height: 400,
             menubar: "file edit view insert format tools table help",
-            toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor | alignleft aligncenter alignright alignjustify | outdent indent | removeformat",
+            toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor | alignleft aligncenter alignright alignjustify | outdent indent | removeformat | customcta",
             setup: (editor) => {
               activeEditor = editor;
               editor.on("init", () => {
@@ -283,6 +291,27 @@ export default function CMSBlogs() {
               });
               editor.on("change keyup", () => {
                 setContent(editor.getContent());
+              });
+
+              // Add custom Green CTA Callout Box insertion button
+              editor.ui.registry.addButton("customcta", {
+                text: "Green CTA",
+                icon: "comment",
+                tooltip: "Insert Green Callout CTA Box",
+                onAction: () => {
+                  const text = window.prompt("Enter CTA Callout Text:");
+                  if (text) {
+                    const html = `<div class="flex items-start gap-4 p-5 my-8 bg-[#f5f8f4] border-l-4 border-[#147a3f] rounded-r-2xl shadow-2xs">
+  <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#e8f1e5] text-[#147a3f] flex-shrink-0 mt-0.5">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 9.8a7 7 0 0 1-13.9.2"></path><path d="M9 22v-4H5"></path></svg>
+  </div>
+  <p class="text-slate-800 italic font-semibold text-[17px] sm:text-[18px] leading-7 m-0">
+    ${text}
+  </p>
+</div><p></p>`;
+                    editor.insertContent(html);
+                  }
+                }
               });
             }
           });
@@ -347,6 +376,9 @@ export default function CMSBlogs() {
       setTwitterCardType("Summary Large Image");
     }
     setSchemaOverride(b.schemaOverride || "");
+    setShowCtaBox(b.ctaBox?.show || false);
+    setCtaBoxText(b.ctaBox?.text || "");
+    setFaqs(b.faqs || []);
     setViewState("edit");
   };
 
@@ -384,7 +416,12 @@ export default function CMSBlogs() {
         twitterDescription,
         twitterCardType
       },
-      schemaOverride
+      schemaOverride,
+      ctaBox: {
+        show: showCtaBox,
+        text: ctaBoxText
+      },
+      faqs
     });
   };
 
@@ -602,31 +639,47 @@ export default function CMSBlogs() {
   };
 
   const getDynamicSchema = () => {
+    const graph = [
+      {
+        "@type": "Article",
+        "@id": `https://nutrafyi.com/post/${slug || "url-slug"}#article`,
+        "headline": title || "Blog Post Title",
+        "image": [
+          featuredImage || "https://images.unsplash.com/photo-1558494949-ef010cbdcc51"
+        ],
+        "author": {
+          "@type": "Person",
+          "name": "Admin"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nutrafyi",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://nutrafyi.com/logo.png"
+          }
+        },
+        "datePublished": new Date().toISOString()
+      }
+    ];
+
+    if (faqs && faqs.length > 0) {
+      graph.push({
+        "@type": "FAQPage",
+        "mainEntity": faqs.map(f => ({
+          "@type": "Question",
+          "name": f.question || "",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": f.answer || ""
+          }
+        }))
+      });
+    }
+
     const defaultSchema = {
       "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "Article",
-          "@id": `https://nutrafyi.com/post/${slug || "url-slug"}#article`,
-          "headline": title || "Blog Post Title",
-          "image": [
-            featuredImage || "https://images.unsplash.com/photo-1558494949-ef010cbdcc51"
-          ],
-          "author": {
-            "@type": "Person",
-            "name": "Admin"
-          },
-          "publisher": {
-            "@type": "Organization",
-            "name": "Nutrafyi",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://nutrafyi.com/logo.png"
-            }
-          },
-          "datePublished": new Date().toISOString()
-        }
-      ]
+      "@graph": graph
     };
     return JSON.stringify(defaultSchema, null, 2);
   };
@@ -1213,7 +1266,8 @@ export default function CMSBlogs() {
                     { id: "general", label: "General SEO" },
                     { id: "social", label: "Social Preview" },
                     { id: "schema", label: "Schema Markup" },
-                    { id: "analyzer", label: "SEO Analyzer" }
+                    { id: "analyzer", label: "SEO Analyzer" },
+                    { id: "interactive", label: "CTA & FAQs" }
                   ].map(tab => (
                     <button
                       key={tab.id}
@@ -1626,6 +1680,106 @@ export default function CMSBlogs() {
                     </div>
                   );
                 })()}
+
+                {/* Tab 5: CTA & FAQs Interactive Blocks */}
+                {activeSeoTab === "interactive" && (
+                  <div className="space-y-6 text-left animate-in fade-in duration-200">
+                    {/* CTA Callout Block */}
+                    <div className="bg-slate-50/50 border border-slate-200/60 rounded-2xl p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-800">CTA Callout Box</h4>
+                          <p className="text-xs text-slate-400 mt-1">Display a beautiful green callout block with a leaf icon inside the article.</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer select-none">
+                          <input 
+                            type="checkbox" 
+                            checked={showCtaBox}
+                            onChange={(e) => setShowCtaBox(e.target.checked)}
+                            className="sr-only peer" 
+                          />
+                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#147a3f]"></div>
+                        </label>
+                      </div>
+
+                      {showCtaBox && (
+                        <div className="animate-in slide-in-from-top duration-250">
+                          <textarea
+                            value={ctaBoxText}
+                            onChange={(e) => setCtaBoxText(e.target.value)}
+                            placeholder="Type callout text (e.g. Balanced nutrition is not about perfection...)"
+                            rows={3}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-[#147a3f] text-sm bg-white"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* FAQs Accordion Block */}
+                    <div className="bg-slate-50/50 border border-slate-200/60 rounded-2xl p-5 space-y-5">
+                      <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-850">FAQ Accordion Feature</h4>
+                          <p className="text-xs text-slate-400 mt-1">Add Q&A sections that render as dynamic accordions and automatically generate FAQPage Schema markup.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setFaqs((prev) => [...prev, { question: "", answer: "" }])}
+                          className="px-4 py-2 bg-[#147a3f] hover:bg-[#106933] text-white rounded-xl text-xs font-bold transition cursor-pointer"
+                        >
+                          + Add FAQ
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        {faqs.length === 0 ? (
+                          <p className="text-xs text-slate-400 text-center py-4">No FAQs added yet. Click "+ Add FAQ" to add one.</p>
+                        ) : (
+                          faqs.map((faq, idx) => (
+                            <div key={idx} className="bg-white border border-slate-150 rounded-xl p-4 space-y-3 relative group">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-[#147a3f]">FAQ #{idx + 1}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setFaqs((prev) => prev.filter((_, i) => i !== idx))}
+                                  className="text-xs font-bold text-rose-500 hover:text-rose-700 transition cursor-pointer"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                              <div className="space-y-3">
+                                <input
+                                  type="text"
+                                  value={faq.question}
+                                  onChange={(e) => {
+                                    const updated = [...faqs];
+                                    updated[idx].question = e.target.value;
+                                    setFaqs(updated);
+                                  }}
+                                  placeholder="Question text"
+                                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-hidden focus:border-[#147a3f]"
+                                  required
+                                />
+                                <textarea
+                                  value={faq.answer}
+                                  onChange={(e) => {
+                                    const updated = [...faqs];
+                                    updated[idx].answer = e.target.value;
+                                    setFaqs(updated);
+                                  }}
+                                  placeholder="Answer text"
+                                  rows={2}
+                                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-hidden focus:border-[#147a3f] resize-y"
+                                  required
+                                />
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
