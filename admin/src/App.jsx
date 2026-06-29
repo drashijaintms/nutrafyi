@@ -21,6 +21,7 @@ import CMSPages from "./pages/CMSPages";
 import CMSBlogs from "./pages/CMSBlogs";
 import Settings from "./pages/Settings";
 import Admins from "./pages/Admins";
+import TrashBin from "./pages/TrashBin";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -190,7 +191,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/trash"
+          element={
+            <ProtectedRoute>
+              <TrashBin />
+            </ProtectedRoute>
+          }
+        />
         {/* Fallback to dashboard */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

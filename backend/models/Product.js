@@ -120,7 +120,9 @@ const ProductSchema = new mongoose.Schema(
       enum: ["Draft", "Published", "Scheduled"],
       default: "Published"
     },
-    publishDate: { type: Date, default: Date.now }
+    publishDate: { type: Date, default: Date.now },
+    deleted: { type: Boolean, default: false },
+    deletedAt: { type: Date }
   },
   {
     timestamps: true,

@@ -1,7 +1,32 @@
+import { useState } from "react";
+import axios from "axios";
 import newsletterIcon from "../assets/newsletter/newsletter-icon.png";
 import leafPattern from "../assets/newsletter/newsletter-leaf.png";
 
 function NewsletterSection() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setLoading(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const res = await axios.post("/api/newsletter/subscribe", { email });
+      setStatus({ type: "success", message: res.data.message });
+      setEmail("");
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || "Failed to subscribe. Please try again.";
+      setStatus({ type: "error", message: errorMsg });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="relative bg-[#eef6ea] overflow-hidden">
       
@@ -52,10 +77,13 @@ function NewsletterSection() {
           {/* Form */}
           <div className="w-full lg:w-auto">
 
-            <form className="flex flex-col sm:flex-row gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
 
               <input
                 type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email address"
                 className="
                   w-full
@@ -73,6 +101,7 @@ function NewsletterSection() {
 
               <button
                 type="submit"
+                disabled={loading}
                 className="
                   h-[60px]
                   px-10
@@ -83,12 +112,19 @@ function NewsletterSection() {
                   rounded-lg
                   transition
                   whitespace-nowrap
+                  disabled:opacity-50
                 "
               >
-                Get Wellness Updates
+                {loading ? "Subscribing..." : "Get Wellness Updates"}
               </button>
 
             </form>
+
+            {status.message && (
+              <p className={`mt-3 text-sm font-semibold ${status.type === "success" ? "text-emerald-700" : "text-rose-600"}`}>
+                {status.message}
+              </p>
+            )}
 
           </div>
 

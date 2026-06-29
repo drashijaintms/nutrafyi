@@ -19,7 +19,8 @@ import {
   Bell,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  Trash2
 } from "lucide-react";
 
 export default function MainLayout({ children }) {
@@ -47,6 +48,8 @@ export default function MainLayout({ children }) {
     { label: "CMS Pages", path: "/pages", icon: FileText, resource: "pages" },
     { label: "CMS Blogs", path: "/blogs", icon: FileText, resource: "blogs" },
     { label: "Settings", path: "/settings", icon: SettingsIcon, resource: "settings" },
+    { label: "Administrators", path: "/admins", icon: Users, resource: "admins" },
+    { label: "Trash Bin", path: "/trash", icon: Trash2 },
   ];
 
   const filteredMenuItems = menuItems.filter((item) => {
@@ -55,10 +58,6 @@ export default function MainLayout({ children }) {
     if (admin.role === "superadmin") return true;
     return admin.permissions && admin.permissions[item.resource] === true;
   });
-
-  if (admin && admin.role === "superadmin") {
-    filteredMenuItems.push({ label: "Administrators", path: "/admins", icon: Users });
-  }
 
   const fetchNotifications = async () => {
     try {

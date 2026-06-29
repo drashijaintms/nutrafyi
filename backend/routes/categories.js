@@ -18,7 +18,7 @@ const slugify = (text) => {
 // GET ALL CATEGORIES (nested formatting and sorting)
 router.get("/", async (req, res) => {
   try {
-    const categories = await Category.find().sort({ order: 1 });
+    const categories = await Category.find({ deleted: { $ne: true } }).sort({ order: 1 });
 
     const categoriesWithCount = await Promise.all(
       categories.map(async (category) => {
@@ -44,7 +44,7 @@ router.get("/", async (req, res) => {
 // GET SINGLE CATEGORY
 router.get("/:id", async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
+    const category = await Category.findOne({ _id: req.params.id, deleted: { $ne: true } });
     if (!category) {
       return res.status(404).json({
         message: "Category not found",
@@ -118,12 +118,14 @@ router.put("/:id", protect, async (req, res) => {
 // DELETE CATEGORY (Admin protected)
 router.delete("/:id", protect, async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
+    const category = await Category.findOne({ _id: req.params.id, deleted: { $ne: true } });
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    await Category.findByIdAndDelete(req.params.id);
+    category.deleted = true;
+    category.deletedAt = new Date();
+    await category.save();
 
     await logAdminActivity(
       req.admin._id,

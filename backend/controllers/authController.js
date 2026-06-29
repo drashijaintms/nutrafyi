@@ -1,5 +1,6 @@
 const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
+const { resolveAdminPermissions } = require("../middleware/auth");
 
 const generateAccessToken = (id) => {
   return jwt.sign(
@@ -40,6 +41,7 @@ const login = async (req, res) => {
       });
 
       await admin.save();
+      await admin.populate("roleId");
 
       // Set refresh token in HttpOnly cookie if rememberMe is true, or handle token exchange
       res.cookie("adminRefreshToken", refreshToken, {
@@ -54,7 +56,8 @@ const login = async (req, res) => {
         name: admin.name,
         email: admin.email,
         role: admin.role,
-        permissions: admin.permissions,
+        roleId: admin.roleId,
+        permissions: resolveAdminPermissions(admin),
         accessToken,
         refreshToken: rememberMe ? refreshToken : undefined, // client can store if rememberMe
       });
@@ -117,9 +120,11 @@ const logout = async (req, res) => {
 // @access  Private
 const getProfile = async (req, res) => {
   try {
-    const admin = await Admin.findById(req.admin._id).select("-password");
+    const admin = await Admin.findById(req.admin._id).select("-password").populate("roleId");
     if (admin) {
-      res.json(admin);
+      const resolvedAdmin = admin.toObject();
+      resolvedAdmin.permissions = resolveAdminPermissions(admin);
+      res.json(resolvedAdmin);
     } else {
       res.status(404).json({ message: "Admin not found" });
     }

@@ -23,7 +23,7 @@ const getProducts = async (req, res) => {
 
     const { search, category, brand, stockStatus, status, sortBy } = req.query;
 
-    let query = {};
+    let query = { deleted: { $ne: true } };
 
     // Filters
     if (search) {
@@ -208,10 +208,9 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    await Product.findByIdAndDelete(req.params.id);
-
-    // Clean up inventory logs
-    await Inventory.deleteMany({ product: req.params.id });
+    product.deleted = true;
+    product.deletedAt = new Date();
+    await product.save();
 
     // Log Activity
     await logAdminActivity(
@@ -238,8 +237,10 @@ const bulkActions = async (req, res) => {
 
   try {
     if (action === "delete") {
-      await Product.deleteMany({ _id: { $in: ids } });
-      await Inventory.deleteMany({ product: { $in: ids } });
+      await Product.updateMany(
+        { _id: { $in: ids } },
+        { $set: { deleted: true, deletedAt: new Date() } }
+      );
 
       await logAdminActivity(
         req.admin._id,

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import API from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
@@ -8,6 +9,14 @@ import { resolveCategoryImage } from "../utils/resolveImage";
 
 export default function Categories() {
   const queryClient = useQueryClient();
+  const admin = useSelector((state) => state.auth.user);
+
+  const isRestrictedBlogManager =
+    admin &&
+    admin.role !== "superadmin" &&
+    admin.permissions?.blogs === true &&
+    admin.permissions?.products !== true &&
+    admin.permissions?.orders !== true;
 
   // Form States
   const [editingId, setEditingId] = useState(null);
@@ -227,18 +236,20 @@ export default function Categories() {
               )}
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">
-                Sort Order
-              </label>
-              <input
-                type="number"
-                value={order}
-                onChange={(e) => setOrder(parseInt(e.target.value) || 0)}
-                placeholder="0"
-                className="w-full text-sm px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
-              />
-            </div>
+            {!isRestrictedBlogManager && (
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">
+                  Sort Order
+                </label>
+                <input
+                  type="number"
+                  value={order}
+                  onChange={(e) => setOrder(parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                  className="w-full text-sm px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                />
+              </div>
+            )}
 
             <div>
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">
@@ -286,8 +297,8 @@ export default function Categories() {
                     <th className="pb-3">Image</th>
                     <th className="pb-3">Name</th>
                     <th className="pb-3">Slug</th>
-                    <th className="pb-3">Products</th>
-                    <th className="pb-3">Order</th>
+                    {!isRestrictedBlogManager && <th className="pb-3">Products</th>}
+                    {!isRestrictedBlogManager && <th className="pb-3">Order</th>}
                     <th className="pb-3 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -312,8 +323,8 @@ export default function Categories() {
                             </div>
                           </td>
                           <td className="py-3.5 font-mono text-xs">{cat.slug}</td>
-                          <td className="py-3.5 font-semibold">{cat.count || 0}</td>
-                          <td className="py-3.5">{cat.order || 0}</td>
+                          {!isRestrictedBlogManager && <td className="py-3.5 font-semibold">{cat.count || 0}</td>}
+                          {!isRestrictedBlogManager && <td className="py-3.5">{cat.order || 0}</td>}
                           <td className="py-3.5 text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <button
@@ -335,7 +346,7 @@ export default function Categories() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-slate-400">
+                      <td colSpan={isRestrictedBlogManager ? 4 : 6} className="py-8 text-center text-slate-400">
                         No categories found.
                       </td>
                     </tr>

@@ -20,8 +20,11 @@ const adminSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["superadmin", "admin", "editor", "viewer"],
       default: "admin",
+    },
+    roleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Role",
     },
     permissions: {
       products: { type: Boolean, default: true },

@@ -70,7 +70,7 @@ const deleteBanner = async (req, res) => {
 
 const getBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find().sort({ createdAt: -1 });
+    const blogs = await Blog.find({ deleted: { $ne: true } }).sort({ createdAt: -1 });
     res.json(blogs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -123,7 +123,7 @@ const updateBlog = async (req, res) => {
 
 const deleteBlog = async (req, res) => {
   try {
-    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+    const deletedBlog = await Blog.findByIdAndUpdate(req.params.id, { deleted: true, deletedAt: new Date() }, { new: true });
     if (!deletedBlog) return res.status(404).json({ message: "Blog not found" });
 
     await logAdminActivity(req.admin._id, "Delete Blog", `Deleted blog post: "${deletedBlog.title}"`);
@@ -139,7 +139,7 @@ const deleteBlog = async (req, res) => {
 
 const getPages = async (req, res) => {
   try {
-    const pages = await Page.find().sort({ title: 1 });
+    const pages = await Page.find({ deleted: { $ne: true } }).sort({ title: 1 });
     res.json(pages);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -184,11 +184,35 @@ const updatePage = async (req, res) => {
 
 const deletePage = async (req, res) => {
   try {
-    const deletedPage = await Page.findByIdAndDelete(req.params.id);
+    const deletedPage = await Page.findByIdAndUpdate(req.params.id, { deleted: true, deletedAt: new Date() }, { new: true });
     if (!deletedPage) return res.status(404).json({ message: "Page not found" });
 
     await logAdminActivity(req.admin._id, "Delete Page", `Deleted static page: "${deletedPage.title}"`);
     res.json({ message: "Page deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getBlogBySlug = async (req, res) => {
+  try {
+    const blog = await Blog.findOne({ slug: req.params.slug, deleted: { $ne: true } });
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+    res.json(blog);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const incrementBlogViews = async (req, res) => {
+  try {
+    const blog = await Blog.findOneAndUpdate(
+      { slug: req.params.slug, deleted: { $ne: true } },
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+    res.json({ views: blog.views });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -204,6 +228,8 @@ module.exports = {
   createBlog,
   updateBlog,
   deleteBlog,
+  getBlogBySlug,
+  incrementBlogViews,
 
   getPages,
   createPage,

@@ -21,8 +21,11 @@ const uploadRoutes = require("./routes/uploads");
 const adminUserRoutes = require("./routes/admins");
 const notificationRoutes = require("./routes/notifications");
 const storefrontUserRoutes = require("./routes/users");
+const roleRoutes = require("./routes/roles");
+const trashRoutes = require("./routes/trash");
+const newsletterRoutes = require("./routes/newsletter");
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 const connectDB = require("./config/db");
 
@@ -52,8 +55,11 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/admins", adminUserRoutes);
+app.use("/api/roles", roleRoutes);
+app.use("/api/trash", trashRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/user", storefrontUserRoutes);
+app.use("/api/newsletter", newsletterRoutes);
 
 // Serve admin panel static files
 app.use("/admin", express.static(path.join(__dirname, "../admin/dist")));
@@ -71,6 +77,7 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-app.listen(5000, () => {
-  console.log("Server Running On Port 5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server Running On Port ${PORT}`);
 });

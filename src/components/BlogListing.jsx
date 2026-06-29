@@ -1,12 +1,46 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import headingLeaf from "../assets/heading-leaf.png";
 import BlogCard from "./BlogCard";
-import { blogs } from "../data/blogs";
+import { blogs as staticBlogs } from "../data/blogs";
 import beautySkin from "../assets/category/herbal-natural.png";
 import nutrition from "../assets/category/weight-management.jpg";
 import fitness from "../assets/category/energy-performance.png";
 import wellness from "../assets/category/immune-support.jpg";
+
 function BlogListing() {
+  const [blogs, setBlogs] = useState([]);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await axios.get("/api/blogs");
+        if (res.data && res.data.length > 0) {
+          setBlogs(res.data.map(b => ({
+            id: b._id,
+            title: b.title,
+            slug: b.slug,
+            category: b.categories && b.categories.length > 0 ? b.categories[0] : "General",
+            image: b.featuredImage || beautySkin,
+            date: new Date(b.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric"
+            }),
+            author: b.author || "Admin",
+            excerpt: b.excerpt || b.content ? b.content.substring(0, 120) + "..." : ""
+          })));
+        } else {
+          setBlogs(staticBlogs);
+        }
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+        setBlogs(staticBlogs);
+      }
+    };
+    fetchBlogs();
+  }, []);
 
 const categories = [
   {

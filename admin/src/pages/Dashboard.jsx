@@ -1,5 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import API from "../services/api";
 import StatsCard from "../components/StatsCard";
 import Loader from "../components/Loader";
@@ -10,7 +12,14 @@ import {
   ShoppingBag,
   TrendingUp,
   MessageSquare,
-  Package
+  Package,
+  FolderTree,
+  FileText,
+  Eye,
+  Mail,
+  Plus,
+  BookOpen,
+  ArrowRight
 } from "lucide-react";
 import {
   AreaChart,
@@ -21,17 +30,71 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  LineChart,
+  Line
 } from "recharts";
 
 export default function Dashboard() {
-  const { data, isLoading, error } = useQuery({
+  const admin = useSelector((state) => state.auth.user);
+
+  const isRestrictedBlogManager =
+    admin &&
+    (admin.role === "blogadmin" ||
+     admin.role === "Editor" ||
+     admin.role === "Blog Editor" ||
+     (admin.permissions?.blogs === true &&
+      admin.permissions?.products !== true &&
+      admin.permissions?.orders !== true));
+
+  // 1. E-Commerce stats query (enabled if NOT blog admin)
+  const { data: ecommerceData, isLoading: isEcommerceLoading, error: ecommerceError } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: async () => {
       const res = await API.get("/dashboard/stats");
       return res.data;
     },
+    enabled: !isRestrictedBlogManager,
   });
+
+  // 2. CMS Blogs query (enabled if blog admin)
+  const { data: blogs = [], isLoading: isBlogsLoading, error: blogsError } = useQuery({
+    queryKey: ["cmsBlogs"],
+    queryFn: async () => {
+      const res = await API.get("/blogs");
+      return res.data;
+    },
+    enabled: !!isRestrictedBlogManager,
+  });
+
+  // 3. Categories query (enabled if blog admin)
+  const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await API.get("/categories");
+      return res.data;
+    },
+    enabled: !!isRestrictedBlogManager,
+  });
+
+  // 4. Newsletter Subscribers query
+  const { data: subscriberData } = useQuery({
+    queryKey: ["subscribersCount"],
+    queryFn: async () => {
+      const res = await API.get("/newsletter/count");
+      return res.data;
+    },
+    enabled: !!isRestrictedBlogManager,
+  });
+  const subscriberCount = subscriberData?.count ?? 0;
+
+  const isLoading = isRestrictedBlogManager
+    ? (isBlogsLoading || isCategoriesLoading)
+    : isEcommerceLoading;
+
+  const error = isRestrictedBlogManager
+    ? blogsError
+    : ecommerceError;
 
   if (isLoading) return <Loader size="lg" />;
   if (error) {
@@ -42,7 +105,192 @@ export default function Dashboard() {
     );
   }
 
-  const { summary = {}, charts = {}, recentOrders = [], recentActivities = [], topProducts = [], topCategories = [] } = data || {};
+  // Render Blog Dashboard if user is a restricted blog manager / Editor / blogadmin
+  if (isRestrictedBlogManager) {
+    const totalViews = blogs.reduce((sum, b) => sum + (b.views || 0), 0);
+    const blogCategoryOptions = categories.length > 0 
+      ? categories.map(c => c.title) 
+      : [];
+    const mostViewedBlogs = [...blogs].sort((a, b) => (b.views || 0) - (a.views || 0));
+
+    const chartData = [
+      { name: "Dec 25", views: 0 },
+      { name: "Jan 26", views: 0 },
+      { name: "Feb 26", views: 0 },
+      { name: "Mar 26", views: 0 },
+      { name: "Apr 26", views: 0 },
+      { name: "May 26", views: totalViews },
+      { name: "Jun 26", views: 0 }
+    ];
+
+    return (
+      <div className="space-y-8 animate-in fade-in duration-200">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Blog Management Overview</h1>
+            <p className="text-sm text-slate-400 mt-1">Manage articles, categories, and track search engine optimization statistics.</p>
+          </div>
+          <div className="flex items-center gap-3 mt-4 sm:mt-0">
+            <Link
+              to="/blogs"
+              state={{ viewState: "list" }}
+              className="px-4.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-650 text-sm font-semibold transition-all cursor-pointer shadow-xs hover:border-slate-300"
+            >
+              Manage Posts
+            </Link>
+            <Link
+              to="/blogs"
+              state={{ triggerCreate: true }}
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md shadow-orange-500/10 cursor-pointer"
+            >
+              <Plus className="w-4.5 h-4.5" /> Add New Post
+            </Link>
+          </div>
+        </div>
+
+        {/* KPI Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Card 1: Total Posts */}
+          <Link
+            to="/blogs"
+            state={{ viewState: "list" }}
+            className="bg-white border border-slate-100 rounded-3xl p-6 shadow-xs flex items-center justify-between hover:shadow-md hover:border-slate-200 transition-all duration-200"
+          >
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Posts</span>
+              <span className="text-3xl font-bold text-slate-800 block">{blogs.length}</span>
+              <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 uppercase tracking-wider">
+                +{blogs.length} total
+              </span>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+              <FileText className="w-6 h-6" />
+            </div>
+          </Link>
+
+          {/* Card 2: Categories */}
+          <Link
+            to="/categories"
+            className="bg-white border border-slate-100 rounded-3xl p-6 shadow-xs flex items-center justify-between hover:shadow-md hover:border-slate-200 transition-all duration-200"
+          >
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Categories</span>
+              <span className="text-3xl font-bold text-slate-800 block">{blogCategoryOptions.length}</span>
+              <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 uppercase tracking-wider">
+                +{blogCategoryOptions.length} modules
+              </span>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+              <FolderTree className="w-6 h-6" />
+            </div>
+          </Link>
+
+          {/* Card 3: Cumulative Views */}
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-xs flex items-center justify-between">
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Cumulative Views</span>
+              <span className="text-3xl font-bold text-slate-800 block">{totalViews}</span>
+              <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 uppercase tracking-wider">
+                Live Traffic
+              </span>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+              <Eye className="w-6 h-6" />
+            </div>
+          </div>
+
+          {/* Card 4: Subscribers */}
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-xs flex items-center justify-between">
+            <div className="space-y-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Subscribers</span>
+              <span className="text-3xl font-bold text-slate-800 block">{subscriberCount}</span>
+              <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 uppercase tracking-wider">
+                {subscriberCount} list
+              </span>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+              <Mail className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* Chart & Most Viewed Articles Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Traffic Analytics Line Chart */}
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-xs lg:col-span-2 space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Traffic Analytics</h3>
+              <p className="text-xs text-slate-400 mt-1">Real Article Views over time</p>
+            </div>
+
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#ffffff",
+                      border: "1px solid #f1f5f9",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)"
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="views"
+                    stroke="#f97316"
+                    strokeWidth={3}
+                    dot={{ fill: "#f97316", r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Most Viewed Articles */}
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-xs space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Most Viewed Articles</h3>
+              <p className="text-xs text-slate-400 mt-1">Top performing content</p>
+            </div>
+
+            <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto pr-1">
+              {mostViewedBlogs.map((b) => (
+                <div key={b._id} className="py-3 flex items-center gap-3 hover:bg-slate-50/50 rounded-xl px-1.5 transition-colors">
+                  <div className="w-12 h-12 rounded-xl border border-slate-100 overflow-hidden bg-slate-50 shrink-0 flex items-center justify-center">
+                    {b.featuredImage ? (
+                      <img src={b.featuredImage} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <FileText className="w-6 h-6 text-slate-400" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-xs font-bold text-slate-800 truncate leading-snug">{b.title}</h4>
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400 font-semibold">
+                      <span>{new Date(b.publishDate).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</span>
+                      <span>•</span>
+                      <span className="text-orange-500 font-bold">{b.views || 0} views</span>
+                      <span>•</span>
+                      <span className="uppercase text-[9px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-sm font-bold">
+                        {b.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, render default E-Commerce dashboard
+  const { summary = {}, charts = {}, recentOrders = [], recentActivities = [], topProducts = [], topCategories = [] } = ecommerceData || {};
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">

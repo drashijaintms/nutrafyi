@@ -7,7 +7,7 @@ const { logAdminActivity } = require("../middleware/activityLogger");
 // Get all administrators
 router.get("/", protect, superAdminOnly, async (req, res) => {
   try {
-    const admins = await Admin.find().select("-password");
+    const admins = await Admin.find().select("-password").populate("roleId");
     res.json(admins);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -16,7 +16,7 @@ router.get("/", protect, superAdminOnly, async (req, res) => {
 
 // Create new administrator
 router.post("/", protect, superAdminOnly, async (req, res) => {
-  const { name, email, password, role, permissions } = req.body;
+  const { name, email, password, role, roleId, permissions } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: "Name, email, and password are required" });
@@ -33,6 +33,7 @@ router.post("/", protect, superAdminOnly, async (req, res) => {
       email,
       password,
       role: role || "admin",
+      roleId: roleId || null,
       permissions: permissions || {
         products: true,
         categories: true,
@@ -49,6 +50,7 @@ router.post("/", protect, superAdminOnly, async (req, res) => {
     });
 
     const saved = await admin.save();
+    await saved.populate("roleId");
 
     await logAdminActivity(
       req.admin._id,
@@ -61,7 +63,9 @@ router.post("/", protect, superAdminOnly, async (req, res) => {
       name: saved.name,
       email: saved.email,
       role: saved.role,
-      permissions: saved.permissions
+      roleId: saved.roleId,
+      permissions: saved.permissions,
+      createdAt: saved.createdAt
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -70,7 +74,7 @@ router.post("/", protect, superAdminOnly, async (req, res) => {
 
 // Update administrator
 router.put("/:id", protect, superAdminOnly, async (req, res) => {
-  const { name, email, password, role, permissions } = req.body;
+  const { name, email, password, role, roleId, permissions } = req.body;
 
   try {
     const admin = await Admin.findById(req.params.id);
@@ -89,10 +93,12 @@ router.put("/:id", protect, superAdminOnly, async (req, res) => {
 
     if (name) admin.name = name;
     if (role) admin.role = role;
+    if (roleId !== undefined) admin.roleId = roleId;
     if (permissions) admin.permissions = permissions;
     if (password) admin.password = password; // pre-save hook will hash it
 
     const updated = await admin.save();
+    await updated.populate("roleId");
 
     await logAdminActivity(
       req.admin._id,
@@ -105,7 +111,9 @@ router.put("/:id", protect, superAdminOnly, async (req, res) => {
       name: updated.name,
       email: updated.email,
       role: updated.role,
-      permissions: updated.permissions
+      roleId: updated.roleId,
+      permissions: updated.permissions,
+      createdAt: updated.createdAt
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

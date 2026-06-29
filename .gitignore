@@ -27,8 +27,10 @@ node_modules
 dist
 build
 
-backend/node_modules
-frontend/node_modules
-
 .vscode
 .DS_Store
+
+# Uploads and Zips
+backend/uploads/*
+*.zip
+backend.zip

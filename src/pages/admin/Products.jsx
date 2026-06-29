@@ -141,6 +141,7 @@ const totalPages = Math.ceil(
   )} of {filteredProducts.length} Products
 </p>
 
+
   <div className="flex gap-3">
 
     <input

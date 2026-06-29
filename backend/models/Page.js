@@ -26,6 +26,13 @@ const pageSchema = new mongoose.Schema(
       enum: ["Draft", "Published"],
       default: "Published",
     },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

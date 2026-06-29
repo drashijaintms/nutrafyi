@@ -76,8 +76,7 @@ const uploadToCloudinary = async (filePath, folder = "nutrafyi") => {
 
   // Fallback to local storage: keep the file in `uploads` folder and return the local URL
   const filename = path.basename(filePath);
-  const port = process.env.PORT || 5000;
-  const localUrl = `http://localhost:${port}/uploads/${filename}`;
+  const localUrl = `/uploads/${filename}`;
   return { url: localUrl, publicId: null };
 };
 
