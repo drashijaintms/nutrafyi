@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import axios from "axios";
 import BreadcrumbBar from "../components/BreadcrumbBar";
 import CategorySidebar from "../components/CategorySidebar";
 import ProductCard from "../components/ProductCard";
+import BlogSection from "../components/BlogSection";
 import { categories } from "../data/categories";
 import { getProducts } from "../services/productService";
 import { productImages } from "../data/productImages";
@@ -22,24 +24,33 @@ function CategoryDetail() {
   const [sortBy, setSortBy] = useState("best-selling");
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
+  const [category, setCategory] = useState(null);
+  const [loadingCategory, setLoadingCategory] = useState(true);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchCategoryAndProducts = async () => {
+      setLoadingCategory(true);
       try {
-        const data = await getProducts();
-        setProducts(Array.isArray(data) ? data : []);
+        // Fetch products
+        const productsData = await getProducts();
+        setProducts(Array.isArray(productsData) ? productsData : []);
+
+        // Fetch categories and find by slug
+        const catRes = await axios.get("/api/categories");
+        if (catRes.data) {
+          const found = catRes.data.find((item) => item.slug === slug);
+          setCategory(found || null);
+        }
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching category/products:", error);
+      } finally {
+        setLoadingCategory(false);
       }
     };
 
-    fetchProducts();
-  }, []);
-
-  const category = categories.find(
-    (item) => item.slug === slug
-  );
+    fetchCategoryAndProducts();
+  }, [slug]);
 
   const categoryProducts = products.filter(
     (product) => product.category === slug
@@ -55,7 +66,7 @@ function CategoryDetail() {
 
   const maxPrice = searchParams.get("maxPrice")
     ? parseInt(searchParams.get("maxPrice"), 10)
-    : 100;
+    : 2000;
 
   const getProductItemForm = (product) => {
     const spec = product.specifications?.find((s) => s.label === "ITEM FORM");
@@ -128,8 +139,17 @@ if (sortBy === "z-a") {
     b.title.localeCompare(a.title)
   );
 }
-if (!category) {
-  return (
+  if (loadingCategory) {
+    return (
+      <div className="py-20 text-center flex flex-col items-center justify-center min-h-[50vh] bg-[#fdfdfc]">
+        <div className="w-10 h-10 border-4 border-[#147a3f] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <span className="text-sm font-bold text-[#147a3f]">Loading category...</span>
+      </div>
+    );
+  }
+
+  if (!category) {
+    return (
     <div className="py-20 text-center">
       Category Not Found
     </div>
@@ -260,6 +280,9 @@ if (!category) {
 
         </div>
       </section>
+
+      {/* Dynamic latest blogs belonging to this category */}
+      <BlogSection category={category.title} />
     </>
   );
 }

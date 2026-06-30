@@ -199,10 +199,44 @@ const addAddress = async (req, res) => {
   }
 };
 
+// @desc    Storefront customer forgot password (verify email + phone)
+// @route   POST /api/user/forgot-password
+// @access  Public
+const forgotPasswordUser = async (req, res) => {
+  const { email, phone, newPassword } = req.body;
+
+  if (!email || !phone || !newPassword) {
+    return res.status(400).json({ message: "Email, phone number, and new password are required" });
+  }
+
+  try {
+    const customer = await Customer.findOne({ 
+      email: email.toLowerCase(), 
+      phone: phone.trim() 
+    });
+
+    if (!customer) {
+      return res.status(404).json({ message: "No account found matching this email and phone number combination." });
+    }
+
+    customer.password = newPassword;
+    customer.activityHistory.push({
+      action: "Password Reset via email + phone verification",
+      timestamp: new Date()
+    });
+
+    await customer.save();
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   toggleWishlist,
   addAddress,
+  forgotPasswordUser,
 };

@@ -282,35 +282,461 @@ export default function CMSBlogs() {
           window.tinymce.init({
             selector: "#blog-editor-textarea",
             height: 400,
-            menubar: "file edit view insert format tools table help",
-            toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor | alignleft aligncenter alignright alignjustify | outdent indent | removeformat | customcta",
+             menubar: "file edit view insert format tools table help",
+            plugins: "link lists image table code help wordcount visualblocks searchreplace emoticons charmap visualchars",
+            toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor | link | alignleft aligncenter alignright alignjustify | outdent indent | removeformat | customcta customfaq",
+            content_style: `
+              body { font-family: 'Outfit', Helvetica, Arial, sans-serif; font-size:16px; color: #334155; line-height: 1.6; padding: 20px; }
+              .cta-style-1 { display: flex; align-items: start; gap: 16px; padding: 24px; margin: 32px 0; background-color: #f5f8f4; border-left: 4px solid #147a3f; border-radius: 0 16px 16px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-align: left; }
+              .cta-style-2 { border: 1px solid rgba(20, 122, 63, 0.15); border-radius: 16px; padding: 24px; margin: 32px 0; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 16px; text-align: left; }
+              .cta-style-3 { border: 1px solid #f1f5f9; border-radius: 16px; overflow: hidden; margin: 32px 0; background-color: #f8fafc; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; text-align: left; }
+              .cta-style-3-img { width: 100%; height: 160px; background-size: cover; background-position: center; }
+              .cta-style-3-content { padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+              .cta-style-4 { background: linear-gradient(135deg, #147a3f, #0e3b20); border-radius: 16px; padding: 28px; margin: 32px 0; color: #ffffff; box-shadow: 0 4px 12px rgba(20, 122, 63, 0.15); display: flex; flex-direction: column; gap: 20px; text-align: left; }
+              .cta-style-5 { border-top: 1px dashed rgba(20, 122, 63, 0.4); border-bottom: 1px dashed rgba(20, 122, 63, 0.4); padding: 28px 16px; margin: 32px 0; text-align: center; background-color: #fdfdfd; }
+              .cta-title { font-size: 19px; font-weight: 800; color: #0e3b20; margin: 0 0 6px 0; font-family: serif; }
+              .cta-title-white { font-size: 19px; font-weight: 800; color: #ffffff; margin: 0 0 6px 0; font-family: serif; }
+              .cta-text { color: #475569; font-size: 15px; margin: 0; }
+              .cta-text-white { color: #a7f3d0; font-size: 15px; margin: 0; }
+              .cta-btn { display: inline-block; background-color: #147a3f; color: #ffffff !important; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 24px; border-radius: 12px; text-decoration: none !important; border: none; cursor: pointer; text-align: center; }
+              .cta-btn-white { display: inline-block; background-color: #ffffff; color: #147a3f !important; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 24px; border-radius: 12px; text-decoration: none !important; border: none; cursor: pointer; text-align: center; }
+              .cta-icon-container { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #e8f1e5; color: #147a3f; }
+              .cta-img-circle { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+              
+              /* FAQ Accordion Styles in Editor */
+              .faq-accordion-item { border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background-color: #ffffff; margin: 16px 0; }
+              .faq-accordion-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 20px; text-align: left; font-weight: bold; border: none; background-color: #fafafa; color: #1e293b; }
+              .faq-accordion-content { padding: 20px; border-top: 1px solid #e2e8f0; background-color: #ffffff; color: #475569; }
+            `,
             setup: (editor) => {
               activeEditor = editor;
               editor.on("init", () => {
                 editor.setContent(content || "");
+
+                // Override default Link command to use our custom checkbox dialog
+                editor.addCommand("mceLink", () => {
+                const selectedText = editor.selection.getContent({ format: "text" }) || "";
+                const anchorNode = editor.dom.getParent(editor.selection.getNode(), "a");
+                let isAnchor = false;
+                let initialUrl = "";
+                let initialText = selectedText;
+                let initialTitle = "";
+                let initialTarget = "_self";
+                let initialNoFollow = false;
+                let initialNoOpener = false;
+                let initialNoReferrer = false;
+
+                if (anchorNode) {
+                  isAnchor = true;
+                  initialUrl = editor.dom.getAttrib(anchorNode, "href") || "";
+                  initialText = anchorNode.textContent || anchorNode.innerText || selectedText;
+                  initialTitle = editor.dom.getAttrib(anchorNode, "title") || "";
+                  initialTarget = editor.dom.getAttrib(anchorNode, "target") || "_self";
+                  
+                  const rel = editor.dom.getAttrib(anchorNode, "rel") || "";
+                  initialNoFollow = rel.includes("nofollow");
+                  initialNoOpener = rel.includes("noopener");
+                  initialNoReferrer = rel.includes("noreferrer");
+                }
+
+                editor.windowManager.open({
+                  title: "Insert/Edit Link",
+                  body: {
+                    type: "panel",
+                    items: [
+                      {
+                        type: "input",
+                        name: "url",
+                        label: "URL"
+                      },
+                      {
+                        type: "input",
+                        name: "text",
+                        label: "Text to display"
+                      },
+                      {
+                        type: "input",
+                        name: "title",
+                        label: "Title"
+                      },
+                      {
+                        type: "selectbox",
+                        name: "target",
+                        label: "Open link in...",
+                        items: [
+                          { text: "Current window", value: "_self" },
+                          { text: "New window", value: "_blank" }
+                        ]
+                      },
+                      {
+                        type: "checkbox",
+                        name: "nofollow",
+                        label: "No Follow (nofollow)"
+                      },
+                      {
+                        type: "checkbox",
+                        name: "noopener",
+                        label: "No Opener (noopener)"
+                      },
+                      {
+                        type: "checkbox",
+                        name: "noreferrer",
+                        label: "No Referrer (noreferrer)"
+                      }
+                    ]
+                  },
+                  initialData: {
+                    url: initialUrl,
+                    text: initialText,
+                    title: initialTitle,
+                    target: initialTarget,
+                    nofollow: initialNoFollow,
+                    noopener: initialNoOpener,
+                    noreferrer: initialNoReferrer
+                  },
+                  buttons: [
+                    {
+                      type: "cancel",
+                      text: "Cancel"
+                    },
+                    {
+                      type: "submit",
+                      text: "Save",
+                      primary: true
+                    }
+                  ],
+                  onSubmit: (api) => {
+                    const data = api.getData();
+                    if (!data.url) {
+                      editor.windowManager.alert("URL is required.");
+                      return;
+                    }
+
+                    const textToDisplay = data.text || data.url;
+                    const relArray = [];
+                    if (data.nofollow) relArray.push("nofollow");
+                    if (data.noopener) relArray.push("noopener");
+                    if (data.noreferrer) relArray.push("noreferrer");
+                    
+                    const relString = relArray.length > 0 ? ` rel="${relArray.join(" ")}"` : "";
+                    const titleAttr = data.title ? ` title="${data.title}"` : "";
+                    const targetAttr = data.target && data.target !== "_self" ? ` target="${data.target}"` : "";
+
+                    if (isAnchor && anchorNode) {
+                      editor.dom.setAttrib(anchorNode, "href", data.url);
+                      if (data.title) {
+                        editor.dom.setAttrib(anchorNode, "title", data.title);
+                      } else {
+                        editor.dom.setAttrib(anchorNode, "title", null);
+                      }
+                      if (data.target && data.target !== "_self") {
+                        editor.dom.setAttrib(anchorNode, "target", data.target);
+                      } else {
+                        editor.dom.setAttrib(anchorNode, "target", null);
+                      }
+                      if (relArray.length > 0) {
+                        editor.dom.setAttrib(anchorNode, "rel", relArray.join(" "));
+                      } else {
+                        editor.dom.setAttrib(anchorNode, "rel", null);
+                      }
+                      anchorNode.textContent = textToDisplay;
+                    } else {
+                      const linkHtml = `<a href="${data.url}"${titleAttr}${targetAttr}${relString}>${textToDisplay}</a>`;
+                      editor.insertContent(linkHtml);
+                    }
+                    api.close();
+                  }
+                });
               });
-              editor.on("change keyup", () => {
+            });
+
+            editor.on("change keyup", () => {
                 setContent(editor.getContent());
               });
 
-              // Add custom Green CTA Callout Box insertion button
+              // Add custom CTA Callout Box insertion button
               editor.ui.registry.addButton("customcta", {
-                text: "Green CTA",
+                text: "CTA",
                 icon: "comment",
-                tooltip: "Insert Green Callout CTA Box",
+                tooltip: "Insert Custom CTA Box",
                 onAction: () => {
-                  const text = window.prompt("Enter CTA Callout Text:");
-                  if (text) {
-                    const html = `<div class="flex items-start gap-4 p-5 my-8 bg-[#f5f8f4] border-l-4 border-[#147a3f] rounded-r-2xl shadow-2xs">
-  <div class="flex items-center justify-center w-10 h-10 rounded-full bg-[#e8f1e5] text-[#147a3f] flex-shrink-0 mt-0.5">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 9.8a7 7 0 0 1-13.9.2"></path><path d="M9 22v-4H5"></path></svg>
+                  editor.windowManager.open({
+                    title: "Insert Beautiful CTA Box",
+                    body: {
+                      type: "panel",
+                      items: [
+                        {
+                          type: "selectbox",
+                          name: "style",
+                          label: "Select Design Style",
+                          items: [
+                            { text: "Style 1: Elegant Left-Border Green", value: "style1" },
+                            { text: "Style 2: Clean Card with Action Button", value: "style2" },
+                            { text: "Style 3: Image Left & Text Right Card", value: "style3" },
+                            { text: "Style 4: Dark Gradient Spotlight Card", value: "style4" },
+                            { text: "Style 5: Minimalist Dashed Spacer Banner", value: "style5" }
+                          ]
+                        },
+                        {
+                          type: "htmlpanel",
+                          html: `
+                            <div style="margin-top: 10px; margin-bottom: 15px; border: 1px solid #e2e8f0; padding: 12px; background-color: #f8fafc; border-radius: 8px; font-family: sans-serif;">
+                              <p style="font-weight: bold; font-size: 11px; color: #475569; margin: 0 0 8px 0; text-transform: uppercase;">Selected Style Preview:</p>
+                              
+                              <!-- Style 1 Preview -->
+                              <div id="cta-preview-card-style1" style="display: block;">
+                                <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background-color: #f5f8f4; border-left: 3px solid #147a3f; border-radius: 0 8px 8px 0; text-align: left;">
+                                  <div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background-color: #e8f1e5; color: #147a3f; font-size: 12px; flex-shrink: 0; margin-top: 2px;">🍃</div>
+                                  <div>
+                                    <h5 style="font-size: 12px; font-weight: bold; color: #0e3b20; margin: 0 0 3px 0; font-family: serif;">Headline Example</h5>
+                                    <p style="color: #475569; font-style: italic; font-size: 10.5px; margin: 0; line-height: 1.45;">This is an elegant callout style ideal for quotes, key facts, or important nutritional guidance.</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- Style 2 Preview -->
+                              <div id="cta-preview-card-style2" style="display: none;">
+                                <div style="border: 1px solid rgba(20, 122, 63, 0.15); border-radius: 8px; padding: 12px; background-color: #ffffff; display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; text-align: left;">
+                                  <div>
+                                    <h5 style="font-size: 12px; font-weight: bold; color: #0e3b20; margin: 0 0 3px 0; font-family: serif;">Clean Modern Layout</h5>
+                                    <p style="color: #64748b; font-size: 10.5px; margin: 0; line-height: 1.45;">A perfect template to direct readers to catalog pages, specific products, or related information.</p>
+                                  </div>
+                                  <span style="display: inline-block; background-color: #147a3f; color: white; font-size: 8.5px; font-weight: bold; text-transform: uppercase; padding: 5px 10px; border-radius: 5px; white-space: nowrap;">Click Here</span>
+                                </div>
+                              </div>
+
+                              <!-- Style 3 Preview -->
+                              <div id="cta-preview-card-style3" style="display: none;">
+                                <div style="border: 1px solid #f1f5f9; border-radius: 8px; overflow: hidden; background-color: #f8fafc; display: flex; flex-direction: row; text-align: left;">
+                                  <div style="width: 25%; background-color: #e8f1e5; display: flex; align-items: center; justify-content: center; font-size: 16px; min-height: 70px;">🥗</div>
+                                  <div style="width: 75%; padding: 10px; display: flex; flex-direction: column; justify-content: center; gap: 3px;">
+                                    <h5 style="font-size: 12px; font-weight: bold; color: #0e3b20; margin: 0 0 2px 0; font-family: serif;">Image & Text Banner</h5>
+                                    <p style="color: #64748b; font-size: 9.5px; margin: 0 0 3px 0; line-height: 1.4;">Incorporate high-impact visuals right next to your product recommendations.</p>
+                                    <span style="display: inline-block; background-color: #147a3f; color: white; font-size: 8px; font-weight: bold; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; self-start; width: max-content;">Shop Now</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- Style 4 Preview -->
+                              <div id="cta-preview-card-style4" style="display: none;">
+                                <div style="background: linear-gradient(135deg, #147a3f, #0e3b20); border-radius: 8px; padding: 12px; color: #ffffff; display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; text-align: left;">
+                                  <div>
+                                    <h5 style="font-size: 12px; font-weight: bold; color: #ffffff; margin: 0 0 3px 0; font-family: serif;">Announcement Spotlight</h5>
+                                    <p style="color: #a7f3d0; font-size: 10.5px; margin: 0; line-height: 1.45;">A vibrant, high-contrast block designed to capture immediate reader attention for newsletters or special discounts.</p>
+                                  </div>
+                                  <span style="display: inline-block; background-color: #ffffff; color: #147a3f; font-size: 8.5px; font-weight: bold; text-transform: uppercase; padding: 5px 10px; border-radius: 5px; white-space: nowrap;">Claim Offer</span>
+                                </div>
+                              </div>
+
+                              <!-- Style 5 Preview -->
+                              <div id="cta-preview-card-style5" style="display: none;">
+                                <div style="border-top: 1px dashed rgba(20, 122, 63, 0.3); border-bottom: 1px dashed rgba(20, 122, 63, 0.3); padding: 12px 6px; text-align: center; background-color: #fdfdfd;">
+                                  <div style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background-color: #f5f8f4; color: #147a3f; font-size: 9px; margin-bottom: 2px;">✨</div>
+                                  <h5 style="font-size: 12px; font-weight: bold; color: #0e3b20; margin: 0 0 2px 0; font-family: serif;">Dashed Spacer Layout</h5>
+                                  <p style="color: #475569; font-size: 10.5px; margin: 0 0 4px 0; line-height: 1.45;">A low-key callout option that breaks up long articles gently.</p>
+                                  <span style="display: inline-block; background-color: #147a3f; color: white; font-size: 8px; font-weight: bold; text-transform: uppercase; padding: 3px 8px; border-radius: 4px;">View More</span>
+                                </div>
+                              </div>
+                            </div>
+                          `
+                        },
+                        {
+                          type: "input",
+                          name: "title",
+                          label: "CTA Title / Header (Optional)"
+                        },
+                        {
+                          type: "textarea",
+                          name: "text",
+                          label: "CTA Text / Body Content"
+                        },
+                        {
+                          type: "input",
+                          name: "image",
+                          label: "Image / Icon URL (Optional, defaults to Green Leaf if empty)"
+                        },
+                        {
+                          type: "input",
+                          name: "btnText",
+                          label: "Button Text (Optional)"
+                        },
+                        {
+                          type: "input",
+                          name: "btnLink",
+                          label: "Button Link / URL (Optional)"
+                        }
+                      ]
+                    },
+                    buttons: [
+                      {
+                        type: "cancel",
+                        text: "Cancel"
+                      },
+                      {
+                        type: "submit",
+                        text: "Insert CTA",
+                        primary: true
+                      }
+                    ],
+                    onChange: (dialogApi, details) => {
+                      if (details.name === "style") {
+                        const selectedStyle = dialogApi.getData().style;
+                        for (let i = 1; i <= 5; i++) {
+                          const el = document.getElementById(`cta-preview-card-style${i}`);
+                          if (el) {
+                            el.style.display = selectedStyle === `style${i}` ? "block" : "none";
+                          }
+                        }
+                      }
+                    },
+                    onSubmit: (api) => {
+                      const data = api.getData();
+                      if (!data.text) {
+                        editor.windowManager.alert("CTA Text/Body Content is required.");
+                        return;
+                      }
+
+                      // Generate dynamic HTML based on selected template style
+                      const { style, title, text, image, btnText, btnLink } = data;
+                      
+                      const titleClass = style === "style4" ? "cta-title-white" : "cta-title";
+                      const titleHtml = title ? `<h4 class="${titleClass}">${title}</h4>` : "";
+                      
+                      let mediaHtml = "";
+                      if (image) {
+                        mediaHtml = `<img src="${image}" class="cta-img-circle" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;" />`;
+                      } else {
+                        mediaHtml = `
+<div class="cta-icon-container" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #e8f1e5; color: #147a3f; flex-shrink: 0;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 9.8a7 7 0 0 1-13.9.2"></path><path d="M9 22v-4H5"></path></svg>
+</div>`;
+                      }
+                      
+                      let buttonHtml = "";
+                      if (btnText && btnLink) {
+                        const btnClass = style === "style4" ? "cta-btn-white" : "cta-btn";
+                        buttonHtml = `
+<div class="cta-btn-wrapper" style="margin-top: 10px; margin-bottom: 5px;">
+  <a href="${btnLink}" class="${btnClass}" target="_blank" rel="noopener noreferrer">${btnText}</a>
+</div>`;
+                      }
+                      
+                      const textClass = style === "style4" ? "cta-text-white" : "cta-text";
+                      const ctaBody = `<p class="${textClass}">${text}</p>`;
+
+                      let html = "";
+                      if (style === "style1") {
+                        html = `
+<div class="cta-style-1" style="display: flex; align-items: start; gap: 16px; padding: 24px; margin: 32px 0; background-color: #f5f8f4; border-left: 4px solid #147a3f; border-radius: 0 16px 16px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); text-align: left;">
+  <div style="flex-shrink: 0; margin-top: 2px;">${mediaHtml}</div>
+  <div>
+    ${titleHtml}
+    ${ctaBody}
   </div>
-  <p class="text-slate-800 italic font-semibold text-[17px] sm:text-[18px] leading-7 m-0">
-    ${text}
-  </p>
 </div><p></p>`;
-                    editor.insertContent(html);
-                  }
+                      } else if (style === "style2") {
+                        html = `
+<div class="cta-style-2" style="border: 1px solid rgba(20, 122, 63, 0.15); border-radius: 16px; padding: 24px; margin: 32px 0; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 16px; text-align: left;">
+  <div style="flex-grow: 1;">
+    ${titleHtml}
+    ${ctaBody}
+  </div>
+  ${buttonHtml ? `<div style="align-self: center; flex-shrink: 0;">${buttonHtml}</div>` : ""}
+</div><p></p>`;
+                      } else if (style === "style3") {
+                        const imageUrl = image || "https://placehold.co/600x400/e8f1e5/147a3f?text=Nutrafyi";
+                        html = `
+<div class="cta-style-3" style="border: 1px solid #f1f5f9; border-radius: 16px; overflow: hidden; margin: 32px 0; background-color: #f8fafc; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; text-align: left;">
+  <div class="cta-style-3-img" style="width: 100%; height: 180px; background-size: cover; background-position: center; background-image: url('${imageUrl}');"></div>
+  <div class="cta-style-3-content" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; gap: 12px; flex-grow: 1;">
+    ${titleHtml}
+    ${ctaBody}
+    ${buttonHtml}
+  </div>
+</div><p></p>`;
+                      } else if (style === "style4") {
+                        html = `
+<div class="cta-style-4" style="background: linear-gradient(135deg, #147a3f, #0e3b20); border-radius: 16px; padding: 28px; margin: 32px 0; color: #ffffff; box-shadow: 0 4px 12px rgba(20, 122, 63, 0.15); display: flex; flex-direction: column; gap: 20px; text-align: left;">
+  <div style="flex-grow: 1;">
+    ${titleHtml}
+    ${ctaBody}
+  </div>
+  ${buttonHtml ? `<div style="align-self: center; flex-shrink: 0;">${buttonHtml}</div>` : ""}
+</div><p></p>`;
+                      } else { // style5
+                        html = `
+<div class="cta-style-5" style="border-top: 1px dashed rgba(20, 122, 63, 0.4); border-bottom: 1px dashed rgba(20, 122, 63, 0.4); padding: 28px 16px; margin: 32px 0; text-align: center; background-color: #fdfdfd;">
+  <div style="display: justify-content: center; margin-bottom: 12px; display: flex;">${mediaHtml}</div>
+  ${titleHtml}
+  ${ctaBody}
+  ${buttonHtml ? `<div style="display: flex; justify-content: center; margin-top: 12px;">${buttonHtml}</div>` : ""}
+</div><p></p>`;
+                      }
+
+                      editor.insertContent(html);
+                      api.close();
+                    }
+                  });
+                }
+              });
+
+              // Add custom FAQ Accordion insertion button
+              editor.ui.registry.addButton("customfaq", {
+                text: "FAQ",
+                icon: "help",
+                tooltip: "Insert FAQ Accordion",
+                onAction: () => {
+                  editor.windowManager.open({
+                    title: "Insert FAQ Accordion",
+                    body: {
+                      type: "panel",
+                      items: [
+                        {
+                          type: "input",
+                          name: "question",
+                          label: "FAQ Question"
+                        },
+                        {
+                          type: "textarea",
+                          name: "answer",
+                          label: "FAQ Answer"
+                        }
+                      ]
+                    },
+                    buttons: [
+                      {
+                        type: "cancel",
+                        text: "Cancel"
+                      },
+                      {
+                        type: "submit",
+                        text: "Insert FAQ",
+                        primary: true
+                      }
+                    ],
+                    onSubmit: (api) => {
+                      const data = api.getData();
+                      if (!data.question || !data.answer) {
+                        editor.windowManager.alert("Both Question and Answer are required.");
+                        return;
+                      }
+
+                      const { question, answer } = data;
+                      const html = `
+<div class="faq-accordion-item border border-slate-150 rounded-2xl overflow-hidden bg-white shadow-2xs my-4" style="border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background-color: #ffffff; margin: 16px 0;">
+  <button class="faq-accordion-trigger w-full flex items-center justify-between p-5 text-left font-bold text-slate-800 text-[16px] sm:text-[17px] hover:text-[#147a3f] transition bg-[#fafafa]" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 20px; text-align: left; font-weight: bold; border: none; background-color: #fafafa; cursor: pointer; color: #1e293b;">
+    <span style="font-size: 16px;">${question}</span>
+    <span class="faq-accordion-icon" style="color: #147a3f; font-size: 18px; font-weight: 900;">+</span>
+  </button>
+  <div class="faq-accordion-content p-5 bg-white border-t border-slate-100 text-slate-650 text-sm sm:text-[15px] leading-7" style="display: none; padding: 20px; border-top: 1px solid #e2e8f0; background-color: #ffffff; color: #475569; font-size: 14px; line-height: 1.6;">
+    ${answer}
+  </div>
+</div><p></p>`;
+
+                      editor.insertContent(html);
+                      api.close();
+                    }
+                  });
                 }
               });
             }
@@ -388,18 +814,29 @@ export default function CMSBlogs() {
     }
   };
 
-  const handleSave = (e) => {
-    if (e) e.preventDefault();
-    if (!title || !content) return toast.error("Title and content are required");
+  const savePost = async (isPreview = false) => {
+    if (!title || !content) {
+      toast.error("Title and content are required");
+      return false;
+    }
 
-    saveMutation.mutate({
+    // Default the status to "Draft" during previews unless the blog was already published
+    let targetStatus = status;
+    if (isPreview) {
+      if (!editingId || status !== "Published") {
+        targetStatus = "Draft";
+        setStatus("Draft");
+      }
+    }
+
+    const payload = {
       title,
       slug: slug || undefined,
       content,
       featuredImage,
       categories: selectedCategories,
       tags: tagsInput.split(",").map((t) => t.trim()).filter(Boolean),
-      status,
+      status: targetStatus,
       displayBadge,
       seo: {
         metaTitle,
@@ -422,7 +859,50 @@ export default function CMSBlogs() {
         text: ctaBoxText
       },
       faqs
-    });
+    };
+
+    try {
+      let savedBlog;
+      if (editingId) {
+        const res = await API.put(`/blogs/${editingId}`, payload);
+        savedBlog = res.data;
+      } else {
+        const res = await API.post("/blogs", payload);
+        savedBlog = res.data;
+        if (savedBlog && savedBlog._id) {
+          setEditingId(savedBlog._id);
+        }
+      }
+      
+      queryClient.invalidateQueries(["cmsBlogs"]);
+      
+      if (!isPreview) {
+        toast.success(editingId ? "Blog post updated" : "Blog post created");
+        setViewState("list");
+        resetForm();
+      }
+      return true;
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong saving the post");
+      return false;
+    }
+  };
+
+  const handlePreview = async () => {
+    if (!slug) {
+      toast.error("Please enter a title or slug first");
+      return;
+    }
+    
+    // Save draft silently first so the database has it
+    const toastId = toast.loading("Saving draft for preview...");
+    const success = await savePost(true);
+    if (success) {
+      toast.success("Opening preview...", { id: toastId });
+      window.open(`/blog/${slug}`, "_blank");
+    } else {
+      toast.error("Failed to prepare preview", { id: toastId });
+    }
   };
 
   // Toggle Category Selection checkbox
@@ -1211,20 +1691,17 @@ export default function CMSBlogs() {
                 </div>
               </div>
             </div>
-
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  toast.success("Preview loaded in a simulated background tab");
-                }}
+                onClick={handlePreview}
                 className="px-4.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-650 text-sm font-semibold transition-all cursor-pointer"
               >
                 Preview
               </button>
               <button
                 type="button"
-                onClick={handleSave}
+                onClick={() => savePost(false)}
                 className="px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-all shadow-md shadow-orange-500/10 cursor-pointer"
               >
                 {editingId ? "Save Changes" : "Publish"}
@@ -1266,8 +1743,7 @@ export default function CMSBlogs() {
                     { id: "general", label: "General SEO" },
                     { id: "social", label: "Social Preview" },
                     { id: "schema", label: "Schema Markup" },
-                    { id: "analyzer", label: "SEO Analyzer" },
-                    { id: "interactive", label: "CTA & FAQs" }
+                    { id: "analyzer", label: "SEO Analyzer" }
                   ].map(tab => (
                     <button
                       key={tab.id}
@@ -1680,106 +2156,6 @@ export default function CMSBlogs() {
                     </div>
                   );
                 })()}
-
-                {/* Tab 5: CTA & FAQs Interactive Blocks */}
-                {activeSeoTab === "interactive" && (
-                  <div className="space-y-6 text-left animate-in fade-in duration-200">
-                    {/* CTA Callout Block */}
-                    <div className="bg-slate-50/50 border border-slate-200/60 rounded-2xl p-5 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-800">CTA Callout Box</h4>
-                          <p className="text-xs text-slate-400 mt-1">Display a beautiful green callout block with a leaf icon inside the article.</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer select-none">
-                          <input 
-                            type="checkbox" 
-                            checked={showCtaBox}
-                            onChange={(e) => setShowCtaBox(e.target.checked)}
-                            className="sr-only peer" 
-                          />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#147a3f]"></div>
-                        </label>
-                      </div>
-
-                      {showCtaBox && (
-                        <div className="animate-in slide-in-from-top duration-250">
-                          <textarea
-                            value={ctaBoxText}
-                            onChange={(e) => setCtaBoxText(e.target.value)}
-                            placeholder="Type callout text (e.g. Balanced nutrition is not about perfection...)"
-                            rows={3}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-[#147a3f] text-sm bg-white"
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* FAQs Accordion Block */}
-                    <div className="bg-slate-50/50 border border-slate-200/60 rounded-2xl p-5 space-y-5">
-                      <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-850">FAQ Accordion Feature</h4>
-                          <p className="text-xs text-slate-400 mt-1">Add Q&A sections that render as dynamic accordions and automatically generate FAQPage Schema markup.</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setFaqs((prev) => [...prev, { question: "", answer: "" }])}
-                          className="px-4 py-2 bg-[#147a3f] hover:bg-[#106933] text-white rounded-xl text-xs font-bold transition cursor-pointer"
-                        >
-                          + Add FAQ
-                        </button>
-                      </div>
-
-                      <div className="space-y-4">
-                        {faqs.length === 0 ? (
-                          <p className="text-xs text-slate-400 text-center py-4">No FAQs added yet. Click "+ Add FAQ" to add one.</p>
-                        ) : (
-                          faqs.map((faq, idx) => (
-                            <div key={idx} className="bg-white border border-slate-150 rounded-xl p-4 space-y-3 relative group">
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-[#147a3f]">FAQ #{idx + 1}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => setFaqs((prev) => prev.filter((_, i) => i !== idx))}
-                                  className="text-xs font-bold text-rose-500 hover:text-rose-700 transition cursor-pointer"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                              <div className="space-y-3">
-                                <input
-                                  type="text"
-                                  value={faq.question}
-                                  onChange={(e) => {
-                                    const updated = [...faqs];
-                                    updated[idx].question = e.target.value;
-                                    setFaqs(updated);
-                                  }}
-                                  placeholder="Question text"
-                                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-hidden focus:border-[#147a3f]"
-                                  required
-                                />
-                                <textarea
-                                  value={faq.answer}
-                                  onChange={(e) => {
-                                    const updated = [...faqs];
-                                    updated[idx].answer = e.target.value;
-                                    setFaqs(updated);
-                                  }}
-                                  placeholder="Answer text"
-                                  rows={2}
-                                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-hidden focus:border-[#147a3f] resize-y"
-                                  required
-                                />
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 

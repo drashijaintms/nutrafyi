@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import BreadcrumbBar from "../components/BreadcrumbBar";
 import { Search, Package, CheckCircle2, Truck, Check, HelpCircle } from "lucide-react";
+import { productImages } from "../data/productImages";
+
+const resolveProductImage = (img, slug) => {
+  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+    return img;
+  }
+  return productImages[img] || productImages[slug] || img;
+};
 
 const STATUS_STEPS = [
   { status: "Pending", label: "Pending Review", desc: "We received your order and are verifying details.", icon: HelpCircle },
@@ -207,9 +215,9 @@ export default function TrackOrder() {
                   {orderData.items.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between py-3">
                       <div className="flex items-center gap-3">
-                        {item.image && (
+                        {resolveProductImage(item.image, item.slug) && (
                           <img
-                            src={item.image}
+                            src={resolveProductImage(item.image, item.slug)}
                             alt=""
                             className="w-12 h-12 object-contain rounded-lg border border-slate-100 p-0.5 bg-white shrink-0"
                           />

@@ -6,19 +6,18 @@ export const useCurrency = () => useContext(CurrencyContext);
 
 const CURRENCIES = {
   USD: { code: "USD", symbol: "$", label: "US Dollar (USD)", flag: "🇺🇸" },
-  INR: { code: "INR", symbol: "₹", label: "Indian Rupee (INR)", flag: "🇮🇳" },
   EUR: { code: "EUR", symbol: "€", label: "Euro (EUR)", flag: "🇪🇺" },
 };
 
 export const CurrencyProvider = ({ children }) => {
   const [currency, setCurrencyState] = useState(() => {
-    return localStorage.getItem("selected_currency") || "USD";
+    const saved = localStorage.getItem("selected_currency");
+    return (saved && CURRENCIES[saved]) ? saved : "USD";
   });
 
   // Rates relative to USD base
   const [rates, setRates] = useState({
     USD: 1.0,
-    INR: 83.5, // sensible fallback
     EUR: 0.92, // sensible fallback
   });
 
@@ -37,7 +36,6 @@ export const CurrencyProvider = ({ children }) => {
           if (item.type === "standard" && data && data.rates) {
             setRates({
               USD: 1.0,
-              INR: data.rates.INR || 83.5,
               EUR: data.rates.EUR || 0.92,
             });
             console.log("Successfully fetched rates from", item.url);
@@ -45,7 +43,6 @@ export const CurrencyProvider = ({ children }) => {
           } else if (item.type === "fawaz" && data && data.usd) {
             setRates({
               USD: 1.0,
-              INR: data.usd.inr ? parseFloat(data.usd.inr) : 83.5,
               EUR: data.usd.eur ? parseFloat(data.usd.eur) : 0.92,
             });
             console.log("Successfully fetched rates from fallback", item.url);
@@ -80,8 +77,6 @@ export const CurrencyProvider = ({ children }) => {
           const detectedCurrency = data.currency;
           if (CURRENCIES[detectedCurrency]) {
             changeCurrency(detectedCurrency);
-          } else if (data.country_code === "IN" || data.country === "India") {
-            changeCurrency("INR");
           } else if (
             ["DE", "FR", "IT", "ES", "NL", "BE", "AT", "IE", "FI"].includes(
               data.country_code

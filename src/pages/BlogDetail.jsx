@@ -99,34 +99,98 @@ function BlogDetail() {
     }
   }, [blog]);
 
-  // Auto-inject FAQ Schema markup in HTML head
+  // Auto-inject FAQ Schema markup in HTML head (combining backend FAQs and editor inline FAQs)
   useEffect(() => {
-    if (blog && blog.faqs && blog.faqs.length > 0) {
-      // Create script tag
-      const script = document.createElement("script");
-      script.setAttribute("type", "application/ld+json");
-      script.setAttribute("id", "faq-page-jsonld");
+    if (blog) {
+      const inlineFaqs = [];
+      if (blog.content) {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(blog.content, "text/html");
+          const items = doc.querySelectorAll(".faq-accordion-item");
+          items.forEach((item) => {
+            const questionEl = item.querySelector(".faq-accordion-trigger span:first-child");
+            const answerEl = item.querySelector(".faq-accordion-content");
+            if (questionEl && answerEl) {
+              inlineFaqs.push({
+                question: questionEl.textContent.trim(),
+                answer: answerEl.textContent.trim()
+              });
+            }
+          });
+        } catch (err) {
+          console.error("Failed to parse inline FAQs for schema:", err);
+        }
+      }
 
-      const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": blog.faqs.map((faq) => ({
-          "@type": "Question",
-          "name": faq.question,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": faq.answer
+      const dbFaqs = blog.faqs || [];
+      const combinedFaqs = [...dbFaqs, ...inlineFaqs];
+
+      if (combinedFaqs.length > 0) {
+        // Create script tag
+        const script = document.createElement("script");
+        script.setAttribute("type", "application/ld+json");
+        script.setAttribute("id", "faq-page-jsonld");
+
+        const faqSchema = {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": combinedFaqs.map((faq) => ({
+            "@type": "Question",
+            "name": faq.question,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": faq.answer
+            }
+          }))
+        };
+
+        script.textContent = JSON.stringify(faqSchema);
+        document.head.appendChild(script);
+
+        return () => {
+          const existingScript = document.getElementById("faq-page-jsonld");
+          if (existingScript) {
+            existingScript.remove();
           }
-        }))
+        };
+      }
+    }
+  }, [blog]);
+
+  // Delegated click handler for inline FAQs inserted into the TinyMCE rich editor
+  useEffect(() => {
+    if (blog && blog.content) {
+      const handleAccordionClick = (e) => {
+        const trigger = e.target.closest(".faq-accordion-trigger");
+        if (trigger) {
+          e.preventDefault();
+          const item = trigger.closest(".faq-accordion-item");
+          if (item) {
+            const content = item.querySelector(".faq-accordion-content");
+            const icon = trigger.querySelector(".faq-accordion-icon");
+            if (content) {
+              const isHidden = content.style.display === "none" || !content.style.display;
+              if (isHidden) {
+                content.style.display = "block";
+                if (icon) icon.textContent = "−";
+              } else {
+                content.style.display = "none";
+                if (icon) icon.textContent = "+";
+              }
+            }
+          }
+        }
       };
 
-      script.textContent = JSON.stringify(faqSchema);
-      document.head.appendChild(script);
+      const contentContainer = document.querySelector(".blog-rich-content");
+      if (contentContainer) {
+        contentContainer.addEventListener("click", handleAccordionClick);
+      }
 
       return () => {
-        const existingScript = document.getElementById("faq-page-jsonld");
-        if (existingScript) {
-          existingScript.remove();
+        if (contentContainer) {
+          contentContainer.removeEventListener("click", handleAccordionClick);
         }
       };
     }

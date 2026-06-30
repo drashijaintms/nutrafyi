@@ -1008,41 +1008,6 @@ saveMutation.mutate(payload);
                         <div className="bg-slate-50/40 p-5 rounded-2xl border border-slate-100 space-y-5">
                           <div>
                             <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                              Indian Rupee (INR) Overrides
-                            </h5>
-                            <p className="text-[10px] text-slate-400 mt-0.5">Custom override price for INR currency (leave blank to use conversion rate)</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-                              <div>
-                                <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">
-                                  Regular Price (₹)
-                                </label>
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={currencyOverrides?.INR?.regularPrice || ""}
-                                  onChange={(e) => handleCurrencyOverrideChange("INR", "regularPrice", e.target.value)}
-                                  placeholder="e.g. 5999"
-                                  className="w-full text-sm px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-semibold text-slate-500 uppercase mb-1">
-                                  Sale Price (₹)
-                                </label>
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={currencyOverrides?.INR?.salePrice || ""}
-                                  onChange={(e) => handleCurrencyOverrideChange("INR", "salePrice", e.target.value)}
-                                  placeholder="e.g. 4999"
-                                  className="w-full text-sm px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-hidden"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="border-t border-slate-100 pt-4">
-                            <h5 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                               Euro (EUR) Overrides
                             </h5>
                             <p className="text-[10px] text-slate-400 mt-0.5">Custom override price for EUR currency (leave blank to use conversion rate)</p>

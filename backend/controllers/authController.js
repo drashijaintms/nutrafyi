@@ -133,9 +133,45 @@ const getProfile = async (req, res) => {
   }
 };
 
+// @desc    Admin forgot password (secret recovery key reset)
+// @route   POST /api/admin/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+  const { email, recoveryKey, newPassword } = req.body;
+
+  if (!email || !recoveryKey || !newPassword) {
+    return res.status(400).json({ message: "Email, recovery key, and new password are required" });
+  }
+
+  try {
+    const configuredKey = process.env.ADMIN_RECOVERY_KEY || "NutrafyiRecoveryKey123";
+    if (recoveryKey !== configuredKey) {
+      return res.status(400).json({ message: "Invalid recovery key" });
+    }
+
+    const admin = await Admin.findOne({ email: email.toLowerCase() });
+    if (!admin) {
+      return res.status(404).json({ message: "No admin account found with this email" });
+    }
+
+    admin.password = newPassword;
+    admin.activityLogs.push({
+      action: "Password Reset",
+      details: "Password was reset via Recovery Key verification",
+      timestamp: new Date()
+    });
+    
+    await admin.save();
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   login,
   refreshToken,
   logout,
   getProfile,
+  forgotPassword,
 };

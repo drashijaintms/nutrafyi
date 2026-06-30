@@ -47,7 +47,7 @@ function CategorySidebar() {
 
   const maxPrice = searchParams.get("maxPrice")
     ? parseInt(searchParams.get("maxPrice"), 10)
-    : 100;
+    : 2000;
 
   // Narrow products context by current category if we are in category detail view
   const contextProducts = slug
@@ -192,7 +192,7 @@ function CategorySidebar() {
         <input
           type="range"
           min="0"
-          max="100"
+          max="2000"
           value={maxPrice}
           onChange={handlePriceChange}
           className="w-full accent-[#147a3f]"

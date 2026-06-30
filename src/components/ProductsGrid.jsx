@@ -48,7 +48,7 @@ function ProductsGrid() {
 
   const maxPrice = searchParams.get("maxPrice")
     ? parseInt(searchParams.get("maxPrice"), 10)
-    : 100;
+    : 2000;
 
   const getProductItemForm = (product) => {
     const spec = product.specifications?.find((s) => s.label === "ITEM FORM");

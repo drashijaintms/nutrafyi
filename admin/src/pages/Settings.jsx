@@ -1228,7 +1228,6 @@ export default function Settings() {
                       className="w-full text-sm px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden"
                     >
                       <option value="United States dollar ($) — USD">United States dollar ($) — USD</option>
-                      <option value="Indian rupee (₹) — INR">Indian rupee (₹) — INR</option>
                       <option value="Euro (€) — EUR">Euro (€) — EUR</option>
                       <option value="Pound sterling (£) — GBP">Pound sterling (£) — GBP</option>
                     </select>

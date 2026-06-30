@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import API from "../services/api";
 import StatsCard from "../components/StatsCard";
 import Loader from "../components/Loader";
+import { resolveProductImage } from "../utils/resolveImage";
 import {
   DollarSign,
   ShoppingCart,
@@ -427,9 +428,9 @@ export default function Dashboard() {
                   topProducts.map((prod) => (
                     <tr key={prod._id} className="hover:bg-slate-50/50">
                       <td className="py-3 flex items-center gap-3">
-                        {prod.image ? (
+                        {resolveProductImage(prod.image, prod.slug) ? (
                           <img
-                            src={prod.image}
+                            src={resolveProductImage(prod.image, prod.slug)}
                             alt=""
                             className="w-10 h-10 object-contain rounded-lg border border-slate-100 p-0.5 shrink-0 bg-white"
                           />
