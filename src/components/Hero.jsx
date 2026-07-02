@@ -1,46 +1,53 @@
-import heroBg from "../assets/index-hero.png";
+import { Link } from "react-router-dom";
+import { ShoppingCart, Heart } from "lucide-react";
 
 function Hero() {
   return (
     <section
-      className="relative min-h-[750px] bg-cover bg-center bg-no-repeat"
+      className="relative bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `url(${heroBg})`,
+        backgroundImage: `url(/hero-bg.png)`,
+        minHeight: "573px",
       }}
     >
-      {/* Light overlay for text readability */}
-      <div className="absolute inset-0 bg-white/15"></div>
 
-      <div className="relative max-w-7xl mx-auto px-6">
-  <div className="min-h-[750px] flex items-center">
+      {/* Content */}
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10 min-h-[573px] flex items-center">
+        <div className="w-full lg:w-[44%]">
 
-    <div className="w-full lg:w-5/12">
+          <h1 className="text-[2.4rem] md:text-[2.8rem] font-bold leading-[1.2] text-[#111] mb-5">
+            Feel Your Best<br />
+            Every Day with<br />
+            Daily Wellness<br />
+            Supplements
+          </h1>
 
-      <h1 className="text-6xl font-bold leading-tight text-black mb-8">
-        Feel Your Best Every Day with Daily Wellness Supplements
-      </h1>
+          <p className="text-[14px] text-gray-600 mb-8 leading-relaxed max-w-[320px]">
+            Daily wellness support for a healthier and more
+            energized lifestyle, because feeling good should be
+            part of every day.
+          </p>
 
-      <p className="text-lg text-gray-800 mb-10 leading-8">
-        Daily wellness support for a healthier and more energized
-        lifestyle, because feeling good should be part of every day.
-      </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-2 bg-[#1a6b35] hover:bg-[#155c2c] text-white px-5 py-3 rounded-lg text-sm font-semibold transition-colors shadow-md"
+            >
+              <ShoppingCart size={15} />
+              Explore Wellness Blog
+            </Link>
 
-      <div className="flex gap-4">
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-2 border border-[#bbb] bg-white/80 hover:bg-white text-[#333] px-5 py-3 rounded-lg text-sm font-semibold transition-colors"
+            >
+              <Heart size={15} className="text-[#1a6b35]" />
+              Explore Wellness Blog
+            </Link>
+          </div>
 
-        <button className="bg-[#147a3f] hover:bg-[#116a37] text-white px-8 py-4 rounded-lg font-medium transition">
-          Explore Wellness Blog
-        </button>
-
-        <button className="bg-white border border-gray-300 text-[#147a3f] px-8 py-4 rounded-lg font-medium">
-          Learn More
-        </button>
-
+        </div>
       </div>
-
-    </div>
-
-  </div>
-</div>
     </section>
   );
 }

@@ -1,1 +1,110 @@
 @import "tailwindcss";
+
+/* ── Global heading font ───────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+button,
+input[type="button"],
+input[type="submit"],
+.btn,
+.button {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* ── Unified Responsive Section Header Styles ── */
+.section-header-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.section-header-title-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto;
+  max-width: 80%;
+}
+
+.section-header-leaf {
+  width: clamp(20px, 3.5vw, 36px);
+  height: auto;
+  flex-shrink: 0;
+}
+
+.section-header-leaf.flipped {
+  transform: scaleX(-1);
+}
+
+.section-header-title {
+  font-family: 'Noto Sans', sans-serif;
+  font-weight: 750;
+  text-transform: uppercase;
+  color: #111111;
+  text-align: center;
+  font-size: clamp(17px, 2.2vw, 25px);
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+}
+
+@media (min-width: 769px) {
+  .section-header-title {
+    white-space: nowrap !important;
+  }
+}
+
+.section-header-link {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Noto Sans', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #111111;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.section-header-link:hover {
+  color: #147a3f;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .section-header-container {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .section-header-link {
+    position: static;
+    transform: none;
+    margin-top: 4px;
+  }
+  .section-header-title-wrap {
+    max-width: 100%;
+  }
+}
+
+/* ── Testimonial Infinite Scrolling Marquee ──────────────── */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}

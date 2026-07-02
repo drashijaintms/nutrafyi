@@ -35,24 +35,22 @@ function ImpactNumbers() {
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
-        <div className="flex items-center justify-center gap-4 mb-14">
-
-          <img
-            src={headingLeaf}
-            alt=""
-            className="w-10"
-          />
-
-          <h2 className="text-[34px] font-bold uppercase">
-            Our Impact In Numbers
-          </h2>
-
-          <img
-            src={headingLeaf}
-            alt=""
-            className="w-10 scale-x-[-1]"
-          />
-
+        <div className="section-header-container mb-10">
+          <div className="section-header-title-wrap">
+            <img
+              src={headingLeaf}
+              alt=""
+              className="section-header-leaf"
+            />
+            <h2 className="section-header-title">
+              Our Impact In Numbers
+            </h2>
+            <img
+              src={headingLeaf}
+              alt=""
+              className="section-header-leaf flipped"
+            />
+          </div>
         </div>
 
         {/* Stats */}

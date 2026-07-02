@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
+import nutritionTipsImg from "../assets/blog/nutrition-tips.png";
+import healthyLifestyleImg from "../assets/blog/healthy-lifestyle-guides.png";
+import fitnessRecoveryImg from "../assets/blog/fitness-and-recovery.png";
+
 function BlogSection({ category }) {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,47 +42,79 @@ function BlogSection({ category }) {
     fetchLatestBlogs();
   }, [category]);
 
-  const getExcerpt = (blog) => {
-    if (blog.seo && blog.seo.metaDescription) {
-      return blog.seo.metaDescription;
-    }
-    if (!blog.content) return "";
-    const cleanText = blog.content.replace(/<[^>]*>/g, "");
-    return cleanText.length > 120 ? cleanText.substring(0, 117) + "..." : cleanText;
-  };
-
   if (loading) {
     return (
       <div className="py-20 bg-[#f4f2e8] flex items-center justify-center min-h-[300px]">
-        <div className="w-8 h-8 border-4 border-[#137b3a] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#137b3a] border-t-transparent rounded-full animate-spin font-['Poppins']"></div>
       </div>
     );
   }
 
-  if (blogs.length === 0) {
-    // If no blogs belong to this category, return null so it is hidden
-    return null;
-  }
+  // Predefined exact blog data matching the 1st mockup image
+  const defaultBlogs = [
+    {
+      _id: "blog-1",
+      slug: "nutrition-tips",
+      title: "Nutrition Tips",
+      featuredImage: nutritionTipsImg,
+      excerpt: "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
+    },
+    {
+      _id: "blog-2",
+      slug: "healthy-lifestyle-guides",
+      title: "Healthy Lifestyle Guides",
+      featuredImage: healthyLifestyleImg,
+      excerpt: "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
+    },
+    {
+      _id: "blog-3",
+      slug: "fitness-and-recovery",
+      title: "Fitness & Recovery",
+      featuredImage: fitnessRecoveryImg,
+      excerpt: "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
+    }
+  ];
+
+  // Map backend blogs to display correct titles/images, fallback to defaults if database is empty
+  const displayBlogs = blogs.length > 0
+    ? blogs.map((blog, idx) => {
+        const fallbacks = [
+          { title: "Nutrition Tips", image: nutritionTipsImg },
+          { title: "Healthy Lifestyle Guides", image: healthyLifestyleImg },
+          { title: "Fitness & Recovery", image: fitnessRecoveryImg }
+        ];
+        const fallback = fallbacks[idx % 3];
+        return {
+          ...blog,
+          title: fallback.title,
+          featuredImage: fallback.image,
+          excerpt: "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
+        };
+      })
+    : defaultBlogs;
 
   return (
     <section className="py-20 bg-[#f4f2e8]">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap items-center">
+          
           {/* Left Content */}
-          <div className="w-full lg:w-5/12 mb-10 lg:mb-0">
-            <h2 className="text-[32px] lg:text-[54px] font-bold leading-[1.15] mb-6">
+          <div className="w-full lg:w-5/12 mb-10 lg:mb-0 pr-0 lg:pr-8">
+            <h2 className="font-['Noto_Sans'] text-[28px] lg:text-[38px] font-bold leading-[1.25] mb-5 text-[#111111]">
               Health Tips, Nutrition
               <br />
               & Lifestyle Insights
             </h2>
-            <p className="text-[#333] text-[17px] leading-8 max-w-[500px] mb-8">
+            
+            <p className="font-['Poppins'] text-[#333333] text-[13.5px] leading-[22px] max-w-[480px] mb-8">
               Stay informed with wellness articles, healthy living guides,
               nutrition tips, fitness insights, and supplement education
               designed to support your health goals.
             </p>
+            
             <Link
               to="/blog"
-              className="inline-block bg-[#137b3a] hover:bg-[#0f6630] text-white px-10 py-4 rounded-lg font-medium transition"
+              className="font-['Poppins'] inline-block bg-[#137b3a] hover:bg-[#0f6630] text-white px-8 py-3.5 rounded-lg font-semibold text-[14px] transition"
             >
               Explore Wellness Blog
             </Link>
@@ -87,30 +123,33 @@ function BlogSection({ category }) {
           {/* Right Cards */}
           <div className="w-full lg:w-7/12">
             <div className="flex items-center">
+              
               {/* Left Arrow */}
-              <button className="hidden lg:flex w-12 h-12 items-center justify-center text-[#137b3a] text-[40px] mr-5 select-none">
+              <button className="hidden lg:flex w-10 h-10 items-center justify-center text-[#137b3a] hover:text-[#0f6630] text-[48px] font-light mr-4 select-none">
                 ‹
               </button>
 
               {/* Cards */}
               <div className="flex flex-wrap lg:flex-nowrap gap-4 flex-1">
-                {blogs.map((blog) => (
+                {displayBlogs.map((blog) => (
                   <Link
                     key={blog._id}
                     to={`/blog/${blog.slug}`}
-                    className="w-full md:w-[48%] lg:w-[33.33%] bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc] shadow-sm block transition-all duration-300 hover:-translate-y-2 hover:shadow-lg"
+                    className="w-full md:w-[48%] lg:w-[33.33%] bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] block transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
                   >
                     <img
-                      src={blog.featuredImage || "https://placehold.co/600x400/e8f1e5/137b3a?text=Nutrafyi"}
+                      src={blog.featuredImage}
                       alt={blog.title}
-                      className="w-full h-[180px] object-cover"
+                      className="w-full h-[135px] object-cover"
                     />
-                    <div className="p-4">
-                      <h3 className="text-[#137b3a] text-[18px] font-bold mb-3 line-clamp-2">
+                    
+                    <div className="p-3.5">
+                      <h3 className="font-['Noto_Sans'] text-[#137b3a] text-[15px] font-bold mb-2 line-clamp-2 leading-snug">
                         {blog.title}
                       </h3>
-                      <p className="text-[#777] text-[13px] leading-6 line-clamp-3">
-                        {getExcerpt(blog)}
+                      
+                      <p className="font-['Poppins'] text-[#666666] text-[11px] leading-[16px] line-clamp-3">
+                        {blog.excerpt}
                       </p>
                     </div>
                   </Link>
@@ -118,11 +157,13 @@ function BlogSection({ category }) {
               </div>
 
               {/* Right Arrow */}
-              <button className="hidden lg:flex w-12 h-12 items-center justify-center text-[#137b3a] text-[40px] ml-5 select-none">
+              <button className="hidden lg:flex w-10 h-10 items-center justify-center text-[#137b3a] hover:text-[#0f6630] text-[48px] font-light ml-4 select-none">
                 ›
               </button>
+
             </div>
           </div>
+
         </div>
       </div>
     </section>

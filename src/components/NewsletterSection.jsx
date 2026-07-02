@@ -36,38 +36,37 @@ function NewsletterSection() {
         alt=""
         className="
           absolute
-          right-0
-          bottom-0
-          w-[120px]
-          lg:w-[160px]
-          opacity-70
+          right-[-30px]
+          bottom-[-30px]
+          w-[100px]
+          lg:w-[130px]
+          opacity-75
           pointer-events-none
         "
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8 lg:py-9">
 
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
           {/* Left Content */}
-          <div className="flex items-start gap-5 max-w-2xl">
+          <div className="flex items-center gap-4 lg:max-w-3xl">
 
             <img
               src={newsletterIcon}
               alt="Newsletter"
-              className="w-[60px] lg:w-[70px] flex-shrink-0"
+              className="w-[50px] lg:w-[56px] flex-shrink-0"
             />
 
             <div>
 
-              <h2 className="text-[#147a3f] text-[28px] lg:text-[52px] font-bold leading-tight mb-3">
+              <h2 className="font-['Noto_Sans'] text-[#137b3a] text-[18px] lg:text-[22px] font-bold leading-tight mb-1">
                 Join the NutraFYI Wellness Community
               </h2>
 
-              <p className="text-[#333] text-[16px] lg:text-[18px] leading-8">
-                Get exclusive wellness tips, product updates,
-                healthy lifestyle inspiration, and special offers
-                delivered directly to your inbox.
+              <p className="font-['Poppins'] text-[#4a4a4a] text-[12.5px] lg:text-[13px] leading-relaxed max-w-[580px]">
+                Get exclusive wellness tips, product updates, healthy lifestyle
+                inspiration, and special offers delivered directly to your inbox.
               </p>
 
             </div>
@@ -77,7 +76,7 @@ function NewsletterSection() {
           {/* Form */}
           <div className="w-full lg:w-auto">
 
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
 
               <input
                 type="email"
@@ -87,15 +86,17 @@ function NewsletterSection() {
                 placeholder="Enter your email address"
                 className="
                   w-full
-                  lg:w-[420px]
-                  h-[60px]
-                  px-5
+                  lg:w-[320px]
+                  h-[48px]
+                  px-4
                   rounded-lg
                   border
                   border-[#e1e1e1]
                   bg-white
+                  text-[13px]
+                  font-['Poppins']
                   focus:outline-none
-                  focus:border-[#147a3f]
+                  focus:border-[#137b3a]
                 "
               />
 
@@ -103,12 +104,14 @@ function NewsletterSection() {
                 type="submit"
                 disabled={loading}
                 className="
-                  h-[60px]
-                  px-10
-                  bg-[#147a3f]
-                  hover:bg-[#106933]
+                  h-[48px]
+                  px-7
+                  bg-[#137b3a]
+                  hover:bg-[#0f6630]
                   text-white
                   font-semibold
+                  text-[13px]
+                  font-['Poppins']
                   rounded-lg
                   transition
                   whitespace-nowrap
@@ -121,7 +124,7 @@ function NewsletterSection() {
             </form>
 
             {status.message && (
-              <p className={`mt-3 text-sm font-semibold ${status.type === "success" ? "text-emerald-700" : "text-rose-600"}`}>
+              <p className={`mt-2 text-xs font-semibold font-['Poppins'] ${status.type === "success" ? "text-emerald-700" : "text-rose-600"}`}>
                 {status.message}
               </p>
             )}

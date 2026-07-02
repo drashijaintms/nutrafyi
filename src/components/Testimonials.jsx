@@ -1,8 +1,11 @@
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import headingLeaf from "../assets/heading-leaf.png";
 
 import sarahImg from "../assets/testimonials/sarah-mitchell.png";
 import jamesImg from "../assets/testimonials/james-carter.png";
 import emilyImg from "../assets/testimonials/emily-johnson.png";
+import michaelImg from "../assets/testimonials/michael-brown.png";
 
 function Testimonials() {
   const testimonials = [
@@ -30,86 +33,247 @@ function Testimonials() {
       review:
         "The support team was very helpful, and the shopping experience was smooth from start to finish.",
     },
+    {
+      image: michaelImg,
+      name: "Michael Brown",
+      location: "Illinois",
+      title: "Highly Recommend!",
+      review:
+        "The supplements are pure and highly effective. I've noticed a significant boost in my energy levels within a week.",
+    },
   ];
 
+  // Rotate list to support infinite loop carousel
+  const [list, setList] = useState(testimonials);
+  const [translateX, setTranslateX] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [animating, setAnimating] = useState(false);
+  const [visibleCards, setVisibleCards] = useState(3);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setVisibleCards(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCards(2);
+      } else {
+        setVisibleCards(3);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleNext = () => {
+    if (animating) return;
+    setAnimating(true);
+    setIsTransitioning(true);
+    setTranslateX(-(100 / visibleCards));
+
+    setTimeout(() => {
+      setList((prev) => {
+        const nextList = [...prev];
+        const first = nextList.shift();
+        nextList.push(first);
+        return nextList;
+      });
+      setIsTransitioning(false);
+      setTranslateX(0);
+      setAnimating(false);
+    }, 500);
+  };
+
+  const handlePrev = () => {
+    if (animating) return;
+    setAnimating(true);
+    setIsTransitioning(false);
+    setTranslateX(-(100 / visibleCards));
+
+    setList((prev) => {
+      const nextList = [...prev];
+      const last = nextList.pop();
+      nextList.unshift(last);
+      return nextList;
+    });
+
+    setTimeout(() => {
+      setIsTransitioning(true);
+      setTranslateX(0);
+      setTimeout(() => {
+        setAnimating(false);
+      }, 500);
+    }, 50);
+  };
+
+  // Automatically crawl/play every 3 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      handleNext();
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [animating, visibleCards]);
+
   return (
-    <section className="py-20 bg-[#f5f5f5]">
+    <section className="py-20 bg-transparent overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
-
         {/* Heading */}
-        <div className="flex items-center justify-center gap-4 mb-14">
-
-          <img
-            src={headingLeaf}
-            alt=""
-            className="w-10 md:w-14"
-          />
-
-          <h2 className="text-[24px] md:text-[36px] lg:text-[42px] font-bold uppercase text-center">
-            What Our Customers Say
-          </h2>
-
-          <img
-            src={headingLeaf}
-            alt=""
-            className="w-10 md:w-14 scale-x-[-1]"
-          />
-
+        <div className="section-header-container mb-12">
+          <div className="section-header-title-wrap">
+            <img
+              src={headingLeaf}
+              alt=""
+              className="section-header-leaf"
+            />
+            <h2 className="section-header-title">
+              What Our Customers Say
+            </h2>
+            <img
+              src={headingLeaf}
+              alt=""
+              className="section-header-leaf flipped"
+            />
+          </div>
         </div>
 
-        {/* Testimonials */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* Carousel Wrapper */}
+        <div className="relative px-0 md:px-8">
+          <div className="overflow-hidden">
+            {/* Sliding Track */}
+            <div
+              className="flex gap-6 select-none"
+              style={{
+                transform: `translate3d(${translateX}%, 0, 0)`,
+                transition: isTransitioning ? "transform 500ms ease-in-out" : "none",
+              }}
+            >
+              {list.map((item, index) => (
+                <div
+                  key={`${item.name}-${index}`}
+                  className="
+                    bg-white
+                    border
+                    border-[#e5e5db]/60
+                    rounded-[28px]
+                    p-6
+                    shadow-[0_10px_35px_rgba(0,0,0,0.03)]
+                    relative
+                    flex
+                    gap-6
+                    w-full
+                    md:w-[calc(50%-12px)]
+                    lg:w-[calc(33.3333%-16px)]
+                    flex-shrink-0
+                    items-end
+                    text-left
+                    min-h-[195px]
+                  "
+                >
+                  {/* Left Avatar */}
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="
+                      w-[84px]
+                      h-[84px]
+                      rounded-[16px]
+                      object-cover
+                      border
+                      border-[#e5e5db]/50
+                      flex-shrink-0
+                    "
+                  />
 
-          {testimonials.map((item, index) => (
-           <div className="relative bg-white border border-[#ddd] rounded-[20px] p-6">
+                  {/* Right Details */}
+                  <div className="flex-1 flex flex-col min-w-0 pr-6">
+                    <div className="text-[#f4a000] text-[15px] leading-none mb-1.5 flex gap-0.5">
+                      {"★".repeat(5)}
+                    </div>
 
-  {/* Quote */}
-  <div className="absolute top-4 right-4 w-12 h-12 rounded-full border border-[#ddd] flex items-center justify-center">
-    <span className="text-[#137b3a] text-[28px] font-bold">”</span>
-  </div>
+                    <h3 className="font-['Noto_Sans'] font-bold text-[16px] text-black mb-1.5 leading-tight">
+                      “{item.title}”
+                    </h3>
 
-  {/* Main Content */}
-  <div className="pl-[90px]">
+                    <p className="font-['Poppins'] text-[13.5px] leading-[20px] text-[#333333] mb-2.5 whitespace-normal">
+                      “{item.review}”
+                    </p>
 
-    <div className="text-[#f4a000] text-[22px] mb-3">
-      ★★★★★
-    </div>
+                    <span className="font-['Poppins'] text-[13px] font-semibold text-[#137b3a]">
+                      — {item.name}, {item.location}
+                    </span>
+                  </div>
 
-    <h3 className="text-[18px] font-bold mb-3">
-      “{item.title}”
-    </h3>
+                  {/* Quote Circle Icon (Top-Right) */}
+                  <div className="absolute top-5 right-5 w-[36px] h-[36px] rounded-full border border-[#e5e5db]/50 bg-white flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                    <span className="text-[#137b3a] text-[24px] font-bold leading-none">”</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-    <p className="text-[16px] leading-8 text-[#222] mb-6">
-      “{item.review}”
-    </p>
+          {/* Left Arrow Button */}
+          <button
+            onClick={handlePrev}
+            className="
+              absolute
+              left-0
+              top-1/2
+              -translate-y-1/2
+              -translate-x-1/2
+              z-20
+              w-10
+              h-10
+              bg-white
+              border
+              border-[#e5e5db]
+              rounded-full
+              flex
+              items-center
+              justify-center
+              shadow-sm
+              hover:bg-slate-50
+              hover:scale-105
+              transition-all
+              hidden
+              md:flex
+            "
+            aria-label="Previous testimonials"
+          >
+            <ChevronLeft className="w-5 h-5 text-[#137b3a]" />
+          </button>
 
-  </div>
-
-  {/* Customer */}
-  <div className="flex items-center mt-4">
-
-    <img
-      src={item.image}
-      alt={item.name}
-      className="
-        w-[68px]
-        h-[68px]
-        rounded-lg
-        object-cover
-      "
-    />
-
-    <h4 className="ml-4 text-[#137b3a] text-[18px] font-semibold">
-      — {item.name}, {item.location}
-    </h4>
-
-  </div>
-
-</div>
-          ))}
-
+          {/* Right Arrow Button */}
+          <button
+            onClick={handleNext}
+            className="
+              absolute
+              right-0
+              top-1/2
+              -translate-y-1/2
+              translate-x-1/2
+              z-20
+              w-10
+              h-10
+              bg-white
+              border
+              border-[#e5e5db]
+              rounded-full
+              flex
+              items-center
+              justify-center
+              shadow-sm
+              hover:bg-slate-50
+              hover:scale-105
+              transition-all
+              hidden
+              md:flex
+            "
+            aria-label="Next testimonials"
+          >
+            <ChevronRight className="w-5 h-5 text-[#137b3a]" />
+          </button>
         </div>
-
       </div>
     </section>
   );

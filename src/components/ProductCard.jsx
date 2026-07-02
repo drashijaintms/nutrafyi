@@ -166,116 +166,125 @@ function ProductCard({
     <Link
       to={`/product/${slug}`}
       className="
+        group
         relative
         block
-        bg-white
+        w-full
+        bg-transparent
         border
-        border-[#e5e5e5]
-        rounded-xl
+        border-transparent
+        rounded-[20px]
         overflow-hidden
-        hover:shadow-lg
-        transition
+        transition-all
+        duration-300
+        hover:bg-white
+        hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)]
+        hover:scale-[1.03]
       "
     >
-      {/* Best Seller Badge */}
-      {isBestSeller && (
-        <span
-          className="
-            absolute
-            top-0
-            left-0
-            z-10
-            bg-[#d76611]
-            text-white
-            text-[10px]
-            font-medium
-            px-3
-            py-1
-            rounded-br-md
-          "
-        >
-          Best Seller
-        </span>
-      )}
+      {/* Top Half: Image container — white box with borders by default */}
+      <div className="relative w-full h-[180px] bg-white border border-[#e5e5db] group-hover:border-transparent rounded-[16px] shadow-xs group-hover:shadow-none flex items-center justify-center p-4 transition-all duration-300">
+        {/* Best Seller Badge */}
+        {isBestSeller && (
+          <span
+            className="
+              absolute
+              top-0
+              left-0
+              z-10
+              bg-[#d76611]
+              text-white
+              text-[10px]
+              font-semibold
+              px-3
+              py-1
+              rounded-br-md
+              rounded-tl-[16px]
+            "
+          >
+            Best Seller
+          </span>
+        )}
 
-      {/* Sale Badge */}
-      {(hasSale || badge === "Sale") && (
-        <span
-          className={`
-            absolute
-            top-0
-            z-10
-            bg-[#e53e3e]
-            text-white
-            text-[10px]
-            font-bold
-            px-3
-            py-1
-            rounded-br-md
-            uppercase
-            tracking-wider
-            ${isBestSeller ? "left-[75px]" : "left-0"}
-          `}
-        >
-          Sale
-        </span>
-      )}
+        {/* Sale Badge */}
+        {(hasSale || badge === "Sale") && (
+          <span
+            className={`
+              absolute
+              top-0
+              z-10
+              bg-[#e53e3e]
+              text-white
+              text-[10px]
+              font-bold
+              px-3
+              py-1
+              rounded-br-md
+              uppercase
+              tracking-wider
+              ${isBestSeller ? "left-[75px] rounded-tl-none" : "left-0 rounded-tl-[16px]"}
+            `}
+          >
+            Sale
+          </span>
+        )}
 
-      {/* Wishlist Heart Icon */}
-      {id && (
-        <button
-          onClick={handleToggleWishlist}
-          type="button"
-          className="
-            absolute
-            top-3
-            right-3
-            z-10
-            bg-white/80
-            backdrop-blur-xs
-            p-2
-            rounded-full
-            border
-            border-slate-200/60
-            hover:text-red-500
-            hover:scale-110
-            transition-all
-            shadow-xs
-          "
-          title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-        >
-          <Heart
-            className={`w-4 h-4 transition-colors ${
-              isWishlisted ? "fill-red-500 text-red-500" : "text-slate-400"
-            }`}
-          />
-        </button>
-      )}
+        {/* Wishlist Heart Icon */}
+        {id && (
+          <button
+            onClick={handleToggleWishlist}
+            type="button"
+            className="
+              absolute
+              top-3
+              right-3
+              z-10
+              bg-white/80
+              backdrop-blur-xs
+              p-2
+              rounded-full
+              border
+              border-slate-200/60
+              hover:text-red-500
+              hover:scale-110
+              transition-all
+              shadow-xs
+            "
+            title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors ${
+                isWishlisted ? "fill-red-500 text-red-500" : "text-slate-400"
+              }`}
+            />
+          </button>
+        )}
 
-      <div className="h-[180px] flex items-center justify-center p-4">
         <img
           src={image}
           alt={name}
-          className="max-h-full object-contain"
+          className="max-h-full object-contain transition duration-300 group-hover:scale-105"
         />
       </div>
 
-      <div className="p-4 text-center">
-
-        <h3 className="text-[14px] leading-6 mb-2 font-semibold text-slate-800 line-clamp-2 min-h-[48px]">
+      {/* Bottom Half: Details container */}
+      <div className="px-4 pb-6 pt-4 text-center">
+        <h3 className="font-bold text-[15px] leading-[20px] min-h-[40px] text-black mb-2">
           {name}
         </h3>
 
-        <div className="text-[#f6a400] text-sm mb-2 flex items-center justify-center gap-1">
-          <span>{"★".repeat(rating)}</span>
-          <span className="text-[#555] ml-1 text-xs">
+        <div className="flex items-center justify-center gap-1.5 mb-2.5">
+          <span className="text-[#f5a300] text-[18px] leading-none">
+            {"★".repeat(rating || 5)}
+          </span>
+          <span className="text-[13px] text-slate-800 font-medium">
             ({reviews})
           </span>
         </div>
 
         {hasSale ? (
-          <div className="flex items-baseline justify-center gap-2 mt-2 mb-2">
-            <span className="font-bold text-[20px] text-[#dc2626]">
+          <div className="flex items-baseline justify-center gap-2 mt-3 mb-4">
+            <span className="font-extrabold text-[19px] text-[#dc2626]">
               {formatPrice(salePrice, currencyOverrides)}
             </span>
             <span className="text-[13px] line-through text-slate-400 font-semibold">
@@ -283,7 +292,7 @@ function ProductCard({
             </span>
           </div>
         ) : (
-          <div className="font-bold text-[20px] mt-2 mb-2 text-slate-850">
+          <div className="font-extrabold text-[19px] mt-3 mb-4 text-black">
             {formatPrice(regularPrice || price, currencyOverrides)}
           </div>
         )}
@@ -292,16 +301,16 @@ function ProductCard({
           <button
             onClick={handleBuyNow}
             className="
-              mt-4
               w-full
-              bg-[#d76611]
-              hover:bg-[#b5530b]
+              bg-[#147a3f]
+              hover:bg-[#106933]
               text-white
-              py-2
-              rounded-md
-              text-sm
+              text-[12px]
               font-bold
-              transition-colors
+              uppercase
+              py-[10px]
+              rounded-[6px]
+              transition
             "
           >
             {buttonText || "BUY NOW"}
@@ -310,32 +319,31 @@ function ProductCard({
           <button
             onClick={handleAddToCart}
             className="
-              mt-4
               w-full
               bg-[#147a3f]
-              hover:bg-[#0f6630]
+              hover:bg-[#106933]
               text-white
-              py-2
-              rounded-md
-              text-sm
+              text-[12px]
               font-bold
-              transition-colors
+              uppercase
+              py-[10px]
+              rounded-[6px]
+              transition
             "
           >
             ADD TO CART
           </button>
         )}
 
-        {toast.show && (
-          <div className="fixed bottom-8 right-8 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
-            <span className="text-xs font-bold uppercase tracking-wider">{toast.message}</span>
-          </div>
-        )}
-
-      </div>
-    </Link>
-  );
+          {toast.show && (
+            <div className="fixed bottom-8 right-8 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+              <span className="text-xs font-bold uppercase tracking-wider">{toast.message}</span>
+            </div>
+          )}
+        </div>
+      </Link>
+    );
 }
 
 export default ProductCard;

@@ -33,42 +33,42 @@ function WellnessCategories() {
 
   if (loading) {
     return (
-      <div className="py-20 bg-[#f7f7f7] flex items-center justify-center min-h-[300px]">
+      <div className="py-20 bg-transparent flex items-center justify-center min-h-[300px]">
         <div className="w-8 h-8 border-4 border-[#137b3a] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <section className="py-20 bg-[#f7f7f7]">
+    <section className="py-20 bg-transparent">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <img
-            src={headingLeaf}
-            alt="Leaf"
-            className="w-14 h-auto"
-          />
-
-          <h2 className="text-[32px] lg:text-[42px] font-bold uppercase text-center">
-            Nature Wellness Products Designed For Every Lifestyle
-          </h2>
-
-          <img
-            src={headingLeaf}
-            alt="Leaf"
-            className="w-14 h-auto scale-x-[-1]"
-          />
+        <div className="section-header-container mb-2">
+          <div className="section-header-title-wrap">
+            <img
+              src={headingLeaf}
+              alt="Leaf"
+              className="section-header-leaf"
+            />
+            <h2 className="section-header-title">
+              Nature Wellness Products Designed For Every Lifestyle
+            </h2>
+            <img
+              src={headingLeaf}
+              alt="Leaf"
+              className="section-header-leaf flipped"
+            />
+          </div>
         </div>
 
-        {/* Top Right Link */}
-        <div className="flex justify-end mb-6">
+        {/* View All Link below the heading, right-aligned */}
+        <div className="w-full text-right mb-6 px-3">
           <Link
             to="/category"
-            className="font-semibold uppercase text-sm hover:text-green-700 transition"
+            className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"
           >
-            View All Categories →
+            View All Categories &gt;
           </Link>
         </div>
 
@@ -105,7 +105,7 @@ function WellnessCategories() {
 
                 <div className="p-5 text-center">
 
-                  <h3 className="text-[#137b3a] font-bold text-[20px] leading-[26px] uppercase min-h-[60px] flex items-center justify-center">
+                  <h3 className="text-[#137b3a] font-bold text-[17px] leading-[22px] uppercase min-h-[60px] flex items-center justify-center">
                     {item.title}
                   </h3>
 

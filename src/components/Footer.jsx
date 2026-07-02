@@ -1,3 +1,4 @@
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaGoogle } from "react-icons/fa";
 import footerLogo from "../assets/footer-logo.png";
 
 function Footer() {
@@ -5,13 +6,13 @@ function Footer() {
     <footer>
 
       {/* Main Footer */}
-      <div className="bg-[#0b6b2d]">
-        <div className="max-w-7xl mx-auto px-4 py-10">
+      <div className="bg-[#0f4d25]">
+        <div className="max-w-7xl mx-auto px-4 py-12">
 
-          <div className="flex flex-wrap">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
             {/* Logo Column */}
-            <div className="w-full md:w-6/12 lg:w-3/12 mb-8 lg:mb-0">
+            <div>
 
               <img
                 src={footerLogo}
@@ -19,53 +20,53 @@ function Footer() {
                 className="w-[180px] mb-4"
               />
 
-              <p className="text-white text-sm leading-6 max-w-[180px]">
+              <p className="font-['Poppins'] text-white/90 text-[13px] leading-[22px] max-w-[180px]">
                 Supporting Healthier Living Every Day.
               </p>
 
             </div>
 
             {/* Quick Links */}
-            <div className="w-full sm:w-6/12 lg:w-2/12 mb-8 lg:mb-0">
+            <div>
 
-              <h4 className="text-white font-semibold mb-4">
+              <h4 className="font-['Noto_Sans'] text-white font-bold text-[16px] mb-4">
                 Quick Links
               </h4>
 
-              <ul className="space-y-2">
+              <ul className="space-y-1 font-['Poppins']">
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Home
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Shop
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     About Us
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Wellness Blog
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Contact Us
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     FAQ
                   </a>
                 </li>
@@ -75,34 +76,34 @@ function Footer() {
             </div>
 
             {/* Customer Support */}
-            <div className="w-full sm:w-6/12 lg:w-2/12 mb-8 lg:mb-0">
+            <div>
 
-              <h4 className="text-white font-semibold mb-4">
+              <h4 className="font-['Noto_Sans'] text-white font-bold text-[16px] mb-4">
                 Customer Support
               </h4>
 
-              <ul className="space-y-2">
+              <ul className="space-y-1 font-['Poppins']">
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Shipping Information
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Return Policy
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Privacy Policy
                   </a>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/90 text-sm hover:text-white">
+                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Terms & Conditions
                   </a>
                 </li>
@@ -112,45 +113,48 @@ function Footer() {
             </div>
 
             {/* Social */}
-            <div className="w-full lg:w-3/12">
+            <div>
 
-              <h4 className="text-white font-semibold mb-4">
+              <h4 className="font-['Noto_Sans'] text-white font-bold text-[16px] mb-4">
                 Follow Us
               </h4>
 
-              <p className="text-white/90 text-sm leading-6 mb-5 max-w-[240px]">
-                Stay connected for wellness inspiration,
-                product updates, and healthy living tips.
+              <p className="font-['Poppins'] text-white/90 text-[13px] leading-[22px] mb-5 max-w-[250px]">
+                Stay connected for wellness inspiration, product updates, and healthy living tips.
               </p>
 
               <div className="flex gap-3">
 
                 <a
                   href="#"
-                  className="w-9 h-9 border border-white rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0b6b2d] transition"
+                  aria-label="Facebook"
+                  className="w-9 h-9 border border-white/80 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0f4d25] transition-all duration-200"
                 >
-                  f
+                  <FaFacebookF className="w-4 h-4" />
                 </a>
 
                 <a
                   href="#"
-                  className="w-9 h-9 border border-white rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0b6b2d] transition"
+                  aria-label="Instagram"
+                  className="w-9 h-9 border border-white/80 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0f4d25] transition-all duration-200"
                 >
-                  ig
+                  <FaInstagram className="w-4 h-4" />
                 </a>
 
                 <a
                   href="#"
-                  className="w-9 h-9 border border-white rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0b6b2d] transition"
+                  aria-label="LinkedIn"
+                  className="w-9 h-9 border border-white/80 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0f4d25] transition-all duration-200"
                 >
-                  in
+                  <FaLinkedinIn className="w-4 h-4" />
                 </a>
 
                 <a
                   href="#"
-                  className="w-9 h-9 border border-white rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0b6b2d] transition"
+                  aria-label="Google"
+                  className="w-9 h-9 border border-white/80 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-[#0f4d25] transition-all duration-200"
                 >
-                  G
+                  <FaGoogle className="w-4 h-4" />
                 </a>
 
               </div>
@@ -163,10 +167,10 @@ function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="bg-[#f3f0e3] py-4">
+      <div className="bg-[#fbfaf3] py-5 border-t border-[#e5e5db]/40">
         <div className="max-w-7xl mx-auto px-4 text-center">
 
-          <p className="text-[13px] text-[#222]">
+          <p className="font-['Poppins'] text-[13.5px] text-[#222222] font-semibold tracking-wide">
             NutraFYI — Supporting Healthier Living Every Day.
           </p>
 

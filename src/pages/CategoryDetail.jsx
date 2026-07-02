@@ -174,7 +174,7 @@ if (sortBy === "z-a") {
 
               {/* Heading */}
               <div className="flex items-center gap-3 mb-6">
-                <h1 className="text-[48px] font-bold">
+                <h1 className="text-[30px] md:text-[40px] lg:text-[48px] font-bold">
                   {category.title}
                 </h1>
 

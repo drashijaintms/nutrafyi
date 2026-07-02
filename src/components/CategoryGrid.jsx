@@ -42,7 +42,7 @@ function CategoryGrid() {
     <div>
       {/* Heading */}
       <div className="flex items-center gap-4 mb-6">
-        <h2 className="text-[52px] font-bold leading-none">
+        <h2 className="text-[32px] md:text-[42px] lg:text-[52px] font-bold leading-none">
           All Categories
         </h2>
 

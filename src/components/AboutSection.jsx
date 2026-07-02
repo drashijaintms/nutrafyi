@@ -2,43 +2,42 @@ import aboutImage from "../assets/about-nutrafyi.png";
 
 function AboutSection() {
   return (
-    <section className="py-24 bg-[#f5f5f5]">
+    <section className="py-24 bg-transparent">
       <div className="max-w-7xl mx-auto px-4">
 
-        <div className="flex flex-wrap items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
           {/* Left Image */}
-          <div className="w-full lg:w-7/12 mb-10 lg:mb-0">
-
-            <div className="pr-0 lg:pr-8">
-
+          <div className="w-full lg:col-span-7 flex">
+            <div className="w-full pr-0 lg:pr-6 h-full flex">
               <img
                 src={aboutImage}
                 alt="About NutraFYI"
                 className="
                   w-full
-                  rounded-[20px]
+                  h-full
+                  min-h-[320px]
                   object-cover
+                  rounded-[20px]
                   shadow-sm
+                  flex-1
                 "
               />
-
             </div>
-
           </div>
 
           {/* Right Content */}
-          <div className="w-full lg:w-5/12">
+          <div className="w-full lg:col-span-5 flex flex-col justify-center">
 
-            <span className="text-[#137b3a] text-[18px] font-semibold mb-4 block">
+            <span className="font-['Taviraj'] text-[#137b3a] text-[15px] lg:text-[16px] font-semibold mb-2 block">
               About NutraFYI
             </span>
 
-            <h2 className="text-[32px] lg:text-[52px] font-bold leading-[1.2] mb-8">
+            <h2 className="font-['Noto_Sans'] text-[24px] lg:text-[34px] font-bold leading-[1.25] mb-4 text-black">
               Your Wellness Partner for Everyday Nutrition
             </h2>
 
-            <div className="space-y-6 text-[#333333] text-[18px] leading-[32px]">
+            <div className="space-y-4 text-[#222222] text-[14px] lg:text-[15px] leading-[22px] lg:leading-[24px] font-['Poppins']">
 
               <p>
                 At NutraFYI, we believe wellness starts with consistency,
@@ -63,22 +62,24 @@ function AboutSection() {
 
             </div>
 
-            <div className="mt-10">
+            <div className="mt-6">
 
               <button
                 className="
+                  font-['Poppins']
                   bg-[#137b3a]
                   hover:bg-[#0f6630]
                   text-white
                   font-semibold
-                  px-8
-                  py-4
-                  rounded-lg
+                  text-[13px]
+                  px-6
+                  py-3
+                  rounded-[5px]
                   transition
                   duration-300
                 "
               >
-                Learn More About Us →
+                Learn More About Us &gt;
               </button>
 
             </div>
