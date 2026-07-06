@@ -1,4 +1,4 @@
-import blogHero from "../assets/blog/blog-hero.png";
+import blogHero from "../assets/blog/blog-hero.jpg";
 
 function BlogHero() {
   return (
