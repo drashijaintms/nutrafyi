@@ -10,10 +10,11 @@ function Navbar() {
 
   const menuItems = [
     { name: "Home", path: "/" },
-    { name: "Female Health", path: "/category/female-health" },
-    { name: "Men's Health & Energy", path: "/category/mens-health-energy" },
-    { name: "Skin & Beauty", path: "/category/skin-beauty" },
-    { name: "Weight Loss", path: "/category/weight-loss" },
+    { name: "Energy & Performance", path: "/category/energy-performance" },
+    { name: "Vitamins & Nutrition", path: "/category/vitamins-nutrition" },
+    { name: "Skin & Beauty", path: "/category/beauty-skin" },
+    { name: "Weight Management", path: "/category/weight-management" },
+    { name: "Immune Support", path: "/category/immune-support" },
     { name: "About", path: "/about" },
     { name: "Blog", path: "/blog" },
     { name: "Contact", path: "/contact" },
@@ -39,7 +40,7 @@ function Navbar() {
           </button>
 
           {/* Desktop nav links - centered */}
-          <ul className="hidden md:flex flex-1 justify-center items-center gap-x-7" style={{ fontFamily: "'Taviraj', serif" }}>
+          <ul className="hidden md:flex flex-1 justify-center items-center gap-x-3.5 lg:gap-x-5 xl:gap-x-6" style={{ fontFamily: "'Taviraj', serif" }}>
             {menuItems.map((item, index) => (
               <li key={index}>
                 <Link
