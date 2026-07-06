@@ -33,6 +33,8 @@ function BlogDetail() {
   const [toc, setToc] = useState([]);
   const [tocOpen, setTocOpen] = useState(false);
   const [activeFaqIndex, setActiveFaqIndex] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [instagramCopied, setInstagramCopied] = useState(false);
 
   // Load individual blog and track view
   useEffect(() => {
@@ -199,7 +201,18 @@ function BlogDetail() {
   // Copy link helper
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert("Link copied to clipboard!");
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  // Instagram: copy link + open Instagram
+  const handleInstagramShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setInstagramCopied(true);
+    setTimeout(() => {
+      setInstagramCopied(false);
+      window.open("https://www.instagram.com", "_blank");
+    }, 1200);
   };
 
   // Smooth scroll handler
@@ -566,22 +579,31 @@ function BlogDetail() {
                 className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all"
                 title="Share on X (Twitter)"
               >
-                {/* X logo SVG */}
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
               </a>
 
-              {/* Instagram — opens Instagram.com (no direct share API) */}
-              <a
-                href="https://www.instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all"
-                title="Share on Instagram"
-              >
-                <FaInstagram className="w-4 h-4" />
-              </a>
+              {/* Instagram — copies link + opens Instagram (no web share API exists) */}
+              <div className="relative">
+                <button
+                  onClick={handleInstagramShare}
+                  className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                    instagramCopied
+                      ? "bg-[#147a3f] text-white border-[#147a3f]"
+                      : "bg-slate-50 border-slate-100 text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f]"
+                  }`}
+                  title="Share on Instagram"
+                >
+                  <FaInstagram className="w-4 h-4" />
+                </button>
+                {instagramCopied && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap bg-[#0e3b20] text-white text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-md">
+                    Link copied! Opening Instagram…
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#0e3b20]" />
+                  </div>
+                )}
+              </div>
 
               {/* Email */}
               <a
@@ -593,14 +615,27 @@ function BlogDetail() {
               </a>
 
               {/* Copy link */}
-              <button
-                onClick={handleCopyLink}
-                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all cursor-pointer"
-                title="Copy link"
-              >
-                <FaLink className="w-4 h-4" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={handleCopyLink}
+                  className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all cursor-pointer ${
+                    linkCopied
+                      ? "bg-[#147a3f] text-white border-[#147a3f]"
+                      : "bg-slate-50 border-slate-100 text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f]"
+                  }`}
+                  title="Copy link"
+                >
+                  <FaLink className="w-4 h-4" />
+                </button>
+                {linkCopied && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap bg-[#0e3b20] text-white text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-md">
+                    Link copied!
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#0e3b20]" />
+                  </div>
+                )}
+              </div>
             </div>
+
 
             {/* Pagination Prev/Next Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
