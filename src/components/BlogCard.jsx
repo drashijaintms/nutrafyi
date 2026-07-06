@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar } from "lucide-react";
 
@@ -9,6 +10,8 @@ function BlogCard({
   slug,
   excerpt,
 }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <Link
       to={`/blog/${slug}`}
@@ -28,10 +31,11 @@ function BlogCard({
       "
     >
       {/* Image */}
-      {image && (
+      {image && !imgError && (
         <img
           src={image}
           alt={title}
+          onError={() => setImgError(true)}
           className="
             w-full
             h-[170px]

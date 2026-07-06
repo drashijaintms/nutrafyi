@@ -272,11 +272,14 @@ function BlogSection({ category }) {
                       }}
                       className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col h-[380px] lg:h-[420px] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
                     >
-                      <img
-                        src={blog.featuredImage}
-                        alt={blog.title}
-                        className="w-full h-[135px] object-cover"
-                      />
+                      {blog.featuredImage && (
+                        <img
+                          src={blog.featuredImage}
+                          alt={blog.title}
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          className="w-full h-[135px] object-cover"
+                        />
+                      )}
                       
                       <div className="p-4 flex flex-col flex-1">
                         <div>
