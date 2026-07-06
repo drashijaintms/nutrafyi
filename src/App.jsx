@@ -19,6 +19,11 @@ import BlogDetail from './pages/BlogDetail';
 import Login from "./pages/Login";
 import Account from "./pages/Account";
 import TrackOrder from "./pages/TrackOrder";
+import FAQ from "./pages/FAQ";
+import ShippingInfo from "./pages/ShippingInfo";
+import ReturnPolicy from "./pages/ReturnPolicy";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
 
 import Checkout from "./pages/Checkout";
 
@@ -55,6 +60,11 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/account" element={<Account />} />
             <Route path="/track-order" element={<TrackOrder />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/shipping-info" element={<ShippingInfo />} />
+            <Route path="/return-policy" element={<ReturnPolicy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-conditions" element={<TermsConditions />} />
           </Route>
 
           {/* Standalone Checkout Route to match custom layout */}

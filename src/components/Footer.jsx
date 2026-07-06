@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaGoogle } from "react-icons/fa";
 import footerLogo from "../assets/footer-logo.png";
 
@@ -36,39 +37,39 @@ function Footer() {
               <ul className="space-y-1 font-['Poppins']">
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Home
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/products" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Shop
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/about" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     About Us
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/blog" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Wellness Blog
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/contact" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Contact Us
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/faq" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     FAQ
-                  </a>
+                  </Link>
                 </li>
 
               </ul>
@@ -85,27 +86,27 @@ function Footer() {
               <ul className="space-y-1 font-['Poppins']">
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/shipping-info" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Shipping Information
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/return-policy" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Return Policy
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/privacy-policy" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
 
                 <li>
-                  <a href="#" className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                  <Link to="/terms-conditions" className="text-white/85 text-[13px] hover:text-white transition duration-200">
                     Terms & Conditions
-                  </a>
+                  </Link>
                 </li>
 
               </ul>
