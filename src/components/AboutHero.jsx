@@ -4,12 +4,13 @@ import aboutHero from "../assets/about/about-hero.png";
 
 function AboutHero() {
   return (
-    <section>
+    <section className="relative overflow-hidden">
       <div
         className="
           relative
-          h-[600px]
-          overflow-hidden
+          min-h-[460px]
+          md:min-h-[520px]
+          lg:min-h-[580px]
           flex
           items-center
         "
@@ -28,71 +29,65 @@ function AboutHero() {
           "
         />
 
-        {/* Overlay */}
-        <div
-          className="
-            absolute
-            inset-0
-            bg-gradient-to-r
-            from-white
-            via-white/85
-            to-transparent
-          "
-        />
-
         {/* Content */}
-        <div className="relative z-10 max-w-[460px] pl-16">
+        <div className="relative z-10 max-w-[550px] w-full px-6 md:px-12 lg:px-20 py-16">
 
           <h1
             className="
-              text-[48px]
-              lg:text-[72px]
+              font-['Noto_Sans']
+              text-[30px]
+              sm:text-[36px]
+              md:text-[42px]
+              lg:text-[48px]
               font-bold
-              leading-[1.05]
-              text-black
-              mb-6
+              leading-[1.15]
+              text-[#111111]
+              mb-5
             "
           >
-            Supporting
-            <br />
-            Healthier Living
-            <br />
+            Supporting<br />
+            Healthier Living<br />
             Every Day
           </h1>
 
           <p
             className="
-              text-[#555]
-              text-[18px]
-              leading-10
+              font-['Poppins']
+              text-slate-600
+              text-[13.5px]
+              sm:text-[14px]
+              leading-relaxed
               mb-8
+              max-w-[440px]
             "
           >
-            At NutraFYI, wellness is more than supplements.
-            It’s about empowering healthier choices and helping
-            people live better every day.
+            At NutraFYI, we believe wellness is not just about supplements—it's about empowering you to live your best life, naturally.
           </p>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3">
 
             <Link
-              to="/category"
+              to="/products"
               className="
                 inline-flex
                 items-center
                 gap-2
-                bg-[#147a3f]
+                bg-[#137b3a]
                 hover:bg-[#0f6630]
                 text-white
-                px-8
-                py-4
+                px-5
+                py-3
                 rounded-lg
+                text-[13px]
                 font-semibold
-                transition
+                font-['Poppins']
+                transition-all
+                duration-200
+                shadow-sm
               "
             >
-              <ShoppingCart size={18} />
-              Explore Products
+              <ShoppingCart size={15} />
+              Explore Product
             </Link>
 
             <Link
@@ -101,19 +96,23 @@ function AboutHero() {
                 inline-flex
                 items-center
                 gap-2
-                bg-white
+                bg-white/90
                 border
-                border-[#d9d9d9]
-                hover:border-[#147a3f]
-                text-black
-                px-8
-                py-4
+                border-slate-300
+                hover:border-[#137b3a]
+                text-slate-700
+                hover:text-slate-900
+                px-5
+                py-3
                 rounded-lg
+                text-[13px]
                 font-semibold
-                transition
+                font-['Poppins']
+                transition-all
+                duration-200
               "
             >
-              <Heart size={18} />
+              <Heart size={15} className="text-[#137b3a]" />
               Explore Wellness Blog
             </Link>
 
