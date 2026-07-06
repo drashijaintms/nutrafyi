@@ -4,10 +4,10 @@ import storyImage from "../assets/about-nutrafyi.png";
 
 function OurStory() {
   return (
-    <section className="py-20">
+    <section className="py-16 md:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4">
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
           {/* Image */}
           <div>
@@ -16,9 +16,10 @@ function OurStory() {
               alt="About NutraFYI"
               className="
                 w-full
-                h-full
-                rounded-2xl
+                h-auto
+                rounded-3xl
                 object-cover
+                shadow-sm
               "
             />
           </div>
@@ -26,47 +27,51 @@ function OurStory() {
           {/* Content */}
           <div>
 
-            <h2 className="text-[#147a3f] text-[42px] font-bold mb-6">
+            <h2 className="font-['Taviraj'] text-[#137b3a] text-[32px] md:text-[38px] lg:text-[42px] font-bold mb-6">
               Our Story
             </h2>
 
-            <p className="text-[#444] text-[16px] leading-8 mb-6">
+            <p className="font-['Poppins'] text-black text-[14.5px] leading-relaxed mb-5">
               NutraFYI was founded with a simple mission to make
               high-quality, science-backed wellness products
               accessible to everyone.
             </p>
 
-            <p className="text-[#444] text-[16px] leading-8 mb-6">
+            <p className="font-['Poppins'] text-black text-[14.5px] leading-relaxed mb-5">
               We understand the challenges of maintaining a healthy
               lifestyle in today’s fast-paced world. That's why we create
               premium supplements made with clean, effective ingredients
               you can trust.
             </p>
 
-            <p className="text-[#444] text-[16px] leading-8 mb-8">
+            <p className="font-['Poppins'] text-black text-[14.5px] leading-relaxed mb-8">
               From immunity and energy to beauty and brain health, our
               products are designed to support your well-being at every
               step of your journey.
             </p>
 
             <Link
-              to="/category"
+              to="/products"
               className="
                 inline-flex
                 items-center
                 gap-2
-                bg-[#147a3f]
+                bg-[#137b3a]
                 hover:bg-[#0f6630]
                 text-white
-                px-6
+                px-5
                 py-3
                 rounded-lg
+                text-[13px]
                 font-semibold
+                font-['Poppins']
                 transition-all
+                duration-200
+                shadow-sm
               "
             >
               Know More About Our Products
-              <ArrowRight size={18} />
+              <ArrowRight size={15} />
             </Link>
 
           </div>
