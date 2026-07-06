@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import CategoriesWidget from "./CategoriesWidget";
 import headingLeaf from "../assets/heading-leaf.png";
 import BlogCard from "./BlogCard";
 import { blogs as staticBlogs } from "../data/blogs";
@@ -340,44 +341,12 @@ const popularPosts = [
 
   </div>
 
-{/* Blog Categories */}
-<div className="bg-white border border-slate-100 rounded-[18px] p-6 shadow-sm">
-  <h3 className="text-[#147a3f] font-bold text-[20px] mb-5">
-    Blog Categories
-  </h3>
-
-  <ul className="space-y-3.5">
-    {dynamicCategories.map((category, index) => {
-      const isActive = activeCategorySlug === category.slug;
-      return (
-        <li key={index} className="flex items-center justify-between text-sm">
-          <Link
-            to={`/blog?category=${category.slug}`}
-            className={`font-medium transition hover:text-[#147a3f] ${
-              isActive ? "text-[#147a3f] font-semibold" : "text-slate-700"
-            }`}
-          >
-            {category.name}
-          </Link>
-          <span className={`text-sm font-medium ${
-            isActive ? "text-[#147a3f] font-bold" : "text-slate-500"
-          }`}>
-            {category.count}
-          </span>
-        </li>
-      );
-    })}
-  </ul>
-
-  <div className="pt-4 border-t border-slate-100 mt-4">
-    <Link
-      to="/blog"
-      className="inline-flex items-center gap-1 text-xs font-bold text-[#147a3f] hover:text-[#106933] uppercase tracking-wider"
-    >
-      View All Blogs →
-    </Link>
-  </div>
-</div>
+    {/* Blog Categories */}
+    <CategoriesWidget
+      categories={dynamicCategories}
+      activeCategorySlug={activeCategorySlug}
+      title="Blog Categories"
+    />
 
 {/* Popular Posts */}
 <div

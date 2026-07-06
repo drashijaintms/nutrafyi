@@ -21,6 +21,7 @@ import {
 // Import local author profile images for beautiful widgets
 import authorProfile from "../assets/testimonials/emily-johnson.png";
 import ctaSupplements from "../assets/category/weight-management.jpg";
+import CategoriesWidget from "../components/CategoriesWidget";
 
 function BlogDetail() {
   const { slug } = useParams();
@@ -704,34 +705,10 @@ function BlogDetail() {
             </div>
 
             {/* Widget 2: Categories — dynamic from real blog data */}
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xs">
-              <h3 className="text-[#147a3f] font-bold text-[20px] mb-5">
-                Categories
-              </h3>
-              <ul className="space-y-3.5">
-                {sidebarCategories.map((cat, idx) => (
-                  <li key={idx} className="flex items-center justify-between text-sm">
-                    <Link
-                      to={`/blog?category=${slugifyCategory(cat.name)}`}
-                      className="font-medium text-slate-700 hover:text-[#147a3f] transition"
-                    >
-                      {cat.name}
-                    </Link>
-                    <span className="text-sm font-medium text-slate-500">
-                      {cat.count}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <div className="pt-4 border-t border-slate-100 mt-4">
-                <Link
-                  to="/blog"
-                  className="inline-flex items-center gap-1 text-xs font-bold text-[#147a3f] hover:text-[#106933] uppercase tracking-wider"
-                >
-                  View All Categories <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
+            <CategoriesWidget
+              categories={sidebarCategories}
+              title="Categories"
+            />
 
 
             {/* Widget 3: Popular Posts */}
