@@ -9,6 +9,7 @@ import fitnessRecoveryImg from "../assets/blog/fitness-and-recovery.png";
 function BlogSection({ category }) {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [startIndex, setStartIndex] = useState(0);
 
   useEffect(() => {
     const fetchLatestBlogs = async () => {
@@ -30,7 +31,7 @@ function BlogSection({ category }) {
             }
           }
           
-          setBlogs(filtered.slice(0, 3));
+          setBlogs(filtered);
         }
       } catch (err) {
         console.error("Failed to load latest blogs for section:", err);
@@ -50,7 +51,7 @@ function BlogSection({ category }) {
     );
   }
 
-  // Predefined exact blog data matching the 1st mockup image
+  // Predefined exact blog data matching the mockups + additional items for carousel sliding
   const defaultBlogs = [
     {
       _id: "blog-1",
@@ -72,11 +73,25 @@ function BlogSection({ category }) {
       title: "Fitness & Recovery",
       featuredImage: fitnessRecoveryImg,
       excerpt: "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
+    },
+    {
+      _id: "blog-4",
+      slug: "nutrition-for-longevity",
+      title: "Nutrition for Longevity",
+      featuredImage: nutritionTipsImg,
+      excerpt: "Explore the top antioxidant-rich superfoods and vitamins that help support cell health and healthy aging...."
+    },
+    {
+      _id: "blog-5",
+      slug: "stress-management-sleep",
+      title: "Stress Management & Sleep",
+      featuredImage: healthyLifestyleImg,
+      excerpt: "Discover daily mindfulness practices, dietary nutrients, and simple routines to lower cortisol and sleep better...."
     }
   ];
 
   // Map backend blogs to display correct titles/images, fallback to defaults if database is empty
-  const displayBlogs = blogs.length > 0
+  const allBlogs = blogs.length > 0
     ? blogs.map((blog, idx) => {
         const fallbacks = [
           { title: "Nutrition Tips", image: nutritionTipsImg },
@@ -92,6 +107,30 @@ function BlogSection({ category }) {
         };
       })
     : defaultBlogs;
+
+  // Carousel navigation handlers
+  const handleNext = () => {
+    if (allBlogs.length <= 3) return;
+    setStartIndex((prev) => (prev + 1) % allBlogs.length);
+  };
+
+  const handlePrev = () => {
+    if (allBlogs.length <= 3) return;
+    setStartIndex((prev) => (prev - 1 + allBlogs.length) % allBlogs.length);
+  };
+
+  // Get exactly 3 visible blogs starting from startIndex in a circular wrap-around fashion
+  const getDisplayBlogs = () => {
+    if (allBlogs.length <= 3) return allBlogs;
+    const result = [];
+    for (let i = 0; i < 3; i++) {
+      const index = (startIndex + i) % allBlogs.length;
+      result.push(allBlogs[index]);
+    }
+    return result;
+  };
+
+  const displayBlogs = getDisplayBlogs();
 
   return (
     <section className="py-20 bg-[#f4f2e8]">
@@ -125,7 +164,10 @@ function BlogSection({ category }) {
             <div className="flex items-center">
               
               {/* Left Arrow */}
-              <button className="hidden lg:flex w-10 h-10 items-center justify-center text-[#137b3a] hover:text-[#0f6630] text-[48px] font-light mr-4 select-none">
+              <button
+                onClick={handlePrev}
+                className="hidden lg:flex w-10 h-10 items-center justify-center text-[#137b3a] hover:text-[#0f6630] text-[48px] font-light mr-4 select-none cursor-pointer transition-colors"
+              >
                 ‹
               </button>
 
@@ -157,7 +199,10 @@ function BlogSection({ category }) {
               </div>
 
               {/* Right Arrow */}
-              <button className="hidden lg:flex w-10 h-10 items-center justify-center text-[#137b3a] hover:text-[#0f6630] text-[48px] font-light ml-4 select-none">
+              <button
+                onClick={handleNext}
+                className="hidden lg:flex w-10 h-10 items-center justify-center text-[#137b3a] hover:text-[#0f6630] text-[48px] font-light ml-4 select-none cursor-pointer transition-colors"
+              >
                 ›
               </button>
 
