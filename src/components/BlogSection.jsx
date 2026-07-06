@@ -110,20 +110,20 @@ function BlogSection({ category }) {
 
   // Carousel navigation handlers
   const handleNext = () => {
-    if (allBlogs.length <= 3) return;
+    if (allBlogs.length <= 1) return;
     setStartIndex((prev) => (prev + 1) % allBlogs.length);
   };
 
   const handlePrev = () => {
-    if (allBlogs.length <= 3) return;
+    if (allBlogs.length <= 1) return;
     setStartIndex((prev) => (prev - 1 + allBlogs.length) % allBlogs.length);
   };
 
   // Get exactly 3 visible blogs starting from startIndex in a circular wrap-around fashion
   const getDisplayBlogs = () => {
-    if (allBlogs.length <= 3) return allBlogs;
     const result = [];
-    for (let i = 0; i < 3; i++) {
+    const countToShow = Math.min(3, allBlogs.length);
+    for (let i = 0; i < countToShow; i++) {
       const index = (startIndex + i) % allBlogs.length;
       result.push(allBlogs[index]);
     }
