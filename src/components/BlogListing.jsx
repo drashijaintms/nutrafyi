@@ -29,7 +29,11 @@ function BlogListing() {
               year: "numeric"
             }),
             author: b.author || "Admin",
-            excerpt: b.excerpt || b.content ? b.content.substring(0, 120) + "..." : ""
+            excerpt: (() => {
+              const raw = b.excerpt || b.content || "";
+              const clean = raw.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+              return clean.length > 120 ? clean.substring(0, 120) + "..." : clean;
+            })()
           })));
         } else {
           setBlogs(staticBlogs);

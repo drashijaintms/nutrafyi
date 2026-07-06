@@ -72,7 +72,12 @@ function BlogSection({ category }) {
         ...blog,
         title: blog.title || fallback.title,
         featuredImage: blog.featuredImage || fallback.image,
-        excerpt: blog.excerpt || "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
+        excerpt: (() => {
+          const raw = blog.excerpt || blog.content || "";
+          if (!raw) return "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New....";
+          const clean = raw.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+          return clean.length > 120 ? clean.substring(0, 120) + "..." : clean;
+        })()
       };
     });
 
