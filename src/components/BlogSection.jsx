@@ -90,23 +90,53 @@ function BlogSection({ category }) {
     }
   ];
 
-  // Map backend blogs to display correct titles/images, fallback to defaults if database is empty
-  const allBlogs = blogs.length > 0
-    ? blogs.map((blog, idx) => {
-        const fallbacks = [
-          { title: "Nutrition Tips", image: nutritionTipsImg },
-          { title: "Healthy Lifestyle Guides", image: healthyLifestyleImg },
-          { title: "Fitness & Recovery", image: fitnessRecoveryImg }
-        ];
-        const fallback = fallbacks[idx % 3];
-        return {
-          ...blog,
-          title: fallback.title,
-          featuredImage: fallback.image,
-          excerpt: "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
-        };
-      })
-    : defaultBlogs;
+  // Get backend blogs, and pad them with default blogs if there are fewer than 6 items to guarantee carousel slideability
+  const getCombinedBlogs = () => {
+    if (blogs.length === 0) return defaultBlogs;
+    
+    // Start with backend blogs, formatted properly
+    const list = blogs.map((blog, idx) => {
+      const fallbacks = [
+        { title: "Nutrition Tips", image: nutritionTipsImg },
+        { title: "Healthy Lifestyle Guides", image: healthyLifestyleImg },
+        { title: "Fitness & Recovery", image: fitnessRecoveryImg }
+      ];
+      const fallback = fallbacks[idx % 3];
+      return {
+        ...blog,
+        title: blog.title || fallback.title,
+        featuredImage: blog.featuredImage || fallback.image,
+        excerpt: blog.excerpt || "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New...."
+      };
+    });
+
+    // If less than 6, append default blogs to make it interactive
+    if (list.length < 6) {
+      const toAdd = 6 - list.length;
+      for (let i = 0; i < toAdd; i++) {
+        const defaultBlog = defaultBlogs[i % defaultBlogs.length];
+        list.push({
+          ...defaultBlog,
+          _id: `padded-${i}-${defaultBlog._id}`
+        });
+      }
+    }
+    return list;
+  };
+
+  const allBlogs = getCombinedBlogs();
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Auto-play effect (shifts carousel index one-by-one every 4 seconds, pauses on mouse hover)
+  useEffect(() => {
+    if (allBlogs.length <= 3 || isPaused) return;
+
+    const interval = setInterval(() => {
+      setStartIndex((prev) => (prev + 1) % allBlogs.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [allBlogs.length, isPaused]);
 
   // Carousel navigation handlers
   const handleNext = () => {
@@ -172,7 +202,11 @@ function BlogSection({ category }) {
               </button>
 
               {/* Cards */}
-              <div className="flex flex-wrap lg:flex-nowrap gap-4 flex-1">
+              <div 
+                className="flex flex-wrap lg:flex-nowrap gap-4 flex-1"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+              >
                 {displayBlogs.map((blog) => (
                   <Link
                     key={blog._id}
