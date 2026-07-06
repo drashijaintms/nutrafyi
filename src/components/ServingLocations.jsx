@@ -4,7 +4,7 @@ import europeMap from "../assets/about/Europe-Map.png";
 
 function ServingLocations() {
   return (
-    <section className="bg-[#0e4a24] py-8 md:py-12 overflow-hidden">
+    <section className="bg-[#0e4a24] py-3 md:py-4 overflow-hidden">
 
       <div className="max-w-7xl mx-auto px-4">
 
@@ -15,14 +15,14 @@ function ServingLocations() {
             <img
               src={usaMap}
               alt="USA"
-              className="w-[110px] md:w-[140px] opacity-100 object-contain"
+              className="w-[120px] md:w-[160px] opacity-100 object-contain"
             />
           </div>
 
           {/* Center Content */}
           <div className="text-center">
 
-            <div className="flex items-center justify-center gap-1.5 md:gap-2 mb-1.5">
+            <div className="flex items-center justify-center gap-1.5 md:gap-2 mb-1">
 
               <img
                 src={headingLeaf}
@@ -35,8 +35,8 @@ function ServingLocations() {
                   text-white
                   font-extrabold
                   uppercase
-                  text-[14px]
-                  md:text-[18px]
+                  text-[13px]
+                  md:text-[16px]
                   tracking-wider
                 "
                 style={{ fontFamily: "'Noto Sans', sans-serif" }}
@@ -55,11 +55,12 @@ function ServingLocations() {
             <h2
               className="
                 text-[#92d050]
-                text-[24px]
-                sm:text-[28px]
-                md:text-[36px]
+                text-[22px]
+                sm:text-[26px]
+                md:text-[32px]
                 font-bold
                 tracking-wide
+                leading-tight
               "
               style={{ fontFamily: "'Kreon', serif" }}
             >
@@ -73,7 +74,7 @@ function ServingLocations() {
             <img
               src={europeMap}
               alt="Europe"
-              className="w-[90px] md:w-[120px] opacity-100 object-contain"
+              className="w-[95px] md:w-[125px] opacity-100 object-contain"
             />
           </div>
 
