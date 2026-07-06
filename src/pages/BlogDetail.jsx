@@ -277,13 +277,12 @@ function BlogDetail() {
   const prevBlog = currentIndex > 0 ? blogsList[currentIndex - 1] : null;
   const nextBlog = currentIndex < blogsList.length - 1 && currentIndex !== -1 ? blogsList[currentIndex + 1] : null;
 
-  // Sidebar: Compute Categories Post Count — dynamic from actual blogs
+  // Sidebar: Compute Categories — use only primary (first) category per blog, same as BlogListing
   const categoryCounts = blogsList.reduce((acc, b) => {
-    if (b.categories) {
-      b.categories.forEach(cat => {
-        acc[cat] = (acc[cat] || 0) + 1;
-      });
-    }
+    const primaryCat = (b.categories && b.categories.length > 0)
+      ? b.categories[0]
+      : "General";
+    acc[primaryCat] = (acc[primaryCat] || 0) + 1;
     return acc;
   }, {});
 
