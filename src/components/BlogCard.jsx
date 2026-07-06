@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Calendar } from "lucide-react";
 
 function BlogCard({
   image,
@@ -6,24 +7,26 @@ function BlogCard({
   title,
   date,
   slug,
+  excerpt,
 }) {
   return (
     <Link
-  to={`/blog/${slug}`}
-  className="
-    block
-    bg-white
-    border
-    border-[#e5e5e5]
-    rounded-[16px]
-    overflow-hidden
-    hover:shadow-lg
-    hover:-translate-y-2
-    transition-all
-    duration-300
-  "
->
-
+      to={`/blog/${slug}`}
+      className="
+        flex
+        flex-col
+        h-full
+        bg-white
+        border
+        border-[#e5e5e5]
+        rounded-[16px]
+        overflow-hidden
+        hover:shadow-lg
+        hover:-translate-y-2
+        transition-all
+        duration-300
+      "
+    >
       {/* Image */}
       <img
         src={image}
@@ -36,40 +39,57 @@ function BlogCard({
       />
 
       {/* Content */}
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-1">
 
-        <h3
-          className="
-            text-[#147a3f]
-            font-bold
-            text-[16px]
-            uppercase
-            mb-3
-          "
-        >
-          {category}
-        </h3>
+        {/* Category */}
+        <div>
+          <span 
+            className="text-[#137b3a] font-bold text-[13.5px] uppercase tracking-wider border-b-[2px] border-[#137b3a] pb-0.5 inline-block mb-4"
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+          >
+            {category}
+          </span>
+        </div>
 
+        {/* Title */}
         <h4
           className="
             text-[14px]
-            font-semibold
-            leading-7
-            mb-6
+            sm:text-[14.5px]
+            font-extrabold
+            leading-[1.4]
+            mb-3
             uppercase
+            text-[#111111]
           "
+          style={{ fontFamily: "'Noto Sans', sans-serif" }}
         >
           {title}
         </h4>
 
-        <div className="flex items-center gap-2 text-[12px] text-[#666]">
+        {/* Excerpt Paragraph */}
+        {excerpt && (
+          <p
+            className="
+              text-[#555555]
+              text-[11.5px]
+              leading-[18px]
+              font-medium
+              uppercase
+              tracking-wide
+              mb-5
+              line-clamp-3
+            "
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+          >
+            {excerpt}
+          </p>
+        )}
 
-          <span>📅</span>
-
-          <span>
-            {date}
-          </span>
-
+        {/* Date Aligned at bottom */}
+        <div className="mt-auto pt-4 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[11px] font-bold text-[#111111] uppercase tracking-wider">
+          <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
+          <span>{date}</span>
         </div>
 
       </div>

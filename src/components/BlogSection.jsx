@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { Calendar } from "lucide-react";
 
 import nutritionTipsImg from "../assets/blog/nutrition-tips.png";
 import healthyLifestyleImg from "../assets/blog/healthy-lifestyle-guides.png";
@@ -256,7 +257,7 @@ function BlogSection({ category }) {
                   onMouseEnter={() => setIsPaused(true)}
                   onMouseLeave={() => setIsPaused(false)}
                 >
-                  {list.map((blog, idx) => (
+                   {list.map((blog, idx) => (
                     <Link
                       key={`${blog._id}-${idx}`}
                       to={`/blog/${blog.slug}`}
@@ -264,7 +265,7 @@ function BlogSection({ category }) {
                         width: `calc((100% - ${(visibleCards - 1) * 24}px) / ${visibleCards})`,
                         flexShrink: 0,
                       }}
-                      className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] block transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
+                      className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col h-[380px] lg:h-[420px] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
                     >
                       <img
                         src={blog.featuredImage}
@@ -272,14 +273,40 @@ function BlogSection({ category }) {
                         className="w-full h-[135px] object-cover"
                       />
                       
-                      <div className="p-3.5">
-                        <h3 className="font-['Noto_Sans'] text-[#137b3a] text-[15px] font-bold mb-2 line-clamp-2 leading-snug">
+                      <div className="p-4 flex flex-col flex-1">
+                        <div>
+                          <span 
+                            className="text-[#137b3a] font-bold text-[12px] uppercase tracking-wider border-b-[2px] border-[#137b3a] pb-0.5 inline-block mb-3"
+                            style={{ fontFamily: "'Poppins', sans-serif" }}
+                          >
+                            {blog.categories && blog.categories.length > 0 ? blog.categories[0] : "General"}
+                          </span>
+                        </div>
+
+                        <h3 
+                          className="text-[#111111] text-[13.5px] font-extrabold mb-2 uppercase line-clamp-2 leading-snug"
+                          style={{ fontFamily: "'Noto Sans', sans-serif" }}
+                        >
                           {blog.title}
                         </h3>
                         
-                        <p className="font-['Poppins'] text-[#666666] text-[11px] leading-[16px] line-clamp-3">
+                        <p 
+                          className="text-[#555555] text-[11px] leading-[16px] line-clamp-3 uppercase tracking-wide mb-4"
+                          style={{ fontFamily: "'Poppins', sans-serif" }}
+                        >
                           {blog.excerpt}
                         </p>
+
+                        <div className="mt-auto pt-3 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[10px] font-bold text-[#111111] uppercase tracking-wider">
+                          <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
+                          <span>
+                            {new Date(blog.createdAt || Date.now()).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "2-digit",
+                              year: "numeric"
+                            })}
+                          </span>
+                        </div>
                       </div>
                     </Link>
                   ))}

@@ -154,6 +154,7 @@ const popularPosts = [
     title={blog.title}
     date={blog.date}
     slug={blog.slug}
+    excerpt={blog.excerpt}
   />
 ))}
 
