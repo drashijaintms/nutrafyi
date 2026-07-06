@@ -57,9 +57,8 @@ function BlogHero() {
               alt="Wellness Blog"
               className="
                 absolute
-                top-0
-                -left-[24px]
-                w-[calc(100%+24px)]
+                inset-0
+                w-full
                 h-full
                 object-cover
                 block
