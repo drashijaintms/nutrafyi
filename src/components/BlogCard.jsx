@@ -28,15 +28,17 @@ function BlogCard({
       "
     >
       {/* Image */}
-      <img
-        src={image}
-        alt={title}
-        className="
-          w-full
-          h-[170px]
-          object-cover
-        "
-      />
+      {image && (
+        <img
+          src={image}
+          alt={title}
+          className="
+            w-full
+            h-[170px]
+            object-cover
+          "
+        />
+      )}
 
       {/* Content */}
       <div className="p-5 flex flex-col flex-1">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import headingLeaf from "../assets/heading-leaf.png";
 import BlogCard from "./BlogCard";
@@ -14,14 +14,53 @@ function BlogListing() {
   const [currentPage, setCurrentPage] = useState(1);
   const blogsPerPage = 9;
 
+  const [searchParams] = useSearchParams();
+  const activeCategorySlug = searchParams.get("category");
+
+  const slugify = (text) => {
+    if (!text) return "";
+    return text
+      .toString()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/\-\-+/g, "-")
+      .trim();
+  };
+
+  const filteredBlogs = activeCategorySlug
+    ? blogs.filter((b) => slugify(b.category) === activeCategorySlug)
+    : blogs;
+
+  // Reset page to 1 when category changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [blogs]);
+  }, [activeCategorySlug]);
 
-  const totalPages = Math.max(1, Math.ceil(blogs.length / blogsPerPage));
+  // Scroll to top of viewport on page change or category change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage, activeCategorySlug]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBlogs.length / blogsPerPage));
   const indexOfLastBlog = currentPage * blogsPerPage;
   const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
-  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
+  const currentBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
+
+  // Dynamic category counts from the full blogs list
+  const categoryCounts = blogs.reduce((acc, blog) => {
+    const catName = blog.category || "General";
+    acc[catName] = (acc[catName] || 0) + 1;
+    return acc;
+  }, {});
+
+  const dynamicCategories = Object.keys(categoryCounts)
+    .map((catName) => ({
+      name: catName,
+      count: categoryCounts[catName],
+      slug: slugify(catName),
+    }))
+    .sort((a, b) => b.count - a.count);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -33,7 +72,7 @@ function BlogListing() {
             title: b.title,
             slug: b.slug,
             category: b.categories && b.categories.length > 0 ? b.categories[0] : "General",
-            image: b.featuredImage || beautySkin,
+            image: b.featuredImage || "", // do not add default feature image
             date: new Date(b.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "2-digit",
@@ -57,38 +96,6 @@ function BlogListing() {
     fetchBlogs();
   }, []);
 
-const categories = [
-  {
-    name: "Vitamins & Nutrition",
-    count: 18,
-    slug: "vitamins-nutrition",
-  },
-  {
-    name: "Weight Management",
-    count: 14,
-    slug: "weight-management",
-  },
-  {
-    name: "Energy & Performance",
-    count: 16,
-    slug: "energy-performance",
-  },
-  {
-    name: "Immune Support",
-    count: 12,
-    slug: "immune-support",
-  },
-  {
-    name: "Beauty & Skin",
-    count: 15,
-    slug: "beauty-skin",
-  },
-  {
-    name: "Healthy Living Essentials",
-    count: 20,
-    slug: "healthy-living",
-  },
-];
 const popularPosts = [
   {
     image: beautySkin,
@@ -305,7 +312,7 @@ const popularPosts = [
 
   </div>
 
-{/* Shop Categories */}
+{/* Blog Categories */}
 <div
   className="
     bg-[#f7f7f7]
@@ -313,7 +320,6 @@ const popularPosts = [
     p-8
   "
 >
-
   <h3
     className="
       text-[#147a3f]
@@ -322,45 +328,46 @@ const popularPosts = [
       mb-6
     "
   >
-    Shop Categories
+    Blog Categories
   </h3>
 
-<div className="space-y-4">
+  <div className="space-y-4">
+    {dynamicCategories.map((category, index) => {
+      const isActive = activeCategorySlug === category.slug;
+      return (
+        <Link
+          key={index}
+          to={`/blog?category=${category.slug}`}
+          className={`
+            flex
+            justify-between
+            hover:text-[#147a3f]
+            transition
+            ${isActive ? "text-[#147a3f] font-bold" : "text-[#444]"}
+          `}
+        >
+          <span>{category.name}</span>
+          <span>{category.count}</span>
+        </Link>
+      );
+    })}
+  </div>
 
-  {categories.map((category, index) => (
-    <Link
-      key={index}
-      to={`/category/${category.slug}`}
-      className="
-        flex
-        justify-between
-        hover:text-[#147a3f]
-        transition
-      "
-    >
-      <span>{category.name}</span>
-      <span>{category.count}</span>
-    </Link>
-  ))}
-
-</div>
-
-<Link
-  to="/category"
-  className="
-    inline-flex
-    items-center
-    gap-2
-    mt-6
-    text-[#147a3f]
-    font-bold
-    uppercase
-    text-sm
-  "
->
-  View All Products →
-</Link>
-
+  <Link
+    to="/blog"
+    className="
+      inline-flex
+      items-center
+      gap-2
+      mt-6
+      text-[#147a3f]
+      font-bold
+      uppercase
+      text-sm
+    "
+  >
+    View All Blogs →
+  </Link>
 </div>
 {/* Popular Posts */}
 <div
