@@ -341,62 +341,46 @@ const popularPosts = [
   </div>
 
 {/* Blog Categories */}
-<div
-  className="
-    bg-[#f7f7f7]
-    rounded-[18px]
-    p-8
-  "
->
-  <h3
-    className="
-      text-[#147a3f]
-      font-bold
-      text-[22px]
-      mb-6
-    "
-  >
+<div className="bg-white border border-slate-100 rounded-[18px] p-6 shadow-sm">
+  <h3 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 uppercase tracking-wider mb-4">
     Blog Categories
   </h3>
 
-  <div className="space-y-4">
+  <ul className="space-y-3.5">
     {dynamicCategories.map((category, index) => {
       const isActive = activeCategorySlug === category.slug;
       return (
-        <Link
-          key={index}
-          to={`/blog?category=${category.slug}`}
-          className={`
-            flex
-            justify-between
-            hover:text-[#147a3f]
-            transition
-            ${isActive ? "text-[#147a3f] font-bold" : "text-[#444]"}
-          `}
-        >
-          <span>{category.name}</span>
-          <span>{category.count}</span>
-        </Link>
+        <li key={index} className="flex items-center justify-between text-sm">
+          <Link
+            to={`/blog?category=${category.slug}`}
+            className={`font-semibold transition hover:text-[#147a3f] ${
+              isActive ? "text-[#147a3f]" : "text-slate-700"
+            }`}
+          >
+            {category.name}
+          </Link>
+          <span className={`flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+            isActive
+              ? "bg-[#147a3f] text-white border-[#147a3f]"
+              : "bg-[#f0f7f2] text-[#147a3f] border-[#d4e6da]"
+          }`}>
+            {category.count}
+          </span>
+        </li>
       );
     })}
-  </div>
+  </ul>
 
-  <Link
-    to="/blog"
-    className="
-      inline-flex
-      items-center
-      gap-2
-      mt-6
-      text-[#147a3f]
-      font-bold
-      uppercase
-      text-sm
-    "
-  >
-    View All Blogs →
-  </Link>
+  <div className="pt-4 border-t border-slate-100 mt-4">
+    <Link
+      to="/blog"
+      className="inline-flex items-center gap-1 text-xs font-bold text-[#147a3f] hover:text-[#106933] uppercase tracking-wider"
+    >
+      View All Blogs →
+    </Link>
+  </div>
 </div>
+
 {/* Popular Posts */}
 <div
   className="
