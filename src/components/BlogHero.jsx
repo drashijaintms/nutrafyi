@@ -14,20 +14,20 @@ function BlogHero() {
 
               <h1
                 className="
-                  font-['Kreon']
-                  text-[32px]
-                  sm:text-[38px]
-                  md:text-[44px]
-                  lg:text-[48px]
+                  font-['Noto_Sans']
+                  text-[28px]
+                  sm:text-[34px]
+                  md:text-[40px]
+                  lg:text-[45px]
                   font-bold
-                  leading-[1.1]
+                  leading-[1.15]
                   text-[#111111]
                   mb-5
                 "
               >
-                Wellness Insights
+                Wellness Insights for
                 <br />
-                for a Better You
+                a Better You
               </h1>
 
               <p
