@@ -8,18 +8,21 @@ function BlogHero() {
         <div className="grid lg:grid-cols-[45%_55%] min-h-[420px]">
 
           {/* Left Content */}
-          <div className="flex items-center px-8 lg:px-14">
+          <div className="flex items-center px-8 lg:px-14 py-10 lg:py-0">
 
             <div>
 
               <h1
                 className="
-                  text-[48px]
-                  lg:text-[60px]
+                  font-['Kreon']
+                  text-[36px]
+                  sm:text-[44px]
+                  md:text-[52px]
+                  lg:text-[56px]
                   font-bold
-                  leading-[1.05]
-                  text-black
-                  mb-8
+                  leading-[1.1]
+                  text-[#111111]
+                  mb-5
                 "
               >
                 Wellness Insights
@@ -29,10 +32,12 @@ function BlogHero() {
 
               <p
                 className="
-                  text-[#444]
-                  text-[18px]
-                  leading-10
-                  max-w-[360px]
+                  font-['Poppins']
+                  text-[#333333]
+                  text-[14px]
+                  sm:text-[15px]
+                  leading-[24px]
+                  max-w-[420px]
                 "
               >
                 Expert tips, healthy living guides, and nutrition
@@ -54,21 +59,6 @@ function BlogHero() {
                 w-full
                 h-full
                 object-cover
-              "
-            />
-
-            {/* Blend Into Background */}
-            <div
-              className="
-                absolute
-                left-0
-                top-0
-                h-full
-                w-64
-                bg-gradient-to-r
-                from-[#f5f2eb]
-                via-[#f5f2eb]/80
-                to-transparent
               "
             />
 
