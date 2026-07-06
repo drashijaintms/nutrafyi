@@ -32,6 +32,7 @@ function BlogDetail() {
   
   // Table of Contents & FAQs Accordion state
   const [toc, setToc] = useState([]);
+  const [tocOpen, setTocOpen] = useState(false);
   const [activeFaqIndex, setActiveFaqIndex] = useState(null);
 
   // Load individual blog and track view
@@ -76,14 +77,14 @@ function BlogDetail() {
     fetchBlogsList();
   }, []);
 
-  // Parse headings for Table of Contents
+  // Parse headings for Table of Contents (h1, h2, h3)
   useEffect(() => {
     if (blog && blog.content) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(blog.content, "text/html");
-      const headings = doc.querySelectorAll("h3, h2");
+      const headings = doc.querySelectorAll("h1, h2, h3");
       const tocItems = Array.from(headings).map((heading) => {
-        const text = heading.textContent;
+        const text = heading.textContent.trim();
         const id = text
           .toLowerCase()
           .trim()
@@ -92,7 +93,7 @@ function BlogDetail() {
         return {
           id,
           text,
-          level: heading.tagName.toLowerCase(),
+          level: heading.tagName.toLowerCase(), // "h1", "h2", or "h3"
         };
       });
       setToc(tocItems);
@@ -326,27 +327,64 @@ function BlogDetail() {
               </div>
             )}
 
-            {/* Table of Contents Widget */}
+            {/* Table of Contents Widget — collapsible */}
             {toc.length > 0 && (
-              <div className="bg-slate-50 border border-slate-200/60 rounded-[20px] p-6 text-left space-y-3.5 animate-in fade-in duration-300">
-                <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                  <span className="text-[#147a3f] text-base">📋</span> Table of Contents
-                </h4>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm list-none pl-0 my-0 space-y-0">
-                  {toc.map((item, idx) => (
-                    <li key={idx} className="my-0 py-0 flex items-start gap-2">
-                      <span className="text-[#147a3f] font-bold mt-0.5">{idx + 1}.</span>
-                      <button
-                        onClick={() => scrollToHeading(item.id)}
-                        className={`text-slate-650 hover:text-[#147a3f] font-semibold text-left transition hover:underline cursor-pointer ${
-                          item.level === "h3" ? "pl-2" : ""
-                        }`}
-                      >
-                        {item.text}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+              <div
+                className="border border-[#d4e6da] rounded-[16px] overflow-hidden"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                {/* Header bar — always visible, click to toggle */}
+                <button
+                  onClick={() => setTocOpen((prev) => !prev)}
+                  className="w-full flex items-center justify-between px-5 py-4 bg-[#f0f7f2] hover:bg-[#e6f2ea] transition-colors duration-200"
+                >
+                  <span className="flex items-center gap-2.5 text-[15px] font-bold text-[#0e3b20]">
+                    <svg className="w-4 h-4 text-[#147a3f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h16M4 18h10" />
+                    </svg>
+                    Table of Contents
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-[#147a3f] transition-transform duration-300 ${tocOpen ? "rotate-180" : ""}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Expandable content */}
+                {tocOpen && (
+                  <div className="bg-white px-5 py-4">
+                    <ul className="space-y-0 list-none m-0 p-0">
+                      {toc.map((item, idx) => {
+                        const isH1 = item.level === "h1";
+                        const isH2 = item.level === "h2";
+                        const isH3 = item.level === "h3";
+                        return (
+                          <li key={idx} className="my-0">
+                            <button
+                              onClick={() => scrollToHeading(item.id)}
+                              className={`
+                                w-full text-left py-1.5 transition-colors duration-150 hover:text-[#147a3f]
+                                ${isH1 ? "pl-0 text-[14px] font-bold text-[#0e3b20]" : ""}
+                                ${isH2 ? "pl-5 text-[13.5px] font-semibold text-[#1a5c33]" : ""}
+                                ${isH3 ? "pl-10 text-[13px] font-medium text-[#555]" : ""}
+                              `}
+                            >
+                              {isH2 && (
+                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#147a3f] mr-2 mb-0.5 align-middle" />
+                              )}
+                              {isH3 && (
+                                <span className="inline-block w-1 h-1 rounded-full bg-[#aaa] mr-2 mb-0.5 align-middle" />
+                              )}
+                              {item.text}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 
