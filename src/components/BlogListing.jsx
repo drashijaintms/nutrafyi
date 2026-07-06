@@ -11,6 +11,17 @@ import wellness from "../assets/category/immune-support.jpg";
 
 function BlogListing() {
   const [blogs, setBlogs] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const blogsPerPage = 9;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [blogs]);
+
+  const totalPages = Math.max(1, Math.ceil(blogs.length / blogsPerPage));
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -150,92 +161,94 @@ const popularPosts = [
             <div className="">
 
               <div className="grid grid-cols-2 xl:grid-cols-3 gap-6">
-{blogs.map((blog) => (
-  <BlogCard
-    key={blog.id}
-    image={blog.image}
-    category={blog.category}
-    title={blog.title}
-    date={blog.date}
-    slug={blog.slug}
-    excerpt={blog.excerpt}
-  />
-))}
+                {currentBlogs.map((blog) => (
+                  <BlogCard
+                    key={blog.id}
+                    image={blog.image}
+                    category={blog.category}
+                    title={blog.title}
+                    date={blog.date}
+                    slug={blog.slug}
+                    excerpt={blog.excerpt}
+                  />
+                ))}
+              </div>
 
-</div>
-{/* Pagination */}
-<div className="flex justify-center items-center gap-3 mt-12">
+              {/* Pagination */}
+              <div className="flex justify-center items-center gap-3 mt-12">
+                {totalPages > 1 && (
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`
+                      w-10
+                      h-10
+                      rounded-full
+                      border
+                      border-[#ddd]
+                      hover:border-[#147a3f]
+                      transition
+                      flex
+                      items-center
+                      justify-center
+                      ${currentPage === 1 ? "opacity-40 cursor-not-allowed hover:border-[#ddd]" : "cursor-pointer"}
+                    `}
+                  >
+                    ←
+                  </button>
+                )}
 
-  <button
-    className="
-      w-10
-      h-10
-      rounded-full
-      border
-      border-[#ddd]
-      hover:border-[#147a3f]
-      transition
-    "
-  >
-    ←
-  </button>
+                {Array.from({ length: totalPages }, (_, idx) => {
+                  const pageNum = idx + 1;
+                  const isActive = pageNum === currentPage;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`
+                        w-10
+                        h-10
+                        rounded-full
+                        font-semibold
+                        transition
+                        flex
+                        items-center
+                        justify-center
+                        cursor-pointer
+                        border
+                        ${isActive 
+                          ? "bg-[#147a3f] border-[#147a3f] text-white" 
+                          : "border-[#ddd] hover:border-[#147a3f] text-[#333]"
+                        }
+                      `}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
 
-  <button
-    className="
-      w-10
-      h-10
-      rounded-full
-      bg-[#147a3f]
-      text-white
-      font-semibold
-    "
-  >
-    1
-  </button>
-
-  <button
-    className="
-      w-10
-      h-10
-      rounded-full
-      border
-      border-[#ddd]
-      hover:border-[#147a3f]
-      transition
-    "
-  >
-    2
-  </button>
-
-  <button
-    className="
-      w-10
-      h-10
-      rounded-full
-      border
-      border-[#ddd]
-      hover:border-[#147a3f]
-      transition
-    "
-  >
-    3
-  </button>
-
-  <button
-    className="
-      w-10
-      h-10
-      rounded-full
-      border
-      border-[#ddd]
-      hover:border-[#147a3f]
-      transition
-    "
-  >
-    →
-  </button>
-
-</div>
+                {totalPages > 1 && (
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`
+                      w-10
+                      h-10
+                      rounded-full
+                      border
+                      border-[#ddd]
+                      hover:border-[#147a3f]
+                      transition
+                      flex
+                      items-center
+                      justify-center
+                      ${currentPage === totalPages ? "opacity-40 cursor-not-allowed hover:border-[#ddd]" : "cursor-pointer"}
+                    `}
+                  >
+                    →
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>
