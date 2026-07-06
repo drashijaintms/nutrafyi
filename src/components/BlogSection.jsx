@@ -9,7 +9,11 @@ import fitnessRecoveryImg from "../assets/blog/fitness-and-recovery.png";
 function BlogSection({ category }) {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [startIndex, setStartIndex] = useState(0);
+  const [list, setList] = useState([]);
+  const [translateX, setTranslateX] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [animating, setAnimating] = useState(false);
+  const [visibleCards, setVisibleCards] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
 
   // Predefined exact blog data matching the mockups + additional items for carousel sliding
@@ -87,6 +91,12 @@ function BlogSection({ category }) {
 
   const allBlogs = getCombinedBlogs();
 
+  // Sync list state with combined blogs
+  useEffect(() => {
+    setList(allBlogs);
+  }, [blogs]);
+
+  // Fetch blogs
   useEffect(() => {
     const fetchLatestBlogs = async () => {
       try {
@@ -119,40 +129,73 @@ function BlogSection({ category }) {
     fetchLatestBlogs();
   }, [category]);
 
-  // Auto-play effect (shifts carousel index one-by-one every 4 seconds, pauses on mouse hover)
+  // Resize handler for responsive visible cards
   useEffect(() => {
-    if (allBlogs.length <= 3 || isPaused) return;
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCards(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCards(2);
+      } else {
+        setVisibleCards(3);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Autoplay loop navigation triggers handleNext
+  useEffect(() => {
+    if (list.length <= 3 || isPaused || animating) return;
 
     const interval = setInterval(() => {
-      setStartIndex((prev) => (prev + 1) % allBlogs.length);
+      handleNext();
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [allBlogs.length, isPaused]);
+  }, [list.length, isPaused, animating, visibleCards]);
 
-  // Carousel navigation handlers
   const handleNext = () => {
-    if (allBlogs.length <= 1) return;
-    setStartIndex((prev) => (prev + 1) % allBlogs.length);
+    if (animating || list.length <= 3) return;
+    setAnimating(true);
+    setIsTransitioning(true);
+    setTranslateX(-(100 / visibleCards));
+
+    setTimeout(() => {
+      setList((prev) => {
+        const nextList = [...prev];
+        const first = nextList.shift();
+        nextList.push(first);
+        return nextList;
+      });
+      setIsTransitioning(false);
+      setTranslateX(0);
+      setAnimating(false);
+    }, 500);
   };
 
   const handlePrev = () => {
-    if (allBlogs.length <= 1) return;
-    setStartIndex((prev) => (prev - 1 + allBlogs.length) % allBlogs.length);
-  };
+    if (animating || list.length <= 3) return;
+    setAnimating(true);
+    setIsTransitioning(false);
+    setTranslateX(-(100 / visibleCards));
 
-  // Get exactly 3 visible blogs starting from startIndex in a circular wrap-around fashion
-  const getDisplayBlogs = () => {
-    const result = [];
-    const countToShow = Math.min(3, allBlogs.length);
-    for (let i = 0; i < countToShow; i++) {
-      const index = (startIndex + i) % allBlogs.length;
-      result.push(allBlogs[index]);
-    }
-    return result;
-  };
+    setList((prev) => {
+      const nextList = [...prev];
+      const last = nextList.pop();
+      nextList.unshift(last);
+      return nextList;
+    });
 
-  const displayBlogs = getDisplayBlogs();
+    setTimeout(() => {
+      setIsTransitioning(true);
+      setTranslateX(0);
+      setTimeout(() => {
+        setAnimating(false);
+      }, 500);
+    }, 50);
+  };
 
   if (loading) {
     return (
@@ -163,7 +206,7 @@ function BlogSection({ category }) {
   }
 
   return (
-    <section className="py-20 bg-[#f4f2e8]">
+    <section className="py-20 bg-[#f4f2e8] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap items-center">
           
@@ -201,35 +244,46 @@ function BlogSection({ category }) {
                 ‹
               </button>
 
-              {/* Cards */}
-              <div 
-                className="flex flex-wrap lg:flex-nowrap gap-4 flex-1"
-                onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => setIsPaused(false)}
-              >
-                {displayBlogs.map((blog) => (
-                  <Link
-                    key={blog._id}
-                    to={`/blog/${blog.slug}`}
-                    className="w-full md:w-[48%] lg:w-[33.33%] bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] block transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
-                  >
-                    <img
-                      src={blog.featuredImage}
-                      alt={blog.title}
-                      className="w-full h-[135px] object-cover"
-                    />
-                    
-                    <div className="p-3.5">
-                      <h3 className="font-['Noto_Sans'] text-[#137b3a] text-[15px] font-bold mb-2 line-clamp-2 leading-snug">
-                        {blog.title}
-                      </h3>
+              {/* Slider Viewport */}
+              <div className="overflow-hidden flex-1">
+                {/* Sliding Track */}
+                <div
+                  className="flex gap-6 select-none"
+                  style={{
+                    transform: `translate3d(${translateX}%, 0, 0)`,
+                    transition: isTransitioning ? "transform 500ms ease-in-out" : "none",
+                  }}
+                  onMouseEnter={() => setIsPaused(true)}
+                  onMouseLeave={() => setIsPaused(false)}
+                >
+                  {list.map((blog, idx) => (
+                    <Link
+                      key={`${blog._id}-${idx}`}
+                      to={`/blog/${blog.slug}`}
+                      style={{
+                        width: `calc((100% - ${(visibleCards - 1) * 24}px) / ${visibleCards})`,
+                        flexShrink: 0,
+                      }}
+                      className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] block transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
+                    >
+                      <img
+                        src={blog.featuredImage}
+                        alt={blog.title}
+                        className="w-full h-[135px] object-cover"
+                      />
                       
-                      <p className="font-['Poppins'] text-[#666666] text-[11px] leading-[16px] line-clamp-3">
-                        {blog.excerpt}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="p-3.5">
+                        <h3 className="font-['Noto_Sans'] text-[#137b3a] text-[15px] font-bold mb-2 line-clamp-2 leading-snug">
+                          {blog.title}
+                        </h3>
+                        
+                        <p className="font-['Poppins'] text-[#666666] text-[11px] leading-[16px] line-clamp-3">
+                          {blog.excerpt}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               {/* Right Arrow */}
