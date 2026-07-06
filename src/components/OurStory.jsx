@@ -27,52 +27,66 @@ function OurStory() {
           {/* Content */}
           <div className="flex flex-col justify-center">
 
-            <h2 className="!font-['Taviraj'] text-[#137b3a] text-[32px] md:text-[38px] lg:text-[42px] font-bold mb-6">
+            <h2 
+              className="text-[#137b3a] text-[32px] md:text-[38px] lg:text-[42px] font-bold mb-6"
+              style={{ fontFamily: "'Taviraj', serif" }}
+            >
               Our Story
             </h2>
 
-            <p className="font-['Poppins'] text-black text-[14.5px] leading-relaxed mb-5">
+            <p 
+              className="text-black text-[14.5px] leading-relaxed mb-5"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
               NutraFYI was founded with a simple mission to make
               high-quality, science-backed wellness products
               accessible to everyone.
             </p>
 
-            <p className="font-['Poppins'] text-black text-[14.5px] leading-relaxed mb-5">
+            <p 
+              className="text-black text-[14.5px] leading-relaxed mb-5"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
               We understand the challenges of maintaining a healthy
               lifestyle in today’s fast-paced world. That's why we create
               premium supplements made with clean, effective ingredients
               you can trust.
             </p>
 
-            <p className="font-['Poppins'] text-black text-[14.5px] leading-relaxed mb-8">
+            <p 
+              className="text-black text-[14.5px] leading-relaxed mb-8"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
               From immunity and energy to beauty and brain health, our
               products are designed to support your well-being at every
               step of your journey.
             </p>
 
-            <Link
-              to="/products"
-              className="
-                inline-flex
-                items-center
-                gap-2
-                bg-[#137b3a]
-                hover:bg-[#0f6630]
-                text-white
-                px-5
-                py-3
-                rounded-lg
-                text-[13px]
-                font-semibold
-                font-['Poppins']
-                transition-all
-                duration-200
-                shadow-sm
-              "
-            >
-              Know More About Our Products
-              <ArrowRight size={15} />
-            </Link>
+            <div className="flex">
+              <Link
+                to="/products"
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  bg-[#137b3a]
+                  hover:bg-[#0f6630]
+                  text-white
+                  px-5
+                  py-3
+                  rounded-lg
+                  text-[13px]
+                  font-semibold
+                  transition-all
+                  duration-200
+                  shadow-sm
+                "
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                Know More About Our Products
+                <ArrowRight size={15} />
+              </Link>
+            </div>
 
           </div>
 
