@@ -73,7 +73,7 @@ function ImpactNumbers() {
       <div className="max-w-6xl mx-auto px-4">
 
         {/* Heading */}
-        <div className="section-header-container !mb-16">
+        <div className="section-header-container !mb-10">
           <div className="section-header-title-wrap">
             <img
               src={headingLeaf}
