@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { 
   FaFacebook, 
-  FaTwitter, 
   FaInstagram, 
   FaLinkedin, 
   FaEnvelope, 
@@ -265,7 +264,7 @@ function BlogDetail() {
   const prevBlog = currentIndex > 0 ? blogsList[currentIndex - 1] : null;
   const nextBlog = currentIndex < blogsList.length - 1 && currentIndex !== -1 ? blogsList[currentIndex + 1] : null;
 
-  // Sidebar: Compute Categories Post Count
+  // Sidebar: Compute Categories Post Count — dynamic from actual blogs
   const categoryCounts = blogsList.reduce((acc, b) => {
     if (b.categories) {
       b.categories.forEach(cat => {
@@ -275,20 +274,17 @@ function BlogDetail() {
     return acc;
   }, {});
 
-  const sidebarCategories = Object.keys(categoryCounts).map(name => ({
-    name,
-    count: categoryCounts[name]
-  })).slice(0, 6);
+  const sidebarCategories = Object.keys(categoryCounts)
+    .map(name => ({ name, count: categoryCounts[name] }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
 
-  // Fallback default categories if empty
-  const categoriesList = sidebarCategories.length > 0 ? sidebarCategories : [
-    { name: "Nutrition", count: 24 },
-    { name: "Fitness & Exercise", count: 18 },
-    { name: "Health & Wellness", count: 22 },
-    { name: "Natural Living", count: 16 },
-    { name: "Beauty & Skin", count: 14 },
-    { name: "Healthy Recipes", count: 12 }
-  ];
+  const slugifyCategory = (text) =>
+    text.toString().toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/\-\-+/g, "-")
+      .trim();
 
   // Sidebar: Popular posts (sorted by views)
   const popularBlogs = [...blogsList]
@@ -550,21 +546,57 @@ function BlogDetail() {
             {/* Social Sharing Bar */}
             <div className="flex items-center gap-3 py-6 border-y border-slate-100">
               <span className="text-sm font-bold text-slate-400 uppercase tracking-wider mr-2">Share this article:</span>
-              <button className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white transition-all cursor-pointer">
+
+              {/* Facebook */}
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all"
+                title="Share on Facebook"
+              >
                 <FaFacebook className="w-4 h-4" />
-              </button>
-              <button className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white transition-all cursor-pointer">
-                <FaTwitter className="w-4 h-4" />
-              </button>
-              <button className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white transition-all cursor-pointer">
+              </a>
+
+              {/* X (Twitter) */}
+              <a
+                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(blog.title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all"
+                title="Share on X (Twitter)"
+              >
+                {/* X logo SVG */}
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
+
+              {/* Instagram — opens Instagram.com (no direct share API) */}
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all"
+                title="Share on Instagram"
+              >
                 <FaInstagram className="w-4 h-4" />
-              </button>
-              <button className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white transition-all cursor-pointer">
+              </a>
+
+              {/* Email */}
+              <a
+                href={`mailto:?subject=${encodeURIComponent(blog.title)}&body=${encodeURIComponent("Check out this article: " + window.location.href)}`}
+                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all"
+                title="Share via Email"
+              >
                 <FaEnvelope className="w-4 h-4" />
-              </button>
-              <button 
+              </a>
+
+              {/* Copy link */}
+              <button
                 onClick={handleCopyLink}
-                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white transition-all cursor-pointer"
+                className="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#147a3f] hover:text-white hover:border-[#147a3f] transition-all cursor-pointer"
+                title="Copy link"
               >
                 <FaLink className="w-4 h-4" />
               </button>
@@ -637,25 +669,28 @@ function BlogDetail() {
               </div>
             </div>
 
-            {/* Widget 2: Categories */}
+            {/* Widget 2: Categories — dynamic from real blog data */}
             <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xs space-y-4">
               <h3 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 uppercase tracking-wider">
                 Categories
               </h3>
               <ul className="space-y-3.5">
-                {categoriesList.map((cat, idx) => (
+                {sidebarCategories.map((cat, idx) => (
                   <li key={idx} className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-slate-650 hover:text-[#147a3f] transition cursor-pointer">
+                    <Link
+                      to={`/blog?category=${slugifyCategory(cat.name)}`}
+                      className="font-semibold text-slate-650 hover:text-[#147a3f] transition"
+                    >
                       {cat.name}
-                    </span>
-                    <span className="flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-50 text-slate-500 border border-slate-100">
+                    </Link>
+                    <span className="flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f0f7f2] text-[#147a3f] border border-[#d4e6da]">
                       {cat.count}
                     </span>
                   </li>
                 ))}
               </ul>
               <div className="pt-2">
-                <Link 
+                <Link
                   to="/blog"
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#147a3f] hover:text-[#106933] uppercase tracking-wider"
                 >
