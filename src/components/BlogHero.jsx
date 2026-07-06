@@ -5,7 +5,7 @@ function BlogHero() {
     <section className="bg-[#f5f2eb]">
       <div className="">
 
-        <div className="grid lg:grid-cols-[45%_55%] min-h-[420px]">
+        <div className="grid lg:grid-cols-[45%_55%] min-h-[420px] items-stretch">
 
           {/* Left Content */}
           <div className="flex items-center px-8 lg:px-14 py-10 lg:py-0">
@@ -15,10 +15,10 @@ function BlogHero() {
               <h1
                 className="
                   font-['Kreon']
-                  text-[36px]
-                  sm:text-[44px]
-                  md:text-[52px]
-                  lg:text-[56px]
+                  text-[32px]
+                  sm:text-[38px]
+                  md:text-[44px]
+                  lg:text-[48px]
                   font-bold
                   leading-[1.1]
                   text-[#111111]
@@ -34,9 +34,9 @@ function BlogHero() {
                 className="
                   font-['Poppins']
                   text-[#333333]
-                  text-[14px]
-                  sm:text-[15px]
-                  leading-[24px]
+                  text-[13.5px]
+                  sm:text-[14.5px]
+                  leading-[22px]
                   max-w-[420px]
                 "
               >
@@ -50,15 +50,18 @@ function BlogHero() {
           </div>
 
           {/* Right Image */}
-          <div className="relative overflow-hidden">
+          <div className="relative overflow-hidden min-h-[300px] lg:min-h-0 h-full">
 
             <img
               src={blogHero}
               alt="Wellness Blog"
               className="
+                absolute
+                inset-0
                 w-full
                 h-full
                 object-cover
+                block
               "
             />
 
