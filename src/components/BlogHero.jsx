@@ -57,26 +57,12 @@ function BlogHero() {
               alt="Wellness Blog"
               className="
                 absolute
-                inset-0
-                w-full
+                top-0
+                -left-[24px]
+                w-[calc(100%+24px)]
                 h-full
                 object-cover
                 block
-              "
-            />
-
-            {/* Smooth cream gradient overlay to cover the dark shadow on the left edge of the image */}
-            <div
-              className="
-                absolute
-                left-0
-                top-0
-                h-full
-                w-24
-                bg-gradient-to-r
-                from-[#f5f2eb]
-                to-transparent
-                pointer-events-none
               "
             />
 
