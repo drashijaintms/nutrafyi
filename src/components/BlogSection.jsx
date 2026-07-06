@@ -290,7 +290,7 @@ function BlogSection({ category }) {
 
                         <h3 
                           className="text-[#111111] text-[13.5px] font-extrabold mb-2 uppercase line-clamp-2 leading-snug"
-                          style={{ fontFamily: "'Noto Sans', sans-serif" }}
+                          style={{ fontFamily: "'Poppins', sans-serif" }}
                         >
                           {blog.title}
                         </h3>
@@ -302,7 +302,10 @@ function BlogSection({ category }) {
                           {blog.excerpt}
                         </p>
 
-                        <div className="mt-auto pt-3 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[10px] font-bold text-[#111111] uppercase tracking-wider">
+                        <div 
+                          className="mt-auto pt-3 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[10px] font-bold text-[#111111] uppercase tracking-wider"
+                          style={{ fontFamily: "'Poppins', sans-serif" }}
+                        >
                           <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
                           <span>
                             {new Date(blog.createdAt || Date.now()).toLocaleDateString("en-US", {

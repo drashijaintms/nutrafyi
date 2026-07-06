@@ -62,7 +62,7 @@ function BlogCard({
             uppercase
             text-[#111111]
           "
-          style={{ fontFamily: "'Noto Sans', sans-serif" }}
+          style={{ fontFamily: "'Poppins', sans-serif" }}
         >
           {title}
         </h4>
@@ -87,7 +87,10 @@ function BlogCard({
         )}
 
         {/* Date Aligned at bottom */}
-        <div className="mt-auto pt-4 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[11px] font-bold text-[#111111] uppercase tracking-wider">
+        <div 
+          className="mt-auto pt-4 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[11px] font-bold text-[#111111] uppercase tracking-wider"
+          style={{ fontFamily: "'Poppins', sans-serif" }}
+        >
           <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
           <span>{date}</span>
         </div>
