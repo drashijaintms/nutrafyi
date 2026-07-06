@@ -342,7 +342,7 @@ const popularPosts = [
 
 {/* Blog Categories */}
 <div className="bg-white border border-slate-100 rounded-[18px] p-6 shadow-sm">
-  <h3 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 uppercase tracking-wider mb-4">
+  <h3 className="text-[#147a3f] font-bold text-[20px] mb-5">
     Blog Categories
   </h3>
 
@@ -353,16 +353,14 @@ const popularPosts = [
         <li key={index} className="flex items-center justify-between text-sm">
           <Link
             to={`/blog?category=${category.slug}`}
-            className={`font-semibold transition hover:text-[#147a3f] ${
-              isActive ? "text-[#147a3f]" : "text-slate-700"
+            className={`font-medium transition hover:text-[#147a3f] ${
+              isActive ? "text-[#147a3f] font-semibold" : "text-slate-700"
             }`}
           >
             {category.name}
           </Link>
-          <span className={`flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-            isActive
-              ? "bg-[#147a3f] text-white border-[#147a3f]"
-              : "bg-[#f0f7f2] text-[#147a3f] border-[#d4e6da]"
+          <span className={`text-sm font-medium ${
+            isActive ? "text-[#147a3f] font-bold" : "text-slate-500"
           }`}>
             {category.count}
           </span>

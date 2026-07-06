@@ -704,8 +704,8 @@ function BlogDetail() {
             </div>
 
             {/* Widget 2: Categories — dynamic from real blog data */}
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xs space-y-4">
-              <h3 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 uppercase tracking-wider">
+            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xs">
+              <h3 className="text-[#147a3f] font-bold text-[20px] mb-5">
                 Categories
               </h3>
               <ul className="space-y-3.5">
@@ -713,17 +713,17 @@ function BlogDetail() {
                   <li key={idx} className="flex items-center justify-between text-sm">
                     <Link
                       to={`/blog?category=${slugifyCategory(cat.name)}`}
-                      className="font-semibold text-slate-650 hover:text-[#147a3f] transition"
+                      className="font-medium text-slate-700 hover:text-[#147a3f] transition"
                     >
                       {cat.name}
                     </Link>
-                    <span className="flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f0f7f2] text-[#147a3f] border border-[#d4e6da]">
+                    <span className="text-sm font-medium text-slate-500">
                       {cat.count}
                     </span>
                   </li>
                 ))}
               </ul>
-              <div className="pt-2">
+              <div className="pt-4 border-t border-slate-100 mt-4">
                 <Link
                   to="/blog"
                   className="inline-flex items-center gap-1 text-xs font-bold text-[#147a3f] hover:text-[#106933] uppercase tracking-wider"
@@ -732,6 +732,7 @@ function BlogDetail() {
                 </Link>
               </div>
             </div>
+
 
             {/* Widget 3: Popular Posts */}
             <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xs space-y-4">
