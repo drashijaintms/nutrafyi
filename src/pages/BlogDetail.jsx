@@ -707,7 +707,7 @@ function BlogDetail() {
             {/* Widget 2: Categories — dynamic from real blog data */}
             <CategoriesWidget
               categories={sidebarCategories}
-              title="Categories"
+              title="Blog Categories"
             />
 
 
