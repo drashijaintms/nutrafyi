@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import headingLeaf from "../assets/heading-leaf.png";
 import iconCustomers from "../assets/about/icon-customers.png";
 import iconProducts from "../assets/about/icon-products.png";
 import iconCategories from "../assets/about/icon-categories.png";
 import iconSatisfaction from "../assets/about/icon-satisfaction.png";
 
-function AnimatedCounter({ target, suffix }) {
+function AnimatedCounter({ target, suffix, start }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
+    if (!start) return; // Wait to start the count-up until section is visible in viewport
+
     let startTime = null;
     const duration = 1800; // Smooth 1.8 second count-up animation
 
@@ -30,7 +32,7 @@ function AnimatedCounter({ target, suffix }) {
     };
 
     requestAnimationFrame(animate);
-  }, [target]);
+  }, [target, start]);
 
   return (
     <span>
@@ -41,6 +43,31 @@ function AnimatedCounter({ target, suffix }) {
 }
 
 function ImpactNumbers() {
+  const sectionRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Disconnect observer once triggered
+        }
+      },
+      {
+        threshold: 0.1, // Trigger when 10% of the section is visible in viewport
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   const stats = [
     {
       icon: iconCustomers,
@@ -69,7 +96,7 @@ function ImpactNumbers() {
   ];
 
   return (
-    <section className="py-16 md:py-20 bg-white">
+    <section ref={sectionRef} className="py-16 md:py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4">
 
         {/* Heading */}
@@ -141,7 +168,7 @@ function ImpactNumbers() {
                     font-['Poppins']
                   "
                 >
-                  <AnimatedCounter target={item.target} suffix={item.suffix} />
+                  <AnimatedCounter target={item.target} suffix={item.suffix} start={isVisible} />
                 </h3>
 
                 <p
