@@ -6,7 +6,7 @@ function ServingLocations() {
   return (
     <section className="bg-[#0e4a24] py-3 md:py-4 overflow-hidden">
 
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-[850px] mx-auto px-4">
 
         <div className="grid grid-cols-3 items-center gap-4">
 
@@ -35,8 +35,8 @@ function ServingLocations() {
                   text-white
                   font-extrabold
                   uppercase
-                  text-[13px]
-                  md:text-[16px]
+                  text-[15px]
+                  md:text-[19px]
                   tracking-wider
                 "
                 style={{ fontFamily: "'Noto Sans', sans-serif" }}
@@ -55,9 +55,9 @@ function ServingLocations() {
             <h2
               className="
                 text-[#92d050]
-                text-[22px]
-                sm:text-[26px]
-                md:text-[32px]
+                text-[24px]
+                sm:text-[29px]
+                md:text-[35px]
                 font-bold
                 tracking-wide
                 leading-tight
