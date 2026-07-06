@@ -27,7 +27,7 @@ function OurStory() {
           {/* Content */}
           <div>
 
-            <h2 className="font-['Taviraj'] text-[#137b3a] text-[32px] md:text-[38px] lg:text-[42px] font-bold mb-6">
+            <h2 className="!font-['Taviraj'] text-[#137b3a] text-[32px] md:text-[38px] lg:text-[42px] font-bold mb-6">
               Our Story
             </h2>
 
