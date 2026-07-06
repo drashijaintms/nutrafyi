@@ -50,53 +50,37 @@ function BlogCard({
       <div className="p-5 flex flex-col flex-1">
 
         {/* Category */}
-        <div>
+        <div className="mb-4">
           <span 
-            className="text-[#137b3a] font-bold text-[13.5px] uppercase tracking-wider border-b-[2px] border-[#137b3a] pb-0.5 inline-block mb-4"
+            className="text-[#137b3a] font-bold text-[13.5px] uppercase tracking-wider border-b-[2px] border-[#137b3a] pb-0.5 inline-block"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
             {category}
           </span>
         </div>
 
-        {/* Title */}
-        <h4
-          className="
-            text-[14px]
-            sm:text-[14.5px]
-            font-extrabold
-            leading-[1.4]
-            mb-3
-            uppercase
-            text-[#111111]
-          "
-          style={{ fontFamily: "'Poppins', sans-serif" }}
-        >
-          {title}
-        </h4>
-
-        {/* Excerpt Paragraph */}
-        {excerpt && (
-          <p
-            className="
-              text-[#555555]
-              text-[11.5px]
-              leading-[18px]
-              font-medium
-              uppercase
-              tracking-wide
-              mb-5
-              line-clamp-3
-            "
+        {/* Title + Excerpt in a fixed-start block */}
+        <div className="flex-1">
+          <h4
+            className="text-[14px] sm:text-[14.5px] font-extrabold leading-[1.4] mb-3 uppercase text-[#111111]"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
-            {excerpt}
-          </p>
-        )}
+            {title}
+          </h4>
 
-        {/* Date Aligned at bottom */}
+          {excerpt && (
+            <p
+              className="text-[#555555] text-[11.5px] leading-[18px] font-medium uppercase tracking-wide line-clamp-3"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              {excerpt}
+            </p>
+          )}
+        </div>
+
+        {/* Date pinned at bottom — no border line */}
         <div 
-          className="mt-auto pt-4 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[11px] font-bold text-[#111111] uppercase tracking-wider"
+          className="mt-4 flex items-center gap-2 text-[11px] font-bold text-[#111111] uppercase tracking-wider"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
           <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />

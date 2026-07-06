@@ -123,7 +123,7 @@ const popularPosts = [
           <div className="col-span-8">
 
             {/* Heading Row */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-4">
 
               <div className="flex items-center gap-3">
 
@@ -163,6 +163,34 @@ const popularPosts = [
               </select>
 
             </div>
+
+            {/* Active Category Badge — only shown when filtering */}
+            {activeCategorySlug && (
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-[#444] text-[14px]" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  Showing:
+                </span>
+                <span
+                  className="inline-flex items-center gap-2 bg-[#147a3f] text-white text-[13px] font-semibold px-4 py-1.5 rounded-full"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
+                  {dynamicCategories.find(c => c.slug === activeCategorySlug)?.name || activeCategorySlug}
+                  <Link
+                    to="/blog"
+                    className="ml-1 w-4 h-4 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center text-white leading-none transition"
+                    title="Clear filter"
+                  >
+                    ×
+                  </Link>
+                </span>
+                <span className="text-[#888] text-[13px]" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  ({filteredBlogs.length} {filteredBlogs.length === 1 ? "article" : "articles"})
+                </span>
+              </div>
+            )}
+
+            {/* Bottom margin when no filter badge */}
+            {!activeCategorySlug && <div className="mb-4" />}
 
             {/* Blog Grid */}
             <div className="">
