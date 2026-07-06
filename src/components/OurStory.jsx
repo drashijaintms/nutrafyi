@@ -7,25 +7,25 @@ function OurStory() {
     <section className="py-16 md:py-20 bg-white">
       <div className="max-w-5xl mx-auto px-4">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-stretch">
 
           {/* Image */}
-          <div>
+          <div className="min-h-[300px] lg:min-h-0">
             <img
               src={storyImage}
               alt="About NutraFYI"
               className="
                 w-full
-                h-auto
-                rounded-3xl
+                h-full
                 object-cover
+                rounded-3xl
                 shadow-sm
               "
             />
           </div>
 
           {/* Content */}
-          <div>
+          <div className="flex flex-col justify-center">
 
             <h2 className="!font-['Taviraj'] text-[#137b3a] text-[32px] md:text-[38px] lg:text-[42px] font-bold mb-6">
               Our Story
