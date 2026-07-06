@@ -105,7 +105,10 @@ const popularPosts = [
 
               <div className="flex items-center gap-3">
 
-                <h2 className="font-['Kreon'] text-[42px] font-bold">
+                <h2 
+                  className="text-[42px] font-bold"
+                  style={{ fontFamily: "'Kreon', serif" }}
+                >
                   Latest Articles
                 </h2>
 
