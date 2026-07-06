@@ -10,46 +10,7 @@ function BlogSection({ category }) {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [startIndex, setStartIndex] = useState(0);
-
-  useEffect(() => {
-    const fetchLatestBlogs = async () => {
-      try {
-        const res = await axios.get("/api/blogs");
-        if (res.data) {
-          // Filter only published blogs
-          let filtered = res.data.filter(blog => blog.status === "Published");
-          
-          // Filter by category if specified (case-insensitive), fallback to latest blogs if empty
-          if (category) {
-            const categoryFiltered = filtered.filter(blog => 
-              blog.categories && 
-              blog.categories.some(cat => cat.toLowerCase() === category.toLowerCase())
-            );
-            
-            if (categoryFiltered.length > 0) {
-              filtered = categoryFiltered;
-            }
-          }
-          
-          setBlogs(filtered);
-        }
-      } catch (err) {
-        console.error("Failed to load latest blogs for section:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLatestBlogs();
-  }, [category]);
-
-  if (loading) {
-    return (
-      <div className="py-20 bg-[#f4f2e8] flex items-center justify-center min-h-[300px]">
-        <div className="w-8 h-8 border-4 border-[#137b3a] border-t-transparent rounded-full animate-spin font-['Poppins']"></div>
-      </div>
-    );
-  }
+  const [isPaused, setIsPaused] = useState(false);
 
   // Predefined exact blog data matching the mockups + additional items for carousel sliding
   const defaultBlogs = [
@@ -125,7 +86,38 @@ function BlogSection({ category }) {
   };
 
   const allBlogs = getCombinedBlogs();
-  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const fetchLatestBlogs = async () => {
+      try {
+        const res = await axios.get("/api/blogs");
+        if (res.data) {
+          // Filter only published blogs
+          let filtered = res.data.filter(blog => blog.status === "Published");
+          
+          // Filter by category if specified (case-insensitive), fallback to latest blogs if empty
+          if (category) {
+            const categoryFiltered = filtered.filter(blog => 
+              blog.categories && 
+              blog.categories.some(cat => cat.toLowerCase() === category.toLowerCase())
+            );
+            
+            if (categoryFiltered.length > 0) {
+              filtered = categoryFiltered;
+            }
+          }
+          
+          setBlogs(filtered);
+        }
+      } catch (err) {
+        console.error("Failed to load latest blogs for section:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestBlogs();
+  }, [category]);
 
   // Auto-play effect (shifts carousel index one-by-one every 4 seconds, pauses on mouse hover)
   useEffect(() => {
@@ -161,6 +153,14 @@ function BlogSection({ category }) {
   };
 
   const displayBlogs = getDisplayBlogs();
+
+  if (loading) {
+    return (
+      <div className="py-20 bg-[#f4f2e8] flex items-center justify-center min-h-[300px]">
+        <div className="w-8 h-8 border-4 border-[#137b3a] border-t-transparent rounded-full animate-spin font-['Poppins']"></div>
+      </div>
+    );
+  }
 
   return (
     <section className="py-20 bg-[#f4f2e8]">
