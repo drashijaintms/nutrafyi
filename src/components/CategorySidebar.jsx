@@ -53,6 +53,15 @@ function CategorySidebar() {
     ? parseInt(searchParams.get("maxPrice"), 10)
     : 2000;
 
+  const [localMinPrice, setLocalMinPrice] = useState(minPrice);
+  const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice);
+
+  // Sync local inputs when URL query parameters change (e.g. from category navigation)
+  useEffect(() => {
+    setLocalMinPrice(minPrice);
+    setLocalMaxPrice(maxPrice);
+  }, [minPrice, maxPrice]);
+
   // Narrow products context by current category if we are in category detail view
   const contextProducts = slug
     ? allProducts.filter((p) => p.category === slug)
@@ -128,30 +137,37 @@ function CategorySidebar() {
   };
 
   const handlePriceChange = (e) => {
-    const val = e.target.value;
+    const val = parseInt(e.target.value, 10);
+    setLocalMaxPrice(val);
     const newParams = new URLSearchParams(searchParams);
-    newParams.set("maxPrice", val);
+    newParams.set("maxPrice", val.toString());
     setSearchParams(newParams);
   };
 
   const handleMinPriceChange = (e) => {
-    const val = e.target.value;
+    const valStr = e.target.value;
+    setLocalMinPrice(valStr); // allow partial/empty typing state in text inputs
+    
+    const parsed = parseInt(valStr, 10);
     const newParams = new URLSearchParams(searchParams);
-    if (val === "" || isNaN(val)) {
+    if (valStr === "" || isNaN(parsed)) {
       newParams.delete("minPrice");
     } else {
-      newParams.set("minPrice", Math.max(0, parseInt(val, 10)).toString());
+      newParams.set("minPrice", Math.max(0, parsed).toString());
     }
     setSearchParams(newParams);
   };
 
   const handleMaxPriceChange = (e) => {
-    const val = e.target.value;
+    const valStr = e.target.value;
+    setLocalMaxPrice(valStr); // allow partial/empty typing state in text inputs
+    
+    const parsed = parseInt(valStr, 10);
     const newParams = new URLSearchParams(searchParams);
-    if (val === "" || isNaN(val)) {
+    if (valStr === "" || isNaN(parsed)) {
       newParams.delete("maxPrice");
     } else {
-      newParams.set("maxPrice", Math.max(0, parseInt(val, 10)).toString());
+      newParams.set("maxPrice", Math.max(0, parsed).toString());
     }
     setSearchParams(newParams);
   };
@@ -219,7 +235,7 @@ function CategorySidebar() {
           type="range"
           min="0"
           max="2000"
-          value={maxPrice}
+          value={localMaxPrice}
           onChange={handlePriceChange}
           className="w-full accent-[#147a3f]"
         />
@@ -231,7 +247,7 @@ function CategorySidebar() {
               type="number"
               min="0"
               max="2000"
-              value={minPrice}
+              value={localMinPrice}
               onChange={handleMinPriceChange}
               className="w-full text-center focus:outline-none bg-transparent text-sm font-medium text-slate-800"
               style={{ fontFamily: "'Poppins', sans-serif" }}
@@ -248,7 +264,7 @@ function CategorySidebar() {
               type="number"
               min="0"
               max="2000"
-              value={maxPrice}
+              value={localMaxPrice}
               onChange={handleMaxPriceChange}
               className="w-full text-center focus:outline-none bg-transparent text-sm font-medium text-slate-800"
               style={{ fontFamily: "'Poppins', sans-serif" }}
