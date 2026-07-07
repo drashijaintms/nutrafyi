@@ -12,7 +12,7 @@ function Contact() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
-  const [openFaqs, setOpenFaqs] = useState([0]); // First FAQ open by default
+  const [openFaqs, setOpenFaqs] = useState([]); // All FAQs closed by default
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -438,9 +438,10 @@ function Contact() {
         <div className="max-w-7xl mx-auto px-4 w-full">
           
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div className="text-left">
-              <div className="flex items-center gap-2 mb-3 select-none">
+          <div className="relative mb-12 flex flex-col items-center">
+            {/* Centered Heading & Subtitle */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-3 select-none">
                 <img src={headingLeaf} alt="leaf left" className="w-6 h-6 object-contain scale-x-[-1] opacity-90" />
                 <h2 
                   className="text-[#0a3d24] font-bold text-[28px] lg:text-[34px] tracking-wide"
@@ -458,8 +459,8 @@ function Contact() {
               </p>
             </div>
 
-            {/* View All Link */}
-            <div className="shrink-0">
+            {/* View All Link (Positioned on the right for md screens, centered on mobile) */}
+            <div className="mt-4 md:mt-0 md:absolute md:right-0 md:bottom-2">
               <Link 
                 to="/faq" 
                 className="inline-flex items-center gap-1 text-xs font-bold text-[#137b3a] hover:text-[#0f6630] uppercase tracking-wider transition-colors"
