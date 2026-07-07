@@ -675,6 +675,44 @@ export default function ProductDetail() {
     fetchData();
   }, [slug]);
 
+  useEffect(() => {
+    if (product) {
+      // Update document title
+      document.title = product.seo?.metaTitle || `${product.title} | NutraFYI`;
+
+      // Update description meta tag
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', product.seo?.metaDescription || product.shortDescription || "");
+
+      // Update keywords meta tag
+      let metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (!metaKeywords) {
+        metaKeywords = document.createElement('meta');
+        metaKeywords.setAttribute('name', 'keywords');
+        document.head.appendChild(metaKeywords);
+      }
+      if (product.seo?.metaKeywords && product.seo.metaKeywords.length > 0) {
+        metaKeywords.setAttribute('content', product.seo.metaKeywords.join(', '));
+      } else {
+        metaKeywords.setAttribute('content', "");
+      }
+
+      // Update canonical link tag
+      let canonicalLink = document.querySelector('link[rel="canonical"]');
+      if (!canonicalLink) {
+        canonicalLink = document.createElement('link');
+        canonicalLink.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonicalLink);
+      }
+      canonicalLink.setAttribute('href', product.seo?.canonicalUrl || window.location.href);
+    }
+  }, [product]);
+
   if (loading) {
     return (
       <div className="pd-loading">
