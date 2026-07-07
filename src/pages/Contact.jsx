@@ -15,7 +15,7 @@ function Contact() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
-  const [openFaqs, setOpenFaqs] = useState([]); // All FAQs closed by default
+  const [activeFaq, setActiveFaq] = useState(null); // Only one FAQ open at a time
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,11 +32,7 @@ function Contact() {
   };
 
   const toggleFaq = (index) => {
-    if (openFaqs.includes(index)) {
-      setOpenFaqs(openFaqs.filter((i) => i !== index));
-    } else {
-      setOpenFaqs([...openFaqs, index]);
-    }
+    setActiveFaq((prev) => (prev === index ? null : index));
   };
 
   const faqData = [
@@ -481,7 +477,7 @@ function Contact() {
             <div className="space-y-4">
               {faqData.slice(0, 3).map((item, idx) => {
                 const globalIdx = idx;
-                const isOpen = openFaqs.includes(globalIdx);
+                const isOpen = activeFaq === globalIdx;
                 return (
                   <div 
                     key={globalIdx}
@@ -497,23 +493,39 @@ function Contact() {
                       >
                         {item.question}
                       </span>
-                      {isOpen ? (
-                        <ChevronDown className="w-4 h-4 text-[#0a3d24] shrink-0" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-                      )}
+                      <ChevronDown
+                        className="w-4 h-4 shrink-0 transition-transform duration-300 ease-in-out"
+                        style={{
+                          color: isOpen ? "#0a3d24" : "#94a3b8",
+                          transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
+                        }}
+                      />
                     </button>
                     
-                    {isOpen && (
-                      <div className="px-6 pb-5 pt-1 border-t border-slate-100/80">
-                        <p 
-                          className="text-[#555555] text-[13px] leading-[20px] font-normal"
-                          style={{ fontFamily: "'Poppins', sans-serif" }}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateRows: isOpen ? "1fr" : "0fr",
+                        transition: "grid-template-rows 0.32s ease",
+                      }}
+                    >
+                      <div style={{ overflow: "hidden" }}>
+                        <div
+                          className="px-6 pb-5 pt-1 border-t border-slate-100/80"
+                          style={{
+                            opacity: isOpen ? 1 : 0,
+                            transition: "opacity 0.25s ease",
+                          }}
                         >
-                          {item.answer}
-                        </p>
+                          <p 
+                            className="text-[#555555] text-[13px] leading-[20px] font-normal"
+                            style={{ fontFamily: "'Poppins', sans-serif" }}
+                          >
+                            {item.answer}
+                          </p>
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -523,7 +535,7 @@ function Contact() {
             <div className="space-y-4">
               {faqData.slice(3, 6).map((item, idx) => {
                 const globalIdx = idx + 3;
-                const isOpen = openFaqs.includes(globalIdx);
+                const isOpen = activeFaq === globalIdx;
                 return (
                   <div 
                     key={globalIdx}
@@ -539,23 +551,39 @@ function Contact() {
                       >
                         {item.question}
                       </span>
-                      {isOpen ? (
-                        <ChevronDown className="w-4 h-4 text-[#0a3d24] shrink-0" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-                      )}
+                      <ChevronDown
+                        className="w-4 h-4 shrink-0 transition-transform duration-300 ease-in-out"
+                        style={{
+                          color: isOpen ? "#0a3d24" : "#94a3b8",
+                          transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)",
+                        }}
+                      />
                     </button>
                     
-                    {isOpen && (
-                      <div className="px-6 pb-5 pt-1 border-t border-slate-100/80">
-                        <p 
-                          className="text-[#555555] text-[13px] leading-[20px] font-normal"
-                          style={{ fontFamily: "'Poppins', sans-serif" }}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateRows: isOpen ? "1fr" : "0fr",
+                        transition: "grid-template-rows 0.32s ease",
+                      }}
+                    >
+                      <div style={{ overflow: "hidden" }}>
+                        <div
+                          className="px-6 pb-5 pt-1 border-t border-slate-100/80"
+                          style={{
+                            opacity: isOpen ? 1 : 0,
+                            transition: "opacity 0.25s ease",
+                          }}
                         >
-                          {item.answer}
-                        </p>
+                          <p 
+                            className="text-[#555555] text-[13px] leading-[20px] font-normal"
+                            style={{ fontFamily: "'Poppins', sans-serif" }}
+                          >
+                            {item.answer}
+                          </p>
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
