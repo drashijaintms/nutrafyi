@@ -18,7 +18,7 @@ function BlogSliderCard({ blog, visibleCards }) {
         width: `calc((100% - ${(visibleCards - 1) * 24}px) / ${visibleCards})`,
         flexShrink: 0,
       }}
-      className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col h-[340px] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
+      className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col h-[290px] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
     >
       {!imgError && blog.featuredImage ? (
         <img
@@ -45,7 +45,7 @@ function BlogSliderCard({ blog, visibleCards }) {
         
         {blog.excerpt && (
           <p 
-            className="text-[#555555] text-[12px] leading-[18px] font-normal line-clamp-3 mb-4"
+            className="text-[#555555] text-[12px] leading-[18px] font-normal line-clamp-3 mb-0"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
             {blog.excerpt}
