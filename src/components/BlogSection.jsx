@@ -1,11 +1,60 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { Calendar } from "lucide-react";
 
 import nutritionTipsImg from "../assets/blog/nutrition-tips.png";
 import healthyLifestyleImg from "../assets/blog/healthy-lifestyle-guides.png";
 import fitnessRecoveryImg from "../assets/blog/fitness-and-recovery.png";
+
+// Reusable individual slider card to manage its own image error state
+// and match the clean green title-case layout (with no category or date)
+function BlogSliderCard({ blog, visibleCards }) {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <Link
+      to={`/blog/${blog.slug}`}
+      style={{
+        width: `calc((100% - ${(visibleCards - 1) * 24}px) / ${visibleCards})`,
+        flexShrink: 0,
+      }}
+      className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col h-[340px] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
+    >
+      {!imgError && blog.featuredImage ? (
+        <img
+          src={blog.featuredImage}
+          alt={blog.title}
+          onError={() => setImgError(true)}
+          className="w-full h-[165px] object-cover"
+        />
+      ) : (
+        <div className="w-full h-[165px] bg-[#f0f0f0] flex items-center justify-center">
+          <svg className="w-8 h-8 text-[#cccccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+      )}
+      
+      <div className="p-5 flex flex-col flex-1">
+        <h3 
+          className="text-[#137b3a] text-[16px] lg:text-[17px] font-bold mb-2.5 line-clamp-2 leading-snug"
+          style={{ fontFamily: "'Poppins', sans-serif" }}
+        >
+          {blog.title}
+        </h3>
+        
+        {blog.excerpt && (
+          <p 
+            className="text-[#555555] text-[12px] leading-[18px] font-normal line-clamp-3 mb-4"
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+          >
+            {blog.excerpt}
+          </p>
+        )}
+      </div>
+    </Link>
+  );
+}
 
 function BlogSection({ category }) {
   const [blogs, setBlogs] = useState([]);
@@ -76,6 +125,12 @@ function BlogSection({ category }) {
           const raw = blog.excerpt || blog.content || "";
           if (!raw) return "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New....";
           const clean = raw.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+          
+          // Check if excerpt is empty, matches title, or is too short (test blogs like newblog2)
+          const isDummy = !clean || clean.toLowerCase() === (blog.title || "").toLowerCase() || clean.length < 15;
+          if (isDummy) {
+            return "Upgrade To Transform Your Uploaded Files And Images With More Precision, Consistency, And Detail With The New....";
+          }
           return clean.length > 120 ? clean.substring(0, 120) + "..." : clean;
         })()
       };
@@ -263,69 +318,11 @@ function BlogSection({ category }) {
                   onMouseLeave={() => setIsPaused(false)}
                 >
                    {list.map((blog, idx) => (
-                    <Link
+                    <BlogSliderCard
                       key={`${blog._id}-${idx}`}
-                      to={`/blog/${blog.slug}`}
-                      style={{
-                        width: `calc((100% - ${(visibleCards - 1) * 24}px) / ${visibleCards})`,
-                        flexShrink: 0,
-                      }}
-                      className="bg-white rounded-[18px] overflow-hidden border border-[#dcdcdc]/60 shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col h-[380px] lg:h-[420px] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
-                    >
-                      {blog.featuredImage ? (
-                        <img
-                          src={blog.featuredImage}
-                          alt={blog.title}
-                          onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div class="w-full h-[135px] bg-[#f0f0f0] flex items-center justify-center"><svg class=\'w-8 h-8\' fill=\'none\' stroke=\'#cccccc\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg></div>'; }}
-                          className="w-full h-[135px] object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-[135px] bg-[#f0f0f0] flex items-center justify-center">
-                          <svg className="w-8 h-8 text-[#cccccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                      
-                      <div className="p-4 flex flex-col flex-1">
-                        <div>
-                          <span 
-                            className="text-[#137b3a] font-bold text-[12px] uppercase tracking-wider border-b-[2px] border-[#137b3a] pb-0.5 inline-block mb-3"
-                            style={{ fontFamily: "'Poppins', sans-serif" }}
-                          >
-                            {blog.categories && blog.categories.length > 0 ? blog.categories[0] : "General"}
-                          </span>
-                        </div>
-
-                        <h3 
-                          className="text-[#111111] text-[13.5px] font-extrabold mb-2 uppercase line-clamp-2 leading-snug"
-                          style={{ fontFamily: "'Poppins', sans-serif" }}
-                        >
-                          {blog.title}
-                        </h3>
-                        
-                        <p 
-                          className="text-[#555555] text-[11px] leading-[16px] line-clamp-3 uppercase tracking-wide mb-4"
-                          style={{ fontFamily: "'Poppins', sans-serif" }}
-                        >
-                          {blog.excerpt}
-                        </p>
-
-                        <div 
-                          className="mt-auto pt-3 border-t border-[#e5e5db]/60 flex items-center gap-2 text-[10px] font-bold text-[#111111] uppercase tracking-wider"
-                          style={{ fontFamily: "'Poppins', sans-serif" }}
-                        >
-                          <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
-                          <span>
-                            {new Date(blog.createdAt || Date.now()).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "2-digit",
-                              year: "numeric"
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
+                      blog={blog}
+                      visibleCards={visibleCards}
+                    />
                   ))}
                 </div>
               </div>
