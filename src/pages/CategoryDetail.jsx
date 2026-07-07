@@ -64,6 +64,10 @@ function CategoryDetail() {
     ? searchParams.get("dietary").split(",")
     : [];
 
+  const minPrice = searchParams.get("minPrice")
+    ? parseInt(searchParams.get("minPrice"), 10)
+    : 0;
+
   const maxPrice = searchParams.get("maxPrice")
     ? parseInt(searchParams.get("maxPrice"), 10)
     : 2000;
@@ -111,9 +115,9 @@ function CategoryDetail() {
       if (!selectedDietary.includes(diet)) return false;
     }
 
-    // 4. Max price filter
+    // 4. Price range filter
     const priceNum = toNum(product.regularPrice || product.price);
-    if (priceNum > maxPrice) return false;
+    if (priceNum < minPrice || priceNum > maxPrice) return false;
 
     return true;
   });

@@ -45,6 +45,10 @@ function CategorySidebar() {
     ? searchParams.get("dietary").split(",")
     : [];
 
+  const minPrice = searchParams.get("minPrice")
+    ? parseInt(searchParams.get("minPrice"), 10)
+    : 0;
+
   const maxPrice = searchParams.get("maxPrice")
     ? parseInt(searchParams.get("maxPrice"), 10)
     : 2000;
@@ -130,6 +134,28 @@ function CategorySidebar() {
     setSearchParams(newParams);
   };
 
+  const handleMinPriceChange = (e) => {
+    const val = e.target.value;
+    const newParams = new URLSearchParams(searchParams);
+    if (val === "" || isNaN(val)) {
+      newParams.delete("minPrice");
+    } else {
+      newParams.set("minPrice", Math.max(0, parseInt(val, 10)).toString());
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleMaxPriceChange = (e) => {
+    const val = e.target.value;
+    const newParams = new URLSearchParams(searchParams);
+    if (val === "" || isNaN(val)) {
+      newParams.delete("maxPrice");
+    } else {
+      newParams.set("maxPrice", Math.max(0, parseInt(val, 10)).toString());
+    }
+    setSearchParams(newParams);
+  };
+
   const forms = [
     { name: "Capsules", count: getFormCount("Capsules") },
     { name: "Tablets", count: getFormCount("Tablets") },
@@ -198,17 +224,35 @@ function CategorySidebar() {
           className="w-full accent-[#147a3f]"
         />
 
-        <div className="flex items-center justify-between mt-5">
-          <div className="bg-white border border-[#d9d9d9] rounded-md px-4 py-3 min-w-[82px] text-center">
-            $ 0
+        <div className="flex items-center justify-between mt-5 gap-2">
+          <div className="bg-white border border-[#d9d9d9] rounded-md flex items-center px-3 py-2 w-[100px]">
+            <span className="text-gray-400 mr-1.5 font-medium">$</span>
+            <input
+              type="number"
+              min="0"
+              max="2000"
+              value={minPrice}
+              onChange={handleMinPriceChange}
+              className="w-full text-center focus:outline-none bg-transparent text-sm font-medium text-slate-800"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            />
           </div>
 
-          <span className="font-medium">
+          <span className="font-medium text-slate-400 text-sm">
             to
           </span>
 
-          <div className="bg-white border border-[#d9d9d9] rounded-md px-4 py-3 min-w-[82px] text-center">
-            $ {maxPrice}
+          <div className="bg-white border border-[#d9d9d9] rounded-md flex items-center px-3 py-2 w-[100px]">
+            <span className="text-gray-400 mr-1.5 font-medium">$</span>
+            <input
+              type="number"
+              min="0"
+              max="2000"
+              value={maxPrice}
+              onChange={handleMaxPriceChange}
+              className="w-full text-center focus:outline-none bg-transparent text-sm font-medium text-slate-800"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            />
           </div>
         </div>
 
