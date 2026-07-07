@@ -601,14 +601,22 @@ export default function ProductForm() {
       variations,
       specifications: finalSpecs,
       seo: {
-        metaTitle,
-        metaDescription,
-        metaKeywords: metaKeywords.split(",").map((k) => k.trim()).filter(Boolean),
-        canonicalUrl,
+        metaTitle: metaTitle.trim() || `${title} | Premium Health & Wellness Supplement | NutraFYI`,
+        metaDescription: metaDescription.trim() || (() => {
+          const plainDesc = (shortDescription || description || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+          return plainDesc ? `${plainDesc.substring(0, 150)}...` : `Buy ${title} online at NutraFYI. Premium dietary supplement formulated to support your health and wellness journey.`;
+        })(),
+        metaKeywords: metaKeywords.trim()
+          ? metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
+          : (() => {
+              const titleWords = title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+              return [...new Set([category, subcategory, brand, title, ...titleWords])].filter(Boolean);
+            })(),
+        canonicalUrl: canonicalUrl.trim() || `https://nutrafyi.com/products/${slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
       },
     };
 
-saveMutation.mutate(payload);
+    saveMutation.mutate(payload);
   };
 
   if (isEdit && isLoadingProduct) return <Loader size="lg" />;
