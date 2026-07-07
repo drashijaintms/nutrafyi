@@ -678,7 +678,7 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product) {
       // Update document title
-      document.title = product.seo?.metaTitle || `${product.title} | NutraFYI`;
+      document.title = product.seo?.metaTitle || product.title;
 
       // Update description meta tag
       let metaDesc = document.querySelector('meta[name="description"]');
@@ -687,7 +687,7 @@ export default function ProductDetail() {
         metaDesc.setAttribute('name', 'description');
         document.head.appendChild(metaDesc);
       }
-      metaDesc.setAttribute('content', product.seo?.metaDescription || product.shortDescription || "");
+      metaDesc.setAttribute('content', product.seo?.metaDescription || product.title);
 
       // Update keywords meta tag
       let metaKeywords = document.querySelector('meta[name="keywords"]');
