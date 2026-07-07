@@ -4,6 +4,7 @@ import { Leaf, ShieldCheck, Send, CheckCircle2, Headset, Package, MapPin, Clock,
 import contactHeroBg from "../assets/contact-hero-bg.png";
 import contactCtaPlants from "../assets/contact-cta-plants.png";
 import headingLeaf from "../assets/heading-leaf.png";
+import newsletterLeaf from "../assets/newsletter/newsletter-leaf.png";
 import NewsletterSection from "../components/NewsletterSection";
 
 function Contact() {
@@ -569,54 +570,50 @@ function Contact() {
       <section className="bg-white py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 w-full">
           
-          <div className="bg-[#FAF9F5] border border-[#e5e5db]/60 rounded-[24px] p-8 lg:p-12 relative overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.01)]">
+          <div className="bg-[#FAF9F5] border border-[#e5e5db]/60 rounded-[20px] relative overflow-hidden flex flex-col lg:flex-row items-stretch lg:h-[220px] shadow-[0_4px_25px_rgba(0,0,0,0.01)]">
             
-            {/* Soft decorative leaf on the far right */}
-            <div className="absolute right-0 bottom-0 top-0 w-32 hidden lg:flex items-center justify-end pr-8 select-none pointer-events-none opacity-20">
-              <img src={headingLeaf} alt="leaf deco" className="w-24 h-24 object-contain rotate-45" />
+            {/* Left Side: Plant Image (flush with top, bottom, and left edge) */}
+            <div className="w-full lg:w-[35%] min-h-[180px] lg:min-h-0 relative shrink-0">
+              <img 
+                src={contactCtaPlants} 
+                alt="Herbs and supplements" 
+                className="absolute inset-0 w-full h-full object-cover rounded-t-[19px] lg:rounded-tr-none lg:rounded-l-[19px]"
+              />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-              
-              {/* Left Side: Plant Image */}
-              <div className="lg:col-span-5 flex justify-center lg:justify-start">
-                <img 
-                  src={contactCtaPlants} 
-                  alt="Herbs and supplements" 
-                  className="w-full max-w-[360px] h-[180px] object-cover rounded-[18px] border border-[#e5e5db]/40 shadow-2xs"
-                />
+            {/* Right Side: Text & Button */}
+            <div className="w-full lg:w-[65%] p-6 lg:p-8 lg:pl-10 flex flex-col justify-center items-start relative z-10">
+              <h3 
+                className="text-[#0a3d24] font-bold text-[24px] lg:text-[26px] mb-1.5"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
+                Still Need Help?
+              </h3>
+              <p 
+                className="text-slate-500 text-[13.5px] leading-[20px] mb-4.5 max-w-[480px]"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                Our team is just a message away. Reach out and we'll get back to you shortly.
+              </p>
+
+              <div>
+                <a 
+                  href="mailto:support@nutrafyi.com"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0a3d24] hover:bg-[#062616] text-white font-bold rounded-lg text-[13px] transition shadow-xs"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
+                  <Mail className="w-3.5 h-3.5 text-white" />
+                  <span>Email Us Now</span>
+                </a>
               </div>
-
-              {/* Right Side: Text & Button */}
-              <div className="lg:col-span-7 text-left flex flex-col md:flex-row md:items-center justify-between gap-6 pr-0 lg:pr-8">
-                <div>
-                  <h3 
-                    className="text-[#0a3d24] font-bold text-[26px] mb-2"
-                    style={{ fontFamily: "Georgia, serif" }}
-                  >
-                    Still Need Help?
-                  </h3>
-                  <p 
-                    className="text-slate-500 text-[14px] leading-[22px] max-w-[420px]"
-                    style={{ fontFamily: "'Poppins', sans-serif" }}
-                  >
-                    Our team is just a message away. Reach out and we'll get back to you shortly.
-                  </p>
-                </div>
-
-                <div className="shrink-0">
-                  <a 
-                    href="mailto:support@nutrafyi.com"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#0a3d24] hover:bg-[#062616] text-white font-bold rounded-lg text-[13.5px] transition shadow-xs"
-                    style={{ fontFamily: "'Poppins', sans-serif" }}
-                  >
-                    <Mail className="w-4 h-4 text-white" />
-                    <span>Email Us Now</span>
-                  </a>
-                </div>
-              </div>
-
             </div>
+
+            {/* Leaf decoration on the far right */}
+            <img 
+              src={newsletterLeaf} 
+              alt="Decorative leaf" 
+              className="absolute right-0 top-0 bottom-0 h-full w-auto object-contain object-right hidden lg:block select-none pointer-events-none z-0" 
+            />
 
           </div>
 
