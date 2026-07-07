@@ -601,11 +601,8 @@ export default function ProductForm() {
       variations,
       specifications: finalSpecs,
       seo: {
-        metaTitle: metaTitle.trim() || `${title} | Premium Health & Wellness Supplement | NutraFYI`,
-        metaDescription: metaDescription.trim() || (() => {
-          const plainDesc = (shortDescription || description || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
-          return plainDesc ? `${plainDesc.substring(0, 150)}...` : `Buy ${title} online at NutraFYI. Premium dietary supplement formulated to support your health and wellness journey.`;
-        })(),
+        metaTitle: metaTitle.trim() || title,
+        metaDescription: metaDescription.trim() || title,
         metaKeywords: metaKeywords.trim()
           ? metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
           : (() => {
