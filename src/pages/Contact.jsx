@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Leaf, ShieldCheck, Send, CheckCircle2, Headset, Package, MapPin, Clock, Mail, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Leaf, ShieldCheck, Send, CheckCircle2, Headset, Package, MapPin, Clock, Mail, Phone, ChevronDown, ChevronRight } from "lucide-react";
 import contactHeroBg from "../assets/contact-hero-bg.png";
 import headingLeaf from "../assets/heading-leaf.png";
 
@@ -11,6 +12,7 @@ function Contact() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [openFaqs, setOpenFaqs] = useState([0]); // First FAQ open by default
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,6 +27,41 @@ function Contact() {
       setFormData({ name: "", email: "", subject: "", message: "" });
     }, 4000);
   };
+
+  const toggleFaq = (index) => {
+    if (openFaqs.includes(index)) {
+      setOpenFaqs(openFaqs.filter((i) => i !== index));
+    } else {
+      setOpenFaqs([...openFaqs, index]);
+    }
+  };
+
+  const faqData = [
+    {
+      question: "How do I track my order?",
+      answer: "Once your order is shipped, you'll receive a tracking number via email. You can use it to track your package in real time."
+    },
+    {
+      question: "What is your return policy?",
+      answer: "We offer a 30-day money-back guarantee on all unopened products. Simply reach out to our customer support team to initiate a return."
+    },
+    {
+      question: "Are your products safe?",
+      answer: "Yes, all our products are manufactured in FDA-registered, GMP-certified facilities and undergo third-party testing to ensure purity and potency."
+    },
+    {
+      question: "Do you offer international shipping?",
+      answer: "Currently, we ship to select countries worldwide. Shipping rates and delivery times will be calculated at checkout based on your location."
+    },
+    {
+      question: "How can I contact customer support?",
+      answer: "You can reach our support team via email at support@nutrafyi.com, call us at (888) 123-4567, or use the message form on this page."
+    },
+    {
+      question: "Where are your products manufactured?",
+      answer: "Our premium supplements are formulated and manufactured in state-of-the-art facilities in the United States using high-quality global ingredients."
+    }
+  ];
 
   return (
     <div className="w-full">
@@ -246,7 +283,7 @@ function Contact() {
       </section>
 
       {/* SECTION 2: GET IN TOUCH */}
-      <section className="bg-white py-20 lg:py-24">
+      <section className="bg-white py-20 lg:py-24 border-b border-[#e5e5db]/40">
         <div className="max-w-7xl mx-auto px-4 w-full">
           
           {/* Header */}
@@ -393,6 +430,135 @@ function Contact() {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: FREQUENTLY ASKED QUESTIONS */}
+      <section className="bg-[#FAF9F5] py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 w-full">
+          
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div className="text-left">
+              <div className="flex items-center gap-2 mb-3 select-none">
+                <img src={headingLeaf} alt="leaf left" className="w-6 h-6 object-contain scale-x-[-1] opacity-90" />
+                <h2 
+                  className="text-[#0a3d24] font-bold text-[28px] lg:text-[34px] tracking-wide"
+                  style={{ fontFamily: "Georgia, serif" }}
+                >
+                  Frequently Asked Questions
+                </h2>
+                <img src={headingLeaf} alt="leaf right" className="w-6 h-6 object-contain opacity-90" />
+              </div>
+              <p 
+                className="text-slate-500 text-[14.5px]"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                Find quick answers to the most common questions.
+              </p>
+            </div>
+
+            {/* View All Link */}
+            <div className="shrink-0">
+              <Link 
+                to="/faq" 
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#137b3a] hover:text-[#0f6630] uppercase tracking-wider transition-colors"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                View All FAQs →
+              </Link>
+            </div>
+          </div>
+
+          {/* FAQ Columns Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            
+            {/* Left Column: FAQs 0, 1, 2 */}
+            <div className="space-y-4">
+              {faqData.slice(0, 3).map((item, idx) => {
+                const globalIdx = idx;
+                const isOpen = openFaqs.includes(globalIdx);
+                return (
+                  <div 
+                    key={globalIdx}
+                    className="bg-white border border-[#e5e5db]/60 rounded-xl overflow-hidden shadow-[0_3px_15px_rgba(0,0,0,0.01)] transition-all"
+                  >
+                    <button
+                      onClick={() => toggleFaq(globalIdx)}
+                      className="w-full px-6 py-4.5 flex items-center justify-between gap-4 text-left focus:outline-none"
+                    >
+                      <span 
+                        className="text-[#0a3d24] font-bold text-[14.5px] leading-snug"
+                        style={{ fontFamily: "'Poppins', sans-serif" }}
+                      >
+                        {item.question}
+                      </span>
+                      {isOpen ? (
+                        <ChevronDown className="w-4 h-4 text-[#0a3d24] shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                      )}
+                    </button>
+                    
+                    {isOpen && (
+                      <div className="px-6 pb-5 pt-1 border-t border-slate-100/80">
+                        <p 
+                          className="text-[#555555] text-[13px] leading-[20px] font-normal"
+                          style={{ fontFamily: "'Poppins', sans-serif" }}
+                        >
+                          {item.answer}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Column: FAQs 3, 4, 5 */}
+            <div className="space-y-4">
+              {faqData.slice(3, 6).map((item, idx) => {
+                const globalIdx = idx + 3;
+                const isOpen = openFaqs.includes(globalIdx);
+                return (
+                  <div 
+                    key={globalIdx}
+                    className="bg-white border border-[#e5e5db]/60 rounded-xl overflow-hidden shadow-[0_3px_15px_rgba(0,0,0,0.01)] transition-all"
+                  >
+                    <button
+                      onClick={() => toggleFaq(globalIdx)}
+                      className="w-full px-6 py-4.5 flex items-center justify-between gap-4 text-left focus:outline-none"
+                    >
+                      <span 
+                        className="text-[#0a3d24] font-bold text-[14.5px] leading-snug"
+                        style={{ fontFamily: "'Poppins', sans-serif" }}
+                      >
+                        {item.question}
+                      </span>
+                      {isOpen ? (
+                        <ChevronDown className="w-4 h-4 text-[#0a3d24] shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                      )}
+                    </button>
+                    
+                    {isOpen && (
+                      <div className="px-6 pb-5 pt-1 border-t border-slate-100/80">
+                        <p 
+                          className="text-[#555555] text-[13px] leading-[20px] font-normal"
+                          style={{ fontFamily: "'Poppins', sans-serif" }}
+                        >
+                          {item.answer}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+
         </div>
       </section>
     </div>
