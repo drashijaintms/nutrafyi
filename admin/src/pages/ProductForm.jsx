@@ -144,6 +144,14 @@ export default function ProductForm() {
   // Upload States & Handlers
   const [uploadingFeatured, setUploadingFeatured] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [galleryInput, setGalleryInput] = useState("");
+
+  const handleAddGalleryUrl = () => {
+    if (galleryInput.trim()) {
+      setGallery((prev) => [...prev, galleryInput.trim()]);
+      setGalleryInput("");
+    }
+  };
 
   const handleFeaturedImageUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -1843,6 +1851,25 @@ saveMutation.mutate(payload);
               Product Gallery
             </h3>
             <div className="space-y-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={galleryInput}
+                  onChange={(e) => setGalleryInput(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="flex-1 text-xs px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-505 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddGalleryUrl}
+                  className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 font-semibold text-xs px-3 py-2 rounded-lg border border-indigo-100 transition-all"
+                >
+                  Add URL
+                </button>
+              </div>
+
+              <div className="text-center text-[10px] text-slate-400 font-medium">— OR —</div>
+
               <label className="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50/80 cursor-pointer transition-all group text-center">
                 <ImageIcon className="w-8 h-8 text-slate-400 mb-2 group-hover:text-indigo-500 transition-colors" />
                 <p className="text-xs font-semibold text-slate-650">

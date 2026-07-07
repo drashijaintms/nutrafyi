@@ -172,8 +172,8 @@
 }
 
 .pd-gallery-thumb.active {
-  border-color: #147a3f;
-  box-shadow: 0 0 0 3px rgba(20, 122, 63, 0.15);
+  border-color: #137b3a;
+  box-shadow: none;
 }
 
 .pd-gallery-thumb img {
