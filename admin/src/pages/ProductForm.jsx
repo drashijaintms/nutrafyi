@@ -118,7 +118,6 @@ export default function ProductForm() {
     { id: "linked", label: "Linked Products" },
     { id: "attributes", label: "Attributes" },
     ...(productType === "Variable" ? [{ id: "variations", label: "Variations" }] : []),
-    { id: "seo", label: "SEO Settings" }
   ];
 
   useEffect(() => {
@@ -613,7 +612,7 @@ export default function ProductForm() {
       },
     };
 
-    saveMutation.mutate(payload);
+saveMutation.mutate(payload);
   };
 
   if (isEdit && isLoadingProduct) return <Loader size="lg" />;
@@ -811,97 +810,6 @@ export default function ProductForm() {
                       >
                         <Trash className="w-4 h-4" />
                       </button>
-                    </div>
-                  )}
-
-                  {activeTab === "seo" && (
-                    <div className="space-y-6 animate-in fade-in duration-150 text-left">
-                      <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-700">Search Engine Optimization</h4>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Customize how this product appears in search engine results.</p>
-                        </div>
-                      </div>
-
-                      {/* Google SERP Preview block */}
-                      <div className="border border-slate-200/80 rounded-2xl p-5 bg-slate-55/30 space-y-4">
-                        <h5 className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Google Search Snippet Preview</h5>
-                        
-                        <div className="bg-white border border-slate-100 rounded-xl p-5 shadow-3xs space-y-1.5 text-left max-w-xl">
-                          <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1 font-semibold">
-                            <span>https://nutrafyi.com &gt; products &gt;</span>
-                            {slug ? (
-                              <span className="text-slate-400">{slug}</span>
-                            ) : (
-                              <span className="text-slate-300">{title ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "product-slug"}</span>
-                            )}
-                          </div>
-                          <h3 className="text-[19px] text-[#1a0dab] font-normal hover:underline cursor-pointer leading-snug font-sans">
-                            {metaTitle || title || "Your SEO Title Here"}
-                          </h3>
-                          <p className="text-xs text-[#4d5156] leading-relaxed font-sans">
-                            {metaDescription || "Your meta description will appear here. Write a compelling description to increase search visibility and click-through rates..."}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-5">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                            Meta Title
-                          </label>
-                          <input
-                            type="text"
-                            value={metaTitle}
-                            onChange={(e) => setMetaTitle(e.target.value)}
-                            placeholder="Organic Vitamin C Capsules | Buy Dietary Supplements"
-                            className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
-                          />
-                          <span className="text-[10px] text-slate-400 mt-1 block">Usually kept under 60 characters. Recommended: {metaTitle.length}/60 chars.</span>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                            Meta Description
-                          </label>
-                          <textarea
-                            value={metaDescription}
-                            onChange={(e) => setMetaDescription(e.target.value)}
-                            rows={3}
-                            placeholder="Buy pure organic Vitamin C supplements online at best prices. In-stock, fast shipping..."
-                            className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all resize-none"
-                          />
-                          <span className="text-[10px] text-slate-400 mt-1 block">Usually kept under 160 characters. Recommended: {metaDescription.length}/160 chars.</span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                              Meta Keywords (comma separated)
-                            </label>
-                            <input
-                              type="text"
-                              value={metaKeywords}
-                              onChange={(e) => setMetaKeywords(e.target.value)}
-                              placeholder="vitamin c, supplements, organic"
-                              className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                              Canonical URL
-                            </label>
-                            <input
-                              type="text"
-                              value={canonicalUrl}
-                              onChange={(e) => setCanonicalUrl(e.target.value)}
-                              placeholder="https://nutrafyi.com/products/organic-vitamin-c"
-                              className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
-                            />
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   )}
                 </div>
@@ -1775,6 +1683,96 @@ export default function ProductForm() {
                 onChange={setDescription}
                 placeholder="Full specifications, ingredient list, usage instructions..."
               />
+            </div>
+          </div>
+
+          {/* 4. SEO Settings Block (Always visible at the bottom of left column) */}
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs space-y-5 animate-in fade-in duration-100">
+            <div className="border-b border-slate-100 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+                SEO Settings
+              </h3>
+              <span className="text-[10px] text-slate-400 font-medium">Configure search engine metadata for this product.</span>
+            </div>
+
+            {/* Google SERP Preview block */}
+            <div className="border border-slate-200/80 rounded-2xl p-5 bg-slate-50/50 space-y-4">
+              <h5 className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Google Search Snippet Preview</h5>
+              
+              <div className="bg-white border border-slate-100 rounded-xl p-5 shadow-3xs space-y-1.5 text-left max-w-xl">
+                <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1 font-semibold">
+                  <span>https://nutrafyi.com &gt; products &gt;</span>
+                  {slug ? (
+                    <span className="text-slate-450">{slug}</span>
+                  ) : (
+                    <span className="text-slate-400">{title ? title.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "product-slug"}</span>
+                  )}
+                </div>
+                <h3 className="text-[19px] text-[#1a0dab] font-normal hover:underline cursor-pointer leading-snug font-sans">
+                  {metaTitle || title || "Your SEO Title Here"}
+                </h3>
+                <p className="text-xs text-[#4d5156] leading-relaxed font-sans">
+                  {metaDescription || "Your meta description will appear here. Write a compelling description to increase search visibility and click-through rates..."}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  Meta Title
+                </label>
+                <input
+                  type="text"
+                  value={metaTitle}
+                  onChange={(e) => setMetaTitle(e.target.value)}
+                  placeholder="Organic Vitamin C Capsules | Buy Dietary Supplements"
+                  className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">Usually kept under 60 characters. Recommended: {metaTitle.length}/60 chars.</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  Meta Description
+                </label>
+                <textarea
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  rows={3}
+                  placeholder="Buy pure organic Vitamin C supplements online at best prices. In-stock, fast shipping..."
+                  className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all resize-none"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">Usually kept under 160 characters. Recommended: {metaDescription.length}/160 chars.</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                    Meta Keywords (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={metaKeywords}
+                    onChange={(e) => setMetaKeywords(e.target.value)}
+                    placeholder="vitamin c, supplements, organic"
+                    className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                    Canonical URL
+                  </label>
+                  <input
+                    type="text"
+                    value={canonicalUrl}
+                    onChange={(e) => setCanonicalUrl(e.target.value)}
+                    placeholder="https://nutrafyi.com/products/organic-vitamin-c"
+                    className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
