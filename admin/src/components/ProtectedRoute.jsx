@@ -30,7 +30,9 @@ export default function ProtectedRoute({ children, resource, superAdminOnly }) {
   }
 
   if (resource && user) {
-    const hasPerm = user.permissions && user.permissions[resource] === true;
+    const isVendor = user.role === "vendor";
+    const allowedVendorResources = ["products", "categories", "brands"];
+    const hasPerm = (user.permissions && user.permissions[resource] === true) || (isVendor && allowedVendorResources.includes(resource));
 
     if (!isSuperAdmin && !hasPerm) {
       return (
