@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import API from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { ArrowLeft, Save, Plus, Trash, Image as ImageIcon, Edit } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash, Image as ImageIcon, Edit, AlertCircle, Clock } from "lucide-react";
 import { resolveProductImage } from "../utils/resolveImage";
 
 import RichTextEditor from "../components/RichTextEditor";
@@ -14,6 +15,8 @@ export default function ProductForm() {
   const isEdit = !!id;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const admin = useSelector((state) => state.auth.user);
+  const isVendor = admin?.role === "vendor";
 
   const [activeTab, setActiveTab] = useState("general");
 
@@ -639,9 +642,11 @@ saveMutation.mutate(payload);
           </button>
           <div>
             <h1 className="text-xl font-bold text-slate-800">
-              {isEdit ? `Edit Product: ${title}` : "New Product"}
+              {isEdit ? `Edit Product: ${title}` : isVendor ? "Submit New Product" : "New Product"}
             </h1>
-            <p className="text-xs text-slate-400">WooCommerce-style catalog editor.</p>
+            <p className="text-xs text-slate-400">
+              {isVendor ? "Vendor catalog editor — submissions require super admin approval." : "WooCommerce-style catalog editor."}
+            </p>
           </div>
         </div>
 
@@ -650,9 +655,21 @@ saveMutation.mutate(payload);
           disabled={saveMutation.isLoading}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all flex items-center gap-2"
         >
-          <Save className="w-4.5 h-4.5" /> {isEdit ? "Update Product" : "Publish Product"}
+          <Save className="w-4.5 h-4.5" />
+          {isVendor ? (isEdit ? "Resubmit for Approval" : "Submit for Approval") : (isEdit ? "Update Product" : "Publish Product")}
         </button>
       </div>
+
+      {/* Vendor approval banner */}
+      {isVendor && (
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+          <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-amber-800">Vendor Submission</p>
+            <p className="text-xs text-amber-700 mt-0.5">This product will be sent to the platform owner (Super Admin) for review before going live on the storefront. Rejected products can be edited and resubmitted.</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left 3 Columns: Main Form */}

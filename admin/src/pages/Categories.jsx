@@ -4,12 +4,14 @@ import { useSelector } from "react-redux";
 import API from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { Plus, Edit2, Trash2, Folder } from "lucide-react";
+import { Plus, Edit2, Trash2, Folder, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { resolveCategoryImage } from "../utils/resolveImage";
 
 export default function Categories() {
   const queryClient = useQueryClient();
   const admin = useSelector((state) => state.auth.user);
+  const isVendor = admin?.role === "vendor";
+  const isSuperAdmin = admin?.role === "superadmin" || admin?.role === "Administrator";
 
   const isRestrictedBlogManager =
     admin &&
@@ -27,11 +29,12 @@ export default function Categories() {
   const [description, setDescription] = useState("");
   const [order, setOrder] = useState(0);
 
-  // Fetch Categories
+  // Fetch Categories — vendors use /admin/all to see only their own
   const { data: categories = [], isLoading } = useQuery({
-    queryKey: ["categories"],
+    queryKey: ["categories", isVendor ? "vendor" : "all"],
     queryFn: async () => {
-      const res = await API.get("/categories");
+      const endpoint = isVendor ? "/categories/admin/all" : "/categories";
+      const res = await API.get(endpoint);
       return res.data;
     },
   });
@@ -73,8 +76,13 @@ export default function Categories() {
         return await API.post("/categories", payload);
       }
     },
-    onSuccess: () => {
-      toast.success(editingId ? "Category updated" : "Category created");
+    onSuccess: (res) => {
+      const status = res?.data?.approvalStatus;
+      if (status === "pending") {
+        toast.success("Category submitted for approval! It will go live once the super admin approves it.", { duration: 5000 });
+      } else {
+        toast.success(editingId ? "Category updated" : "Category created");
+      }
       queryClient.invalidateQueries(["categories"]);
       resetForm();
     },
@@ -141,8 +149,21 @@ export default function Categories() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-slate-800">Categories</h1>
-        <p className="text-xs text-slate-400 mt-0.5">Manage store product categories, nested hierarchies, and display orders.</p>
+        <p className="text-xs text-slate-400 mt-0.5">
+          {isVendor ? "Your category submissions. New categories require super admin approval before going live." : "Manage store product categories, nested hierarchies, and display orders."}
+        </p>
       </div>
+
+      {/* Vendor info banner */}
+      {isVendor && (
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+          <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-amber-800">Vendor Submission Workflow</p>
+            <p className="text-xs text-amber-700 mt-0.5">Categories you create will be sent to the platform owner for review. They appear on the storefront only after approval.</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Category Form */}
@@ -299,6 +320,7 @@ export default function Categories() {
                     <th className="pb-3">Slug</th>
                     {!isRestrictedBlogManager && <th className="pb-3">Products</th>}
                     {!isRestrictedBlogManager && <th className="pb-3">Order</th>}
+                    <th className="pb-3">Status</th>
                     <th className="pb-3 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -325,6 +347,29 @@ export default function Categories() {
                           <td className="py-3.5 font-mono text-xs">{cat.slug}</td>
                           {!isRestrictedBlogManager && <td className="py-3.5 font-semibold">{cat.count || 0}</td>}
                           {!isRestrictedBlogManager && <td className="py-3.5">{cat.order || 0}</td>}
+                          {/* Approval status badge */}
+                          <td className="py-3.5">
+                            {cat.approvalStatus === "pending" && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                                <Clock className="w-2.5 h-2.5" /> Pending
+                              </span>
+                            )}
+                            {cat.approvalStatus === "approved" && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                <CheckCircle2 className="w-2.5 h-2.5" /> Approved
+                              </span>
+                            )}
+                            {cat.approvalStatus === "rejected" && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
+                                <XCircle className="w-2.5 h-2.5" /> Rejected
+                              </span>
+                            )}
+                            {!cat.approvalStatus && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                <CheckCircle2 className="w-2.5 h-2.5" /> Approved
+                              </span>
+                            )}
+                          </td>
                           <td className="py-3.5 text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <button
