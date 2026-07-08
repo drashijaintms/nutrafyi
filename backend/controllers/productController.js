@@ -73,7 +73,7 @@ const getProducts = async (req, res) => {
 
     const { search, category, brand, stockStatus, status, sortBy } = req.query;
 
-    let query = { deleted: { $ne: true } };
+    let query = { deleted: { $ne: true }, approvalStatus: { $in: ["approved", null] } };
 
     // Filters
     if (search) {

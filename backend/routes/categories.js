@@ -44,9 +44,12 @@ router.get("/", async (req, res) => {
 router.get("/admin/all", protect, async (req, res) => {
   try {
     let query = { deleted: { $ne: true } };
-    // Vendors only see their own categories
+    // Vendors see approved categories + their own categories
     if (req.admin && req.admin.role === "vendor") {
-      query.submittedBy = req.admin._id;
+      query.$or = [
+        { approvalStatus: { $in: ["approved", null] } },
+        { submittedBy: req.admin._id }
+      ];
     }
     const categories = await Category.find(query)
       .populate("submittedBy", "name email role")
@@ -67,17 +70,17 @@ router.get("/admin/all", protect, async (req, res) => {
 // GET SINGLE CATEGORY
 router.get("/:id", async (req, res) => {
   try {
-    const category = await Category.findOne({ _id: req.params.id, deleted: { $ne: true } });
+    const category = await Category.findOne({
+      _id: req.params.id,
+      deleted: { $ne: true },
+      approvalStatus: { $in: ["approved", null] }
+    });
     if (!category) {
-      return res.status(404).json({
-        message: "Category not found",
-      });
+      return res.status(404).json({ message: "Category not found" });
     }
     res.json(category);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -116,32 +119,47 @@ router.post("/", protect, async (req, res) => {
 // UPDATE CATEGORY (Admin protected)
 router.put("/:id", protect, async (req, res) => {
   try {
+    const category = await Category.findById(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // Vendor ownership check: vendors can only edit their own categories
+    if (req.admin.role === "vendor" && String(category.submittedBy) !== String(req.admin._id)) {
+      return res.status(403).json({ message: "You can only edit your own categories" });
+    }
+
     const categoryData = { ...req.body };
     if (categoryData.title && !categoryData.slug) {
       categoryData.slug = slugify(categoryData.title);
     }
 
-    const category = await Category.findByIdAndUpdate(
+    // If vendor edits a rejected category, resubmit as pending
+    if (req.admin.role === "vendor" && category.approvalStatus === "rejected") {
+      categoryData.approvalStatus = "pending";
+      categoryData.approvalNote = "";
+    }
+
+    // Prevent vendors from manually setting approvalStatus
+    if (req.admin.role === "vendor") {
+      delete categoryData.approvalStatus;
+    }
+
+    const updatedCategory = await Category.findByIdAndUpdate(
       req.params.id,
       categoryData,
       { new: true }
     );
 
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-
     await logAdminActivity(
       req.admin._id,
       "Update Category",
-      `Updated category: "${category.title}"`
+      `Updated category: "${updatedCategory.title}"`
     );
 
-    res.json(category);
+    res.json(updatedCategory);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -151,6 +169,11 @@ router.delete("/:id", protect, async (req, res) => {
     const category = await Category.findOne({ _id: req.params.id, deleted: { $ne: true } });
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
+    }
+
+    // Vendor ownership check: vendors can only delete their own categories
+    if (req.admin.role === "vendor" && String(category.submittedBy) !== String(req.admin._id)) {
+      return res.status(403).json({ message: "You can only delete your own categories" });
     }
 
     category.deleted = true;
@@ -163,13 +186,9 @@ router.delete("/:id", protect, async (req, res) => {
       `Deleted category: "${category.title}"`
     );
 
-    res.json({
-      message: "Category Deleted",
-    });
+    res.json({ message: "Category Deleted" });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
 

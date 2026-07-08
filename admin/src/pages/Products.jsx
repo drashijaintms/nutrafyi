@@ -27,7 +27,7 @@ export default function Products() {
   const { data: categories = [] } = useQuery({
     queryKey: ["filterCategories"],
     queryFn: async () => {
-      const res = await API.get("/categories");
+      const res = await API.get("/categories/admin/all");
       return res.data;
     },
   });

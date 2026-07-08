@@ -29,12 +29,11 @@ export default function Categories() {
   const [description, setDescription] = useState("");
   const [order, setOrder] = useState(0);
 
-  // Fetch Categories — vendors use /admin/all to see only their own
+  // Fetch Categories
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ["categories", isVendor ? "vendor" : "all"],
     queryFn: async () => {
-      const endpoint = isVendor ? "/categories/admin/all" : "/categories";
-      const res = await API.get(endpoint);
+      const res = await API.get("/categories/admin/all");
       return res.data;
     },
   });

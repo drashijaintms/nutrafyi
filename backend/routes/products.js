@@ -34,7 +34,11 @@ router.get("/id/:id", getProductById);
 
 router.get("/:slug", async (req, res) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug });
+    const product = await Product.findOne({
+      slug: req.params.slug,
+      approvalStatus: { $in: ["approved", null] },
+      deleted: { $ne: true },
+    });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
