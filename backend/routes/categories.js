@@ -134,15 +134,10 @@ router.put("/:id", protect, async (req, res) => {
       categoryData.slug = slugify(categoryData.title);
     }
 
-    // If vendor edits a rejected category, resubmit as pending
-    if (req.admin.role === "vendor" && category.approvalStatus === "rejected") {
+    // If vendor edits a category, reset approval status to pending and clear rejection notes
+    if (req.admin.role === "vendor") {
       categoryData.approvalStatus = "pending";
       categoryData.approvalNote = "";
-    }
-
-    // Prevent vendors from manually setting approvalStatus
-    if (req.admin.role === "vendor") {
-      delete categoryData.approvalStatus;
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(

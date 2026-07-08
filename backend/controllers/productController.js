@@ -228,15 +228,10 @@ const updateProduct = async (req, res) => {
         updatedData.stockQuantity > 0 ? "In Stock" : "Out of Stock";
     }
 
-    // If vendor edits a rejected product, resubmit as pending
-    if (req.admin.role === "vendor" && product.approvalStatus === "rejected") {
+    // If vendor edits a product, reset approval status to pending and clear rejection notes
+    if (req.admin.role === "vendor") {
       updatedData.approvalStatus = "pending";
       updatedData.approvalNote = "";
-    }
-
-    // Prevent vendors from manually setting approvalStatus
-    if (req.admin.role === "vendor") {
-      delete updatedData.approvalStatus;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
