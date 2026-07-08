@@ -122,7 +122,16 @@ const ProductSchema = new mongoose.Schema(
     },
     publishDate: { type: Date, default: Date.now },
     deleted: { type: Boolean, default: false },
-    deletedAt: { type: Date }
+    deletedAt: { type: Date },
+
+    // Vendor Approval Workflow
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved",  // existing/superadmin products auto-approved
+    },
+    approvalNote: { type: String, default: "" },  // rejection reason from superadmin
+    submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin", default: null },
   },
   {
     timestamps: true,

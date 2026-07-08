@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require("../models/Product");
 const {
   getProducts,
+  getAdminProducts,
   getProductById,
   createProduct,
   updateProduct,
@@ -11,15 +12,18 @@ const {
 } = require("../controllers/productController");
 const { protect, checkPermission } = require("../middleware/auth");
 
-// Public routes (for customer-facing storefront)
+// Public storefront routes — only show approved, non-draft products
 router.get("/", async (req, res) => {
   try {
-    // If query parameters are sent (like search/page), use the advanced getProducts controller
     if (Object.keys(req.query).length > 0) {
       return getProducts(req, res);
     }
-    // Otherwise fallback to return all products for existing storefront compatibility
-    const products = await Product.find({ status: { $ne: "Draft" } });
+    // Fallback: return all approved products for storefront
+    const products = await Product.find({
+      status: { $ne: "Draft" },
+      approvalStatus: { $in: ["approved", null] },
+      deleted: { $ne: true },
+    });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -41,7 +45,7 @@ router.get("/:slug", async (req, res) => {
 });
 
 // Admin Protected routes
-router.get("/admin/all", protect, checkPermission("products"), getProducts);
+router.get("/admin/all", protect, checkPermission("products"), getAdminProducts);
 router.post("/", protect, checkPermission("products"), createProduct);
 router.put("/:id", protect, checkPermission("products"), updateProduct);
 router.delete("/:id", protect, checkPermission("products"), deleteProduct);

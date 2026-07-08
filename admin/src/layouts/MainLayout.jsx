@@ -20,7 +20,9 @@ import {
   Menu,
   X,
   ChevronDown,
-  Trash2
+  Trash2,
+  ClipboardCheck,
+  Store,
 } from "lucide-react";
 
 export default function MainLayout({ children }) {
@@ -29,11 +31,15 @@ export default function MainLayout({ children }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const admin = useSelector((state) => state.auth.user);
+
+  const isSuperAdmin = admin?.role === "superadmin" || admin?.role === "Administrator";
+  const isVendor = admin?.role === "vendor";
 
   const menuItems = [
     { label: "Dashboard", path: "/", icon: LayoutDashboard },
@@ -50,12 +56,19 @@ export default function MainLayout({ children }) {
     { label: "Settings", path: "/settings", icon: SettingsIcon, resource: "settings" },
     { label: "Administrators", path: "/admins", icon: Users, resource: "admins" },
     { label: "Trash Bin", path: "/trash", icon: Trash2 },
+    // Approvals: only visible to superadmins
+    { label: "Approvals", path: "/approvals", icon: ClipboardCheck, superAdminOnly: true, badge: pendingApprovalCount },
   ];
 
   const filteredMenuItems = menuItems.filter((item) => {
-    if (!item.resource) return true;
     if (!admin) return false;
-    if (admin.role === "superadmin") return true;
+    // SuperAdmin-only items
+    if (item.superAdminOnly) return isSuperAdmin;
+    // Vendor: only show Dashboard, Products, Categories
+    if (isVendor) return ["Dashboard", "Products", "Categories"].includes(item.label);
+    // Others: check resource permissions
+    if (!item.resource) return true;
+    if (isSuperAdmin) return true;
     return admin.permissions && admin.permissions[item.resource] === true;
   });
 
@@ -75,7 +88,6 @@ export default function MainLayout({ children }) {
         }
       }
       setIsFirstLoad(false);
-
       setNotifications(newNotifications);
       setUnreadCount(newUnreadCount);
     } catch (err) {
@@ -83,9 +95,23 @@ export default function MainLayout({ children }) {
     }
   };
 
+  const fetchPendingCount = async () => {
+    if (!isSuperAdmin) return;
+    try {
+      const res = await API.get("/approvals/count");
+      setPendingApprovalCount(res.data.pendingCount || 0);
+    } catch (err) {
+      // silently fail
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000);
+    fetchPendingCount();
+    const interval = setInterval(() => {
+      fetchNotifications();
+      fetchPendingCount();
+    }, 15000);
     return () => clearInterval(interval);
   }, [unreadCount, isFirstLoad]);
 
@@ -144,24 +170,43 @@ export default function MainLayout({ children }) {
 
         <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-4rem)]">
           {filteredMenuItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path ||
+              (item.path !== "/" && location.pathname.startsWith(item.path));
             const Icon = item.icon;
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10"
                     : "hover:bg-slate-800 hover:text-slate-100"
                 }`}
               >
-                <Icon className="w-5 h-5" />
-                {item.label}
+                <span className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
+                  {item.label}
+                </span>
+                {item.badge > 0 && (
+                  <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}
+
+          {/* Vendor info banner */}
+          {isVendor && (
+            <div className="mt-4 mx-1 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+              <div className="flex items-center gap-2 mb-1">
+                <Store className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[11px] font-bold text-amber-400">Vendor Account</span>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-relaxed">Products & categories you add will be sent to the super admin for approval before going live.</p>
+            </div>
+          )}
 
           <button
             onClick={handleLogout}
@@ -238,12 +283,18 @@ export default function MainLayout({ children }) {
 
             {/* Profile Dropdown */}
             <div className="flex items-center gap-2 border-l border-slate-100 pl-4">
-              <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600">
-                {admin?.name ? admin.name[0] : "A"}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                isVendor ? "bg-amber-100 border border-amber-200 text-amber-700" :
+                isSuperAdmin ? "bg-indigo-100 border border-indigo-200 text-indigo-700" :
+                "bg-slate-100 border border-slate-200 text-slate-600"
+              }`}>
+                {admin?.name ? admin.name[0].toUpperCase() : "A"}
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-bold text-slate-800 leading-none">{admin?.name || "Admin"}</p>
-                <p className="text-xs text-slate-400 capitalize mt-0.5">{admin?.role || "Administrator"}</p>
+                <p className="text-xs mt-0.5 capitalize font-medium" style={{ color: isVendor ? "#d97706" : isSuperAdmin ? "#6366f1" : "#94a3b8" }}>
+                  {isVendor ? "Vendor" : isSuperAdmin ? "Super Admin" : admin?.role || "Administrator"}
+                </p>
               </div>
             </div>
           </div>

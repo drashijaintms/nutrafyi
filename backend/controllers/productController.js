@@ -12,9 +12,59 @@ const slugify = (text) => {
     .replace(/\-\-+/g, "-");
 };
 
+// @desc    Get all products (admin panel — respects vendor scope)
+// @route   GET /api/products/admin/all
+// @access  Private
+const getAdminProducts = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const { search, category, brand, stockStatus, status, sortBy, approvalStatus } = req.query;
+
+    let query = { deleted: { $ne: true } };
+
+    // Vendors only see their own products
+    if (req.admin && req.admin.role === "vendor") {
+      query.submittedBy = req.admin._id;
+    }
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { sku: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+    if (category) query.category = category;
+    if (brand) query.brand = brand;
+    if (stockStatus) query.stockStatus = stockStatus;
+    if (status) query.status = status;
+    if (approvalStatus) query.approvalStatus = approvalStatus;
+
+    let sortOptions = { createdAt: -1 };
+    if (sortBy === "price_asc") sortOptions = { price: 1 };
+    else if (sortBy === "price_desc") sortOptions = { price: -1 };
+    else if (sortBy === "title_asc") sortOptions = { title: 1 };
+    else if (sortBy === "title_desc") sortOptions = { title: -1 };
+
+    const total = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .populate("submittedBy", "name email role")
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit);
+
+    res.json({ products, page, pages: Math.ceil(total / limit), total });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Get all products (with pagination, filters, sorting)
 // @route   GET /api/products
-// @access  Private
+// @access  Private (kept for backward compat)
 const getProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -111,6 +161,16 @@ const createProduct = async (req, res) => {
         productData.stockQuantity > 0 ? "In Stock" : "Out of Stock";
     }
 
+    // Vendor approval workflow: vendors submit products as pending
+    if (req.admin && req.admin.role === "vendor") {
+      productData.approvalStatus = "pending";
+      productData.submittedBy = req.admin._id;
+    } else {
+      // Super admin / other roles: auto-approve
+      productData.approvalStatus = productData.approvalStatus || "approved";
+      productData.submittedBy = req.admin._id;
+    }
+
     const product = new Product(productData);
     const savedProduct = await product.save();
 
@@ -130,7 +190,7 @@ const createProduct = async (req, res) => {
     await logAdminActivity(
       req.admin._id,
       "Create Product",
-      `Created product: "${savedProduct.title}" (SKU: ${savedProduct.sku || "N/A"})`
+      `Created product: "${savedProduct.title}" (SKU: ${savedProduct.sku || "N/A"}) — Approval: ${savedProduct.approvalStatus}`
     );
 
     res.status(201).json(savedProduct);
@@ -149,6 +209,11 @@ const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Vendor ownership check: vendors can only edit their own products
+    if (req.admin.role === "vendor" && String(product.submittedBy) !== String(req.admin._id)) {
+      return res.status(403).json({ message: "You can only edit your own products" });
+    }
+
     const previousStock = product.stockQuantity;
     const updatedData = { ...req.body };
 
@@ -161,6 +226,17 @@ const updateProduct = async (req, res) => {
     if (updatedData.stockQuantity !== undefined) {
       updatedData.stockStatus =
         updatedData.stockQuantity > 0 ? "In Stock" : "Out of Stock";
+    }
+
+    // If vendor edits a rejected product, resubmit as pending
+    if (req.admin.role === "vendor" && product.approvalStatus === "rejected") {
+      updatedData.approvalStatus = "pending";
+      updatedData.approvalNote = "";
+    }
+
+    // Prevent vendors from manually setting approvalStatus
+    if (req.admin.role === "vendor") {
+      delete updatedData.approvalStatus;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -274,6 +350,7 @@ const bulkActions = async (req, res) => {
 
 module.exports = {
   getProducts,
+  getAdminProducts,
   getProductById,
   createProduct,
   updateProduct,

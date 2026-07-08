@@ -15,29 +15,52 @@ const slugify = (text) => {
     .replace(/\-\-+/g, "-");
 };
 
-// GET ALL CATEGORIES (nested formatting and sorting)
+// GET ALL CATEGORIES (for storefront - only approved)
 router.get("/", async (req, res) => {
   try {
-    const categories = await Category.find({ deleted: { $ne: true } }).sort({ order: 1 });
+    const isAdminRequest = req.query.admin === "true";
+    let query = { deleted: { $ne: true } };
+    if (!isAdminRequest) {
+      query.approvalStatus = { $in: ["approved", null] };
+    }
+    const categories = await Category.find(query).sort({ order: 1 });
 
     const categoriesWithCount = await Promise.all(
       categories.map(async (category) => {
         const count = await Product.countDocuments({
           category: category.slug,
         });
-
-        return {
-          ...category.toObject(),
-          count,
-        };
+        return { ...category.toObject(), count };
       })
     );
 
     res.json(categoriesWithCount);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET ALL CATEGORIES (admin panel — with vendor scope)
+router.get("/admin/all", protect, async (req, res) => {
+  try {
+    let query = { deleted: { $ne: true } };
+    // Vendors only see their own categories
+    if (req.admin && req.admin.role === "vendor") {
+      query.submittedBy = req.admin._id;
+    }
+    const categories = await Category.find(query)
+      .populate("submittedBy", "name email role")
+      .sort({ order: 1 });
+
+    const categoriesWithCount = await Promise.all(
+      categories.map(async (category) => {
+        const count = await Product.countDocuments({ category: category.slug });
+        return { ...category.toObject(), count };
+      })
+    );
+    res.json(categoriesWithCount);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -66,20 +89,27 @@ router.post("/", protect, async (req, res) => {
       categoryData.slug = slugify(categoryData.title);
     }
 
+    // Vendor approval workflow
+    if (req.admin && req.admin.role === "vendor") {
+      categoryData.approvalStatus = "pending";
+      categoryData.submittedBy = req.admin._id;
+    } else {
+      categoryData.approvalStatus = categoryData.approvalStatus || "approved";
+      categoryData.submittedBy = req.admin._id;
+    }
+
     const category = new Category(categoryData);
     const savedCategory = await category.save();
 
     await logAdminActivity(
       req.admin._id,
       "Create Category",
-      `Created category: "${savedCategory.title}"`
+      `Created category: "${savedCategory.title}" — Approval: ${savedCategory.approvalStatus}`
     );
 
     res.status(201).json(savedCategory);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
 

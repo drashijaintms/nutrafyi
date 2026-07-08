@@ -22,6 +22,7 @@ import CMSBlogs from "./pages/CMSBlogs";
 import Settings from "./pages/Settings";
 import Admins from "./pages/Admins";
 import TrashBin from "./pages/TrashBin";
+import ApprovalQueue from "./pages/ApprovalQueue";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -196,6 +197,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <TrashBin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/approvals"
+          element={
+            <ProtectedRoute superAdminOnly>
+              <ApprovalQueue />
             </ProtectedRoute>
           }
         />
