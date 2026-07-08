@@ -226,7 +226,7 @@ export default function ProductForm() {
   const { data: brands = [] } = useQuery({
     queryKey: ["formBrands"],
     queryFn: async () => {
-      const res = await API.get("/brands");
+      const res = await API.get("/brands/admin/all");
       return res.data;
     },
   });

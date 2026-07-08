@@ -119,25 +119,19 @@ router.post("/", protect, async (req, res) => {
 // UPDATE CATEGORY (Admin protected)
 router.put("/:id", protect, async (req, res) => {
   try {
+    // Vendors do not have permission to edit categories
+    if (req.admin.role === "vendor") {
+      return res.status(403).json({ message: "Vendors do not have permission to edit categories." });
+    }
+
     const category = await Category.findById(req.params.id);
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    // Vendor ownership check: vendors can only edit their own categories
-    if (req.admin.role === "vendor" && String(category.submittedBy) !== String(req.admin._id)) {
-      return res.status(403).json({ message: "You can only edit your own categories" });
-    }
-
     const categoryData = { ...req.body };
     if (categoryData.title && !categoryData.slug) {
       categoryData.slug = slugify(categoryData.title);
-    }
-
-    // If vendor edits a category, reset approval status to pending and clear rejection notes
-    if (req.admin.role === "vendor") {
-      categoryData.approvalStatus = "pending";
-      categoryData.approvalNote = "";
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(
@@ -161,14 +155,14 @@ router.put("/:id", protect, async (req, res) => {
 // DELETE CATEGORY (Admin protected)
 router.delete("/:id", protect, async (req, res) => {
   try {
+    // Vendors do not have permission to delete categories
+    if (req.admin.role === "vendor") {
+      return res.status(403).json({ message: "Vendors do not have permission to delete categories." });
+    }
+
     const category = await Category.findOne({ _id: req.params.id, deleted: { $ne: true } });
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
-    }
-
-    // Vendor ownership check: vendors can only delete their own categories
-    if (req.admin.role === "vendor" && String(category.submittedBy) !== String(req.admin._id)) {
-      return res.status(403).json({ message: "You can only delete your own categories" });
     }
 
     category.deleted = true;

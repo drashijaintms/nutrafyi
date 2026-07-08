@@ -1,5 +1,6 @@
 const Product = require("../models/Product");
 const Category = require("../models/Category");
+const Brand = require("../models/Brand");
 const { logAdminActivity } = require("../middleware/activityLogger");
 
 const getApprovals = async (req, res) => {
@@ -8,6 +9,7 @@ const getApprovals = async (req, res) => {
     const status = req.query.status || "pending";
     let products = [];
     let categories = [];
+    let brands = [];
     if (!type || type === "products") {
       products = await Product.find({ approvalStatus: status, deleted: { "$ne": true } })
         .populate("submittedBy", "name email role").sort({ createdAt: -1 });
@@ -16,9 +18,22 @@ const getApprovals = async (req, res) => {
       categories = await Category.find({ approvalStatus: status, deleted: { "$ne": true } })
         .populate("submittedBy", "name email role").sort({ createdAt: -1 });
     }
+    if (!type || type === "brands") {
+      brands = await Brand.find({ approvalStatus: status })
+        .populate("submittedBy", "name email role").sort({ createdAt: -1 });
+    }
     const pendingProductsCount = await Product.countDocuments({ approvalStatus: "pending", deleted: { "$ne": true } });
     const pendingCategoriesCount = await Category.countDocuments({ approvalStatus: "pending", deleted: { "$ne": true } });
-    res.json({ products, categories, pendingCount: pendingProductsCount + pendingCategoriesCount, pendingProductsCount, pendingCategoriesCount });
+    const pendingBrandsCount = await Brand.countDocuments({ approvalStatus: "pending" });
+    res.json({
+      products,
+      categories,
+      brands,
+      pendingCount: pendingProductsCount + pendingCategoriesCount + pendingBrandsCount,
+      pendingProductsCount,
+      pendingCategoriesCount,
+      pendingBrandsCount,
+    });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
@@ -60,12 +75,41 @@ const rejectCategory = async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+const approveBrand = async (req, res) => {
+  try {
+    const brand = await Brand.findByIdAndUpdate(req.params.id, { approvalStatus: "approved", approvalNote: "" }, { new: true }).populate("submittedBy", "name email");
+    if (!brand) return res.status(404).json({ message: "Brand not found" });
+    await logAdminActivity(req.admin._id, "Approve Brand", "Approved: " + brand.name);
+    res.json({ message: "Brand approved successfully", brand });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+const rejectBrand = async (req, res) => {
+  try {
+    const note = req.body.note;
+    const brand = await Brand.findByIdAndUpdate(req.params.id, { approvalStatus: "rejected", approvalNote: note || "Rejected by super admin" }, { new: true }).populate("submittedBy", "name email");
+    if (!brand) return res.status(404).json({ message: "Brand not found" });
+    await logAdminActivity(req.admin._id, "Reject Brand", "Rejected: " + brand.name + " Reason: " + (note || "No reason given"));
+    res.json({ message: "Brand rejected", brand });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 const getPendingCount = async (req, res) => {
   try {
     const productCount = await Product.countDocuments({ approvalStatus: "pending", deleted: { "$ne": true } });
     const categoryCount = await Category.countDocuments({ approvalStatus: "pending", deleted: { "$ne": true } });
-    res.json({ pendingCount: productCount + categoryCount, productCount, categoryCount });
+    const brandCount = await Brand.countDocuments({ approvalStatus: "pending" });
+    res.json({ pendingCount: productCount + categoryCount + brandCount, productCount, categoryCount, brandCount });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-module.exports = { getApprovals, approveProduct, rejectProduct, approveCategory, rejectCategory, getPendingCount };
+module.exports = {
+  getApprovals,
+  approveProduct,
+  rejectProduct,
+  approveCategory,
+  rejectCategory,
+  approveBrand,
+  rejectBrand,
+  getPendingCount,
+};

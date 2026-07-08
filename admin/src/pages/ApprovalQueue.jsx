@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  Tag,
 } from "lucide-react";
 
 // Status badge helper
@@ -83,15 +84,20 @@ function ApprovalCard({ item, type, onApprove, onReject, isApproving, isRejectin
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
             {/* Type icon */}
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${type === "product" ? "bg-indigo-50" : "bg-violet-50"}`}>
-              {type === "product"
-                ? <Package className={`w-5 h-5 text-indigo-500`} />
-                : <FolderTree className={`w-5 h-5 text-violet-500`} />
-              }
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              type === "product" ? "bg-indigo-50" : type === "category" ? "bg-violet-50" : "bg-amber-50"
+            }`}>
+              {type === "product" ? (
+                <Package className="w-5 h-5 text-indigo-500" />
+              ) : type === "category" ? (
+                <FolderTree className="w-5 h-5 text-violet-500" />
+              ) : (
+                <Tag className="w-5 h-5 text-amber-500" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                <h3 className="font-bold text-slate-800 text-sm truncate">{item.title}</h3>
+                <h3 className="font-bold text-slate-800 text-sm truncate">{item.name || item.title}</h3>
                 <ApprovalBadge status={item.approvalStatus} />
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
@@ -179,20 +185,30 @@ export default function ApprovalQueue() {
 
   const approveMutation = useMutation({
     mutationFn: async ({ id, type }) => {
-      const endpoint = type === "product" ? `/approvals/products/${id}/approve` : `/approvals/categories/${id}/approve`;
+      const endpoint = type === "product" 
+        ? `/approvals/products/${id}/approve` 
+        : type === "category"
+          ? `/approvals/categories/${id}/approve`
+          : `/approvals/brands/${id}/approve`;
       await API.post(endpoint);
     },
     onSuccess: () => {
       toast.success("Approved successfully! Item is now live on the storefront.");
       queryClient.invalidateQueries(["approvals"]);
       queryClient.invalidateQueries(["products"]);
+      queryClient.invalidateQueries(["categories"]);
+      queryClient.invalidateQueries(["brands"]);
     },
     onError: (err) => toast.error(err.response?.data?.message || "Failed to approve"),
   });
 
   const rejectMutation = useMutation({
     mutationFn: async ({ id, type, note }) => {
-      const endpoint = type === "product" ? `/approvals/products/${id}/reject` : `/approvals/categories/${id}/reject`;
+      const endpoint = type === "product" 
+        ? `/approvals/products/${id}/reject` 
+        : type === "category"
+          ? `/approvals/categories/${id}/reject`
+          : `/approvals/brands/${id}/reject`;
       await API.post(endpoint, { note });
     },
     onSuccess: () => {
@@ -205,18 +221,23 @@ export default function ApprovalQueue() {
 
   const products = data?.products || [];
   const categories = data?.categories || [];
+  const brands = data?.brands || [];
   const pendingProducts = data?.pendingProductsCount || 0;
   const pendingCategories = data?.pendingCategoriesCount || 0;
+  const pendingBrands = data?.pendingBrandsCount || 0;
   const totalPending = data?.pendingCount || 0;
 
   const displayItems = activeTab === "all"
     ? [
         ...products.map(p => ({ ...p, _type: "product" })),
-        ...categories.map(c => ({ ...c, _type: "category" }))
+        ...categories.map(c => ({ ...c, _type: "category" })),
+        ...brands.map(b => ({ ...b, _type: "brand" }))
       ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     : activeTab === "products"
       ? products.map(p => ({ ...p, _type: "product" }))
-      : categories.map(c => ({ ...c, _type: "category" }));
+      : activeTab === "categories"
+        ? categories.map(c => ({ ...c, _type: "category" }))
+        : brands.map(b => ({ ...b, _type: "brand" }));
 
   return (
     <div className="space-y-6">
@@ -246,7 +267,7 @@ export default function ApprovalQueue() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-semibold text-slate-500">Total Pending</span>
@@ -271,6 +292,14 @@ export default function ApprovalQueue() {
           <p className="text-2xl font-bold text-slate-800">{pendingCategories}</p>
           <p className="text-xs text-slate-400 mt-0.5">Pending category submissions</p>
         </div>
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-semibold text-slate-500">Brands</span>
+            <Tag className="w-4 h-4 text-amber-500" />
+          </div>
+          <p className="text-2xl font-bold text-slate-800">{pendingBrands}</p>
+          <p className="text-xs text-slate-400 mt-0.5">Pending brand submissions</p>
+        </div>
       </div>
 
       {/* Tabs & Filters */}
@@ -278,9 +307,10 @@ export default function ApprovalQueue() {
         <div className="flex items-center justify-between px-4 pt-4 border-b border-slate-100 pb-0">
           <div className="flex gap-1">
             {[
-              { id: "all", label: `All (${products.length + categories.length})` },
+              { id: "all", label: `All (${products.length + categories.length + brands.length})` },
               { id: "products", label: `Products (${products.length})` },
               { id: "categories", label: `Categories (${categories.length})` },
+              { id: "brands", label: `Brands (${brands.length})` },
             ].map(tab => (
               <button
                 key={tab.id}

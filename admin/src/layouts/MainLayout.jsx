@@ -64,8 +64,8 @@ export default function MainLayout({ children }) {
     if (!admin) return false;
     // SuperAdmin-only items
     if (item.superAdminOnly) return isSuperAdmin;
-    // Vendor: only show Dashboard, Products, Categories
-    if (isVendor) return ["Dashboard", "Products", "Categories"].includes(item.label);
+    // Vendor: only show Dashboard, Products, Categories, Brands
+    if (isVendor) return ["Dashboard", "Products", "Categories", "Brands"].includes(item.label);
     // Others: check resource permissions
     if (!item.resource) return true;
     if (isSuperAdmin) return true;

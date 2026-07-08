@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import API from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { Plus, Edit2, Trash2, Tag } from "lucide-react";
+import { Plus, Edit2, Trash2, Tag, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 export default function Brands() {
   const queryClient = useQueryClient();
+  const admin = useSelector((state) => state.auth.user);
+  const isVendor = admin?.role === "vendor";
 
   // Form States
   const [editingId, setEditingId] = useState(null);
@@ -17,9 +20,9 @@ export default function Brands() {
 
   // Fetch Brands
   const { data: brands = [], isLoading } = useQuery({
-    queryKey: ["brands"],
+    queryKey: ["brands", isVendor ? "vendor" : "all"],
     queryFn: async () => {
-      const res = await API.get("/brands");
+      const res = await API.get("/brands/admin/all");
       return res.data;
     },
   });
@@ -61,8 +64,13 @@ export default function Brands() {
         return await API.post("/brands", payload);
       }
     },
-    onSuccess: () => {
-      toast.success(editingId ? "Brand updated" : "Brand created");
+    onSuccess: (res) => {
+      const status = res?.data?.approvalStatus;
+      if (status === "pending") {
+        toast.success("Brand submitted for approval! It will go live once the super admin approves it.", { duration: 5000 });
+      } else {
+        toast.success(editingId ? "Brand updated" : "Brand created");
+      }
       queryClient.invalidateQueries(["brands"]);
       resetForm();
     },
@@ -123,14 +131,27 @@ export default function Brands() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-slate-800">Brands</h1>
-        <p className="text-xs text-slate-400 mt-0.5">Manage store brand profiles, slugs, and logos.</p>
+        <p className="text-xs text-slate-400 mt-0.5">
+          {isVendor ? "Your brand submissions. New brands require super admin approval before going live." : "Manage store brand profiles, slugs, and logos."}
+        </p>
       </div>
+
+      {/* Vendor info banner */}
+      {isVendor && (
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+          <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-amber-800">Vendor Submission Workflow</p>
+            <p className="text-xs text-amber-700 mt-0.5">Brands you create will be sent to the platform owner for review. They appear on the storefront only after approval.</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Brand Form */}
         <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs h-fit space-y-4">
           <h3 className="text-sm font-bold text-slate-700">
-            {editingId ? "Edit Brand" : "Add New Brand"}
+            {isVendor ? "Add New Brand" : (editingId ? "Edit Brand" : "Add New Brand")}
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -245,7 +266,8 @@ export default function Brands() {
                     <th className="pb-3">Name</th>
                     <th className="pb-3">Slug</th>
                     <th className="pb-3">Description</th>
-                    <th className="pb-3 text-right">Actions</th>
+                    <th className="pb-3">Status</th>
+                    {!isVendor && <th className="pb-3 text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-sm text-slate-600">
@@ -267,27 +289,52 @@ export default function Brands() {
                         </td>
                         <td className="py-3.5 font-mono text-xs">{b.slug}</td>
                         <td className="py-3.5 max-w-xs truncate text-slate-400">{b.description || "—"}</td>
-                        <td className="py-3.5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => handleEdit(b)}
-                              className="p-1 rounded-lg hover:bg-slate-100 text-indigo-600 transition-colors"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(b._id)}
-                              className="p-1 rounded-lg hover:bg-slate-100 text-rose-600 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                        {/* Approval status badge */}
+                        <td className="py-3.5">
+                          {b.approvalStatus === "pending" && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                              <Clock className="w-2.5 h-2.5" /> Pending
+                            </span>
+                          )}
+                          {b.approvalStatus === "approved" && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                              <CheckCircle2 className="w-2.5 h-2.5" /> Approved
+                            </span>
+                          )}
+                          {b.approvalStatus === "rejected" && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
+                              <XCircle className="w-2.5 h-2.5" /> Rejected
+                            </span>
+                          )}
+                          {!b.approvalStatus && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                              <CheckCircle2 className="w-2.5 h-2.5" /> Approved
+                            </span>
+                          )}
                         </td>
+                        {!isVendor && (
+                          <td className="py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => handleEdit(b)}
+                                className="p-1 rounded-lg hover:bg-slate-100 text-indigo-600 transition-colors"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(b._id)}
+                                className="p-1 rounded-lg hover:bg-slate-100 text-rose-600 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-slate-400">
+                      <td colSpan={isVendor ? 5 : 6} className="py-8 text-center text-slate-400">
                         No brands found.
                       </td>
                     </tr>

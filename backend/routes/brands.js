@@ -14,10 +14,35 @@ const slugify = (text) => {
     .replace(/\-\-+/g, "-");
 };
 
-// GET ALL BRANDS (Public)
+// GET ALL BRANDS (Public storefront - only approved)
 router.get("/", async (req, res) => {
   try {
-    const brands = await Brand.find().sort({ name: 1 });
+    const isAdminRequest = req.query.admin === "true";
+    let query = {};
+    if (!isAdminRequest) {
+      query.approvalStatus = { $in: ["approved", null] };
+    }
+    const brands = await Brand.find(query).sort({ name: 1 });
+    res.json(brands);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET ALL BRANDS (admin panel — with vendor scope)
+router.get("/admin/all", protect, async (req, res) => {
+  try {
+    let query = {};
+    // Vendors see approved brands + their own brands
+    if (req.admin && req.admin.role === "vendor") {
+      query.$or = [
+        { approvalStatus: { $in: ["approved", null] } },
+        { submittedBy: req.admin._id }
+      ];
+    }
+    const brands = await Brand.find(query)
+      .populate("submittedBy", "name email role")
+      .sort({ name: 1 });
     res.json(brands);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -27,7 +52,10 @@ router.get("/", async (req, res) => {
 // GET BRAND BY ID
 router.get("/:id", async (req, res) => {
   try {
-    const brand = await Brand.findById(req.params.id);
+    const brand = await Brand.findOne({
+      _id: req.params.id,
+      approvalStatus: { $in: ["approved", null] }
+    });
     if (!brand) return res.status(404).json({ message: "Brand not found" });
     res.json(brand);
   } catch (error) {
@@ -43,13 +71,22 @@ router.post("/", protect, async (req, res) => {
       brandData.slug = slugify(brandData.name);
     }
 
+    // Vendor approval workflow
+    if (req.admin && req.admin.role === "vendor") {
+      brandData.approvalStatus = "pending";
+      brandData.submittedBy = req.admin._id;
+    } else {
+      brandData.approvalStatus = brandData.approvalStatus || "approved";
+      brandData.submittedBy = req.admin._id;
+    }
+
     const brand = new Brand(brandData);
     const savedBrand = await brand.save();
 
     await logAdminActivity(
       req.admin._id,
       "Create Brand",
-      `Created brand: "${savedBrand.name}"`
+      `Created brand: "${savedBrand.name}" — Approval: ${savedBrand.approvalStatus}`
     );
 
     res.status(201).json(savedBrand);
@@ -61,6 +98,11 @@ router.post("/", protect, async (req, res) => {
 // UPDATE BRAND (Admin protected)
 router.put("/:id", protect, async (req, res) => {
   try {
+    // Vendors do not have permission to edit brands
+    if (req.admin.role === "vendor") {
+      return res.status(403).json({ message: "Vendors do not have permission to edit brands." });
+    }
+
     const brandData = { ...req.body };
     if (brandData.name && !brandData.slug) {
       brandData.slug = slugify(brandData.name);
@@ -86,6 +128,11 @@ router.put("/:id", protect, async (req, res) => {
 // DELETE BRAND (Admin protected)
 router.delete("/:id", protect, async (req, res) => {
   try {
+    // Vendors do not have permission to delete brands
+    if (req.admin.role === "vendor") {
+      return res.status(403).json({ message: "Vendors do not have permission to delete brands." });
+    }
+
     const brand = await Brand.findById(req.params.id);
     if (!brand) return res.status(404).json({ message: "Brand not found" });
 

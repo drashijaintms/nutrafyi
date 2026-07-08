@@ -168,7 +168,7 @@ export default function Categories() {
         {/* Category Form */}
         <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs h-fit space-y-4">
           <h3 className="text-sm font-bold text-slate-700">
-            {editingId ? "Edit Category" : "Add New Category"}
+            {isVendor ? "Add New Category" : (editingId ? "Edit Category" : "Add New Category")}
           </h3>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -320,7 +320,7 @@ export default function Categories() {
                     {!isRestrictedBlogManager && <th className="pb-3">Products</th>}
                     {!isRestrictedBlogManager && <th className="pb-3">Order</th>}
                     <th className="pb-3">Status</th>
-                    <th className="pb-3 text-right">Actions</th>
+                    {!isVendor && <th className="pb-3 text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-sm text-slate-600">
@@ -369,22 +369,24 @@ export default function Categories() {
                               </span>
                             )}
                           </td>
-                          <td className="py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => handleEdit(cat)}
-                                className="p-1 rounded-lg hover:bg-slate-100 text-indigo-600 transition-colors"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(cat._id)}
-                                className="p-1 rounded-lg hover:bg-slate-100 text-rose-600 transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                          {!isVendor && (
+                            <td className="py-3.5 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => handleEdit(cat)}
+                                  className="p-1 rounded-lg hover:bg-slate-100 text-indigo-600 transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(cat._id)}
+                                  className="p-1 rounded-lg hover:bg-slate-100 text-rose-600 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       );
                     })

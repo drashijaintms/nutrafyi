@@ -7,6 +7,8 @@ const {
   rejectProduct,
   approveCategory,
   rejectCategory,
+  approveBrand,
+  rejectBrand,
   getPendingCount,
 } = require("../controllers/approvalController");
 
@@ -17,5 +19,7 @@ router.post("/products/:id/approve", protect, superAdminOnly, approveProduct);
 router.post("/products/:id/reject", protect, superAdminOnly, rejectProduct);
 router.post("/categories/:id/approve", protect, superAdminOnly, approveCategory);
 router.post("/categories/:id/reject", protect, superAdminOnly, rejectCategory);
+router.post("/brands/:id/approve", protect, superAdminOnly, approveBrand);
+router.post("/brands/:id/reject", protect, superAdminOnly, rejectBrand);
 
 module.exports = router;

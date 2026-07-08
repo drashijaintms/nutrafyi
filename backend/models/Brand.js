@@ -20,6 +20,14 @@ const brandSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    // Vendor Approval Workflow
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved",
+    },
+    approvalNote: { type: String, default: "" },
+    submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin", default: null },
   },
   {
     timestamps: true,
