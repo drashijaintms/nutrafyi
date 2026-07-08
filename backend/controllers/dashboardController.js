@@ -11,7 +11,154 @@ const Admin = require("../models/Admin");
 // @access  Private
 const getStats = async (req, res) => {
   try {
-    // 1. Calculations for Total Revenue
+    const isVendor = req.admin && req.admin.role === "vendor";
+
+    if (isVendor) {
+      // Fetch vendor products list
+      const vendorProductIds = await Product.find({ submittedBy: req.admin._id, deleted: { $ne: true } }).distinct("_id");
+
+      // Completed orders containing vendor products
+      const completedOrders = await Order.find({
+        status: { $nin: ["Cancelled", "Refunded"] },
+        "items.product": { $in: vendorProductIds }
+      });
+
+      let totalRevenue = 0;
+      completedOrders.forEach(order => {
+        order.items.forEach(item => {
+          if (vendorProductIds.some(id => String(id) === String(item.product))) {
+            totalRevenue += (item.price || 0) * (item.quantity || 0);
+          }
+        });
+      });
+
+      const totalOrders = await Order.countDocuments({
+        "items.product": { $in: vendorProductIds }
+      });
+
+      const vendorOrders = await Order.find({
+        "items.product": { $in: vendorProductIds }
+      });
+      const uniqueCustomerEmails = [...new Set(vendorOrders.map(o => o.customer?.email).filter(Boolean))];
+      const totalCustomers = uniqueCustomerEmails.length;
+      const totalProducts = vendorProductIds.length;
+
+      // 30 days daily sales aggregation for vendor
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const vendorOrdersForCharts = await Order.find({
+        createdAt: { $gte: thirtyDaysAgo },
+        status: { $nin: ["Cancelled", "Refunded"] },
+        "items.product": { $in: vendorProductIds }
+      });
+
+      const dailyMap = {};
+      vendorOrdersForCharts.forEach(order => {
+        const dateStr = order.createdAt.toISOString().slice(0, 10);
+        if (!dailyMap[dateStr]) {
+          dailyMap[dateStr] = { revenue: 0, orders: 0 };
+        }
+        dailyMap[dateStr].orders += 1;
+        order.items.forEach(item => {
+          if (vendorProductIds.some(id => String(id) === String(item.product))) {
+            dailyMap[dateStr].revenue += (item.price || 0) * (item.quantity || 0);
+          }
+        });
+      });
+
+      const dailySalesAgg = Object.keys(dailyMap).sort().map(date => ({
+        _id: date,
+        revenue: dailyMap[date].revenue,
+        orders: dailyMap[date].orders
+      }));
+
+      // 12 months monthly sales aggregation for vendor
+      const twelveMonthsAgo = new Date();
+      twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+
+      const vendorMonthlyOrders = await Order.find({
+        createdAt: { $gte: twelveMonthsAgo },
+        status: { $nin: ["Cancelled", "Refunded"] },
+        "items.product": { $in: vendorProductIds }
+      });
+
+      const monthlyMap = {};
+      vendorMonthlyOrders.forEach(order => {
+        const monthStr = order.createdAt.toISOString().slice(0, 7);
+        if (!monthlyMap[monthStr]) {
+          monthlyMap[monthStr] = { revenue: 0, orders: 0 };
+        }
+        monthlyMap[monthStr].orders += 1;
+        order.items.forEach(item => {
+          if (vendorProductIds.some(id => String(id) === String(item.product))) {
+            monthlyMap[monthStr].revenue += (item.price || 0) * (item.quantity || 0);
+          }
+        });
+      });
+
+      const monthlySalesAgg = Object.keys(monthlyMap).sort().map(month => ({
+        _id: month,
+        revenue: monthlyMap[month].revenue,
+        orders: monthlyMap[month].orders
+      }));
+
+      // Recent orders containing vendor products
+      const recentOrders = await Order.find({ "items.product": { $in: vendorProductIds } })
+        .sort({ createdAt: -1 })
+        .limit(5);
+
+      // Top products for vendor
+      const topProdMap = {};
+      completedOrders.forEach(order => {
+        order.items.forEach(item => {
+          if (vendorProductIds.some(id => String(id) === String(item.product))) {
+            const pId = String(item.product);
+            if (!topProdMap[pId]) {
+              topProdMap[pId] = {
+                _id: pId,
+                title: item.title,
+                slug: item.slug,
+                image: item.image,
+                totalQty: 0,
+                totalSales: 0
+              };
+            }
+            topProdMap[pId].totalQty += item.quantity;
+            topProdMap[pId].totalSales += (item.price || 0) * (item.quantity || 0);
+          }
+        });
+      });
+
+      const topProducts = Object.values(topProdMap)
+        .sort((a, b) => b.totalQty - a.totalQty)
+        .slice(0, 5);
+
+      return res.json({
+        summary: {
+          totalRevenue,
+          totalOrders,
+          totalCustomers,
+          totalProducts,
+        },
+        charts: {
+          dailySales: dailySalesAgg.map((item) => ({
+            date: item._id,
+            revenue: item.revenue,
+            orders: item.orders,
+          })),
+          monthlySales: monthlySalesAgg.map((item) => ({
+            month: item._id,
+            revenue: item.revenue,
+            orders: item.orders,
+          })),
+        },
+        recentOrders,
+        topProducts,
+      });
+    }
+
+    // 1. Calculations for Total Revenue (Super Admin / Global)
     const completedOrders = await Order.find({
       status: { $nin: ["Cancelled", "Refunded"] },
     });

@@ -38,6 +38,7 @@ import {
 
 export default function Dashboard() {
   const admin = useSelector((state) => state.auth.user);
+  const isVendor = admin?.role === "vendor";
 
   const isRestrictedBlogManager =
     admin &&
@@ -306,34 +307,34 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total Revenue"
+          title={isVendor ? "Your Revenue" : "Total Revenue"}
           value={`$${(summary.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={DollarSign}
           color="emerald"
-          change="+8.4%"
+          change={!isVendor ? "+8.4%" : undefined}
           changeType="positive"
-          to="/orders"
+          to={!isVendor ? "/orders" : undefined}
         />
         <StatsCard
-          title="Total Orders"
+          title={isVendor ? "Your Orders" : "Total Orders"}
           value={summary.totalOrders || 0}
           icon={ShoppingCart}
           color="indigo"
-          change="+4.2%"
+          change={!isVendor ? "+4.2%" : undefined}
           changeType="positive"
-          to="/orders"
+          to={!isVendor ? "/orders" : undefined}
         />
         <StatsCard
-          title="Total Customers"
+          title={isVendor ? "Your Customers" : "Total Customers"}
           value={summary.totalCustomers || 0}
           icon={Users}
           color="sky"
-          change="+12.1%"
+          change={!isVendor ? "+12.1%" : undefined}
           changeType="positive"
-          to="/customers"
+          to={!isVendor ? "/customers" : undefined}
         />
         <StatsCard
-          title="Total Products"
+          title={isVendor ? "Your Products" : "Total Products"}
           value={summary.totalProducts || 0}
           icon={ShoppingBag}
           color="violet"
@@ -412,7 +413,7 @@ export default function Dashboard() {
       {/* Top Selling Products & Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Top Products */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6 lg:col-span-2">
+        <div className={`bg-white border border-slate-100 rounded-2xl shadow-xs p-6 ${isVendor ? "lg:col-span-3" : "lg:col-span-2"}`}>
           <h3 className="text-sm font-bold text-slate-700 mb-4">Top Selling Products</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -458,32 +459,34 @@ export default function Dashboard() {
         </div>
 
         {/* Top Categories */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6">
-          <h3 className="text-sm font-bold text-slate-700 mb-4">Top Selling Categories</h3>
-          <div className="space-y-4">
-            {topCategories && topCategories.length > 0 ? (
-              topCategories.map((cat, idx) => (
-                <div key={idx} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                  <div>
-                    <h4 className="font-bold text-slate-850 text-sm capitalize">{cat._id}</h4>
-                    <span className="text-xs text-slate-400">{cat.totalQty} units sold</span>
+        {!isVendor && (
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6">
+            <h3 className="text-sm font-bold text-slate-700 mb-4">Top Selling Categories</h3>
+            <div className="space-y-4">
+              {topCategories && topCategories.length > 0 ? (
+                topCategories.map((cat, idx) => (
+                  <div key={idx} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                    <div>
+                      <h4 className="font-bold text-slate-850 text-sm capitalize">{cat._id}</h4>
+                      <span className="text-xs text-slate-400">{cat.totalQty} units sold</span>
+                    </div>
+                    <span className="font-bold text-slate-800 text-sm">${(cat.totalSales || 0).toFixed(2)}</span>
                   </div>
-                  <span className="font-bold text-slate-800 text-sm">${(cat.totalSales || 0).toFixed(2)}</span>
+                ))
+              ) : (
+                <div className="text-center text-slate-400 py-12 text-sm">
+                  No category sales records.
                 </div>
-              ))
-            ) : (
-              <div className="text-center text-slate-400 py-12 text-sm">
-                No category sales records.
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Tables Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Orders */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6 lg:col-span-2">
+        <div className={`bg-white border border-slate-100 rounded-2xl shadow-xs p-6 ${isVendor ? "lg:col-span-3" : "lg:col-span-2"}`}>
           <h3 className="text-sm font-bold text-slate-700 mb-4">Recent Orders</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -530,36 +533,38 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Activity Log */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6">
-          <h3 className="text-sm font-bold text-slate-700 mb-4">Recent Admin Activity</h3>
-          <div className="space-y-4 max-h-[16.5rem] overflow-y-auto pr-2">
-            {recentActivities.length > 0 ? (
-              recentActivities.map((act, idx) => (
-                <div key={idx} className="flex gap-3 text-xs leading-normal">
-                  <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 shrink-0">
-                    {act.adminName[0]}
+        {!isVendor && (
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-xs p-6">
+            <h3 className="text-sm font-bold text-slate-700 mb-4">Recent Admin Activity</h3>
+            <div className="space-y-4 max-h-[16.5rem] overflow-y-auto pr-2">
+              {recentActivities.length > 0 ? (
+                recentActivities.map((act, idx) => (
+                  <div key={idx} className="flex gap-3 text-xs leading-normal">
+                    <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 shrink-0">
+                      {act.adminName[0]}
+                    </div>
+                    <div>
+                      <p className="text-slate-700">
+                        <strong className="font-semibold text-slate-800">{act.adminName}</strong>{" "}
+                        {act.details}
+                      </p>
+                      <span className="text-[10px] text-slate-400">
+                        {new Date(act.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-slate-700">
-                      <strong className="font-semibold text-slate-800">{act.adminName}</strong>{" "}
-                      {act.details}
-                    </p>
-                    <span className="text-[10px] text-slate-400">
-                      {new Date(act.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center text-slate-400 py-12 text-sm">
+                  No recent activity.
                 </div>
-              ))
-            ) : (
-              <div className="text-center text-slate-400 py-12 text-sm">
-                No recent activity.
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
