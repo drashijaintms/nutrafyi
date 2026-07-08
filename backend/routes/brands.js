@@ -33,13 +33,6 @@ router.get("/", async (req, res) => {
 router.get("/admin/all", protect, async (req, res) => {
   try {
     let query = {};
-    // Vendors see approved brands + their own brands
-    if (req.admin && req.admin.role === "vendor") {
-      query.$or = [
-        { approvalStatus: { $in: ["approved", null] } },
-        { submittedBy: req.admin._id }
-      ];
-    }
     const brands = await Brand.find(query)
       .populate("submittedBy", "name email role")
       .sort({ name: 1 });
