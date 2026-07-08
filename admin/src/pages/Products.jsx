@@ -19,7 +19,9 @@ export default function Products() {
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState("");
   const [stockStatus, setStockStatus] = useState("");
+  const [approvalStatus, setApprovalStatus] = useState("");
   const [page, setPage] = useState(1);
+
 
   // Fetch Categories list for filter dropdown
   const { data: categories = [] } = useQuery({
