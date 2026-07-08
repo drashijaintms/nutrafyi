@@ -724,11 +724,15 @@ function BlogDetail() {
                         to={`/blog/${popBlog.slug}`}
                         className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100"
                       >
-                        <img
-                          src={popBlog.featuredImage || authorProfile}
-                          alt={popBlog.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-250"
-                        />
+                        {popBlog.featuredImage ? (
+                          <img
+                            src={popBlog.featuredImage}
+                            alt={popBlog.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-250"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-slate-100" />
+                        )}
                       </Link>
                       <div className="space-y-1.5">
                         <Link 
