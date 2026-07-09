@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCurrency } from "../context/CurrencyContext";
-import { Heart } from "lucide-react";
+import { Heart, Package } from "lucide-react";
 
 const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 0;
 
@@ -260,11 +260,18 @@ function ProductCard({
           </button>
         )}
 
-        <img
-          src={image}
-          alt={name}
-          className="max-h-full object-contain transition duration-300 group-hover:scale-105"
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={name}
+            className="max-h-full object-contain transition duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-slate-350 gap-2 select-none">
+            <Package size={44} className="text-slate-300 stroke-[1.5]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">No Image</span>
+          </div>
+        )}
       </div>
 
       {/* Bottom Half: Details container */}
