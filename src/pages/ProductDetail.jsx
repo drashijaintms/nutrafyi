@@ -27,12 +27,25 @@ const cleanPrice = (val) => {
 // Gallery Component
 // ────────────────────────────────────────────────
 function Gallery({ images, product }) {
-  const allImages = images.filter(Boolean);
-  const [selected, setSelected] = useState(allImages[0] || null);
+  const allImages = images.filter(Boolean).map(url => ({ type: "image", url }));
+  
+  const hasVideo = product.videoType && (product.videoUrl || product.videoIframe);
+  const mediaItems = [...allImages];
+  
+  if (hasVideo) {
+    mediaItems.push({
+      type: "video",
+      videoType: product.videoType,
+      url: product.videoUrl,
+      iframe: product.videoIframe
+    });
+  }
+
+  const [selected, setSelected] = useState(mediaItems[0] || null);
 
   useEffect(() => {
-    setSelected(allImages[0] || null);
-  }, [images[0]]);
+    setSelected(mediaItems[0] || null);
+  }, [images[0], product.videoType, product.videoUrl, product.videoIframe]);
 
   return (
     <div className="pd-gallery">
@@ -47,10 +60,23 @@ function Gallery({ images, product }) {
         )}
       </div>
 
-      {/* Main Image */}
+      {/* Main Image or Video */}
       <div className="pd-gallery-main">
         {selected ? (
-          <img src={selected} alt={product.title} className="pd-gallery-img" />
+          selected.type === "image" ? (
+            <img src={selected.url} alt={product.title} className="pd-gallery-img" />
+          ) : selected.videoType === "url" ? (
+            selected.url.toLowerCase().endsWith(".gif") ? (
+              <img src={selected.url} alt={product.title} className="pd-gallery-img" />
+            ) : (
+              <video src={selected.url} controls className="pd-gallery-video" />
+            )
+          ) : (
+            <div 
+              className="pd-gallery-iframe-wrapper" 
+              dangerouslySetInnerHTML={{ __html: selected.iframe }} 
+            />
+          )
         ) : (
           <div className="pd-gallery-placeholder">
             <Package size={64} color="#ccc" />
@@ -60,17 +86,30 @@ function Gallery({ images, product }) {
       </div>
 
       {/* Thumbnails */}
-      {allImages.length > 1 && (
+      {mediaItems.length > 1 && (
         <div className="pd-gallery-thumbs">
-          {allImages.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => setSelected(img)}
-              className={`pd-gallery-thumb${selected === img ? " active" : ""}`}
-            >
-              <img src={img} alt={`View ${i + 1}`} />
-            </button>
-          ))}
+          {mediaItems.map((item, i) => {
+            const isActive = selected && (
+              (item.type === "image" && selected.type === "image" && item.url === selected.url) ||
+              (item.type === "video" && selected.type === "video")
+            );
+            return (
+              <button
+                key={i}
+                onClick={() => setSelected(item)}
+                className={`pd-gallery-thumb${isActive ? " active" : ""}`}
+              >
+                {item.type === "image" ? (
+                  <img src={item.url} alt={`View ${i + 1}`} />
+                ) : (
+                  <div className="pd-gallery-thumb-video-placeholder">
+                    <span className="text-lg">▶</span>
+                    <span className="text-[9px] uppercase font-bold tracking-wider mt-0.5">Video</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

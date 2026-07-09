@@ -124,6 +124,11 @@ const ProductSchema = new mongoose.Schema(
     deleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
 
+    // Video/Iframe media support
+    videoType: { type: String, enum: ["url", "iframe", ""], default: "" },
+    videoUrl: { type: String, default: "" },
+    videoIframe: { type: String, default: "" },
+
     // Vendor Approval Workflow
     approvalStatus: {
       type: String,

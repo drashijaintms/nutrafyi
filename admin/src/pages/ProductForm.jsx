@@ -32,6 +32,9 @@ export default function ProductForm() {
   const [shortDescription, setShortDescription] = useState("");
   const [image, setImage] = useState("");
   const [gallery, setGallery] = useState([]);
+  const [videoType, setVideoType] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoIframe, setVideoIframe] = useState("");
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
   const [brand, setBrand] = useState("");
@@ -121,6 +124,7 @@ export default function ProductForm() {
     { id: "linked", label: "Linked Products" },
     { id: "attributes", label: "Attributes" },
     ...(productType === "Variable" ? [{ id: "variations", label: "Variations" }] : []),
+    { id: "media", label: "Video / Iframe" },
   ];
 
   useEffect(() => {
@@ -279,6 +283,9 @@ export default function ProductForm() {
       setShortDescription(productData.shortDescription || "");
       setImage(productData.image || "");
       setGallery(productData.gallery || []);
+      setVideoType(productData.videoType || "");
+      setVideoUrl(productData.videoUrl || "");
+      setVideoIframe(productData.videoIframe || "");
       setCategory(productData.category || "");
       setSubcategory(productData.subcategory || "");
       setBrand(productData.brand || "");
@@ -606,6 +613,9 @@ export default function ProductForm() {
       externalUrl,
       buttonText,
       digitalFile,
+      videoType,
+      videoUrl,
+      videoIframe,
       status,
       attributes,
       variations,
@@ -1677,6 +1687,56 @@ saveMutation.mutate(payload);
                           </div>
                         )}
                       </>
+                    )}
+                  </div>
+                )}
+                {activeTab === "media" && (
+                  <div className="space-y-5 animate-in fade-in duration-150">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                        Video / Embed Type
+                      </label>
+                      <select
+                        value={videoType}
+                        onChange={(e) => setVideoType(e.target.value)}
+                        className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                      >
+                        <option value="">No Video</option>
+                        <option value="url">Direct Video URL or GIF (mp4, webm, gif)</option>
+                        <option value="iframe">Iframe Code (YouTube, Instagram, Facebook, Google Drive, etc.)</option>
+                      </select>
+                    </div>
+
+                    {videoType === "url" && (
+                      <div className="animate-in fade-in duration-100">
+                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                          Video URL / GIF URL
+                        </label>
+                        <input
+                          type="text"
+                          value={videoUrl}
+                          onChange={(e) => setVideoUrl(e.target.value)}
+                          placeholder="https://example.com/assets/product-video.mp4 or .gif"
+                          className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                        />
+                        <span className="text-[10px] text-slate-400 mt-1 block">Paste the direct link to a video file (.mp4, .webm) or animated GIF.</span>
+                      </div>
+                    )}
+
+                    {videoType === "iframe" && (
+                      <div className="animate-in fade-in duration-100">
+                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                          Iframe Embed Code
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={videoIframe}
+                          onChange={(e) => setVideoIframe(e.target.value)}
+                          placeholder='<iframe width="560" height="315" src="https://www.youtube.com/embed/..." frameborder="0" allowfullscreen></iframe>'
+                          className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono"
+                        />
+                        <span className="text-[10px] text-slate-400 mt-1 block">Paste the HTML iframe code provided by YouTube, Instagram, Facebook, or other video hosting sites.</span>
+                      </div>
                     )}
                   </div>
                 )}
