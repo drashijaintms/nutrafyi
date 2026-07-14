@@ -7,6 +7,9 @@ import { productImages } from "../data/productImages";
 
 const resolveProductImage = (img, slug) => {
   if (!img) return "";
+  if (img.trim().startsWith("<iframe") || img.trim().startsWith("<div") || img.includes("</iframe>")) {
+    return "";
+  }
   if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/")) {
     return img;
   }

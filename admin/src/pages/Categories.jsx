@@ -26,6 +26,7 @@ export default function Categories() {
   const [slug, setSlug] = useState("");
   const [parentCategory, setParentCategory] = useState("");
   const [image, setImage] = useState("");
+  const [imageAltText, setImageAltText] = useState("");
   const [description, setDescription] = useState("");
   const [order, setOrder] = useState(0);
 
@@ -109,6 +110,7 @@ export default function Categories() {
     setSlug("");
     setParentCategory("");
     setImage("");
+    setImageAltText("");
     setDescription("");
     setOrder(0);
   };
@@ -119,6 +121,7 @@ export default function Categories() {
     setSlug(cat.slug);
     setParentCategory(cat.parentCategory || "");
     setImage(cat.image || "");
+    setImageAltText(cat.imageAltText || "");
     setDescription(cat.description || "");
     setOrder(cat.order || 0);
   };
@@ -138,6 +141,7 @@ export default function Categories() {
       slug: slug || undefined,
       parentCategory: parentCategory || null,
       image,
+      imageAltText,
       description,
       order: parseInt(order) || 0,
     });
@@ -223,7 +227,7 @@ export default function Categories() {
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">
                 Category Image
               </label>
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center mb-2">
                 <input
                   type="text"
                   value={image}
@@ -242,6 +246,13 @@ export default function Categories() {
                   />
                 </label>
               </div>
+              <input
+                type="text"
+                value={imageAltText}
+                onChange={(e) => setImageAltText(e.target.value)}
+                placeholder="Category Image Alt Text"
+                className="w-full text-sm px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+              />
               {image && (
                 <div className="mt-3 relative w-20 h-20 border border-slate-100 rounded-xl overflow-hidden bg-slate-50 shadow-xs flex items-center justify-center p-1 group">
                   <img src={resolveCategoryImage(image, slug)} alt="Category Preview" className="max-h-full max-w-full object-contain" />

@@ -182,6 +182,12 @@
   object-fit: contain;
 }
 
+.pd-gallery-thumb div img {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .pd-gallery-thumb-video-placeholder {
   display: flex;
   flex-direction: column;
@@ -561,6 +567,18 @@
 }
 
 /* Buttons */
+.pd-cta-buttons-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.pd-cta-buttons-wrap .pd-btn-primary,
+.pd-cta-buttons-wrap .pd-btn-secondary {
+  margin-bottom: 0 !important;
+}
+
 .pd-btn-primary {
   display: flex;
   align-items: center;
@@ -990,4 +1008,294 @@
   font-size: 0.95rem;
   line-height: 1.85;
   color: #555;
+}
+
+@media (max-width: 1100px) {
+  .pd-cta-buttons-wrap {
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0.75rem !important;
+  }
+  .pd-cta-buttons-wrap .pd-btn-primary,
+  .pd-cta-buttons-wrap .pd-btn-secondary {
+    flex: 1 1 50% !important;
+    width: 50% !important;
+    height: 50px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* ── Product FAQs Section ── */
+.pd-faq-section {
+  padding: 4.5rem 0;
+  background-color: #fafaf7;
+  border-top: 1px solid #e5e5db;
+}
+
+.pd-faq-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pd-faq-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.pd-faq-item {
+  border: 1px solid #e5e5db;
+  border-radius: 16px;
+  background-color: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pd-faq-item:hover {
+  border-color: rgba(20, 122, 63, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.pd-faq-trigger {
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #111;
+  outline: none;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+.pd-faq-icon {
+  font-size: 1.25rem;
+  color: #147a3f;
+  font-weight: 900;
+  transition: transform 0.25s ease;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.pd-faq-trigger[aria-expanded="true"] .pd-faq-icon {
+  transform: rotate(180deg);
+}
+
+.pd-faq-content-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease-out;
+}
+
+.pd-faq-content-wrapper.open {
+  grid-template-rows: 1fr;
+}
+
+.pd-faq-content-inner {
+  overflow: hidden;
+  transition: visibility 0.25s;
+  visibility: hidden;
+}
+
+.pd-faq-content-wrapper.open .pd-faq-content-inner {
+  visibility: visible;
+}
+
+.pd-faq-content {
+  padding: 0 1.5rem 1.25rem 1.5rem;
+  font-size: 0.925rem;
+  line-height: 1.75;
+  color: #555;
+  font-family: 'Poppins', sans-serif;
+  border-top: 1px solid #f2f2eb;
+  padding-top: 1.25rem;
+}
+
+/* ── Brand Information Section ── */
+.pd-brand-info-section {
+  padding: 4.5rem 0;
+  background: linear-gradient(135deg, #f0faf4 0%, #fafaf7 100%);
+  border-top: 1px solid #e5e5db;
+}
+
+.pd-brand-info-container {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.pd-brand-info-card {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid #e5e5db;
+  overflow: hidden;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.04);
+}
+
+.pd-brand-info-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 1px solid #f2f2eb;
+  flex-wrap: wrap;
+}
+
+.pd-brand-logo-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  border: 1px solid #e5e5db;
+  background: #fafaf7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 8px;
+  flex-shrink: 0;
+}
+
+.pd-brand-logo-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.pd-brand-info-name-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.pd-brand-info-name-wrap h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.pd-brand-info-name-wrap p {
+  font-size: 0.85rem;
+  color: #777;
+  margin: 0;
+}
+
+.pd-brand-website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: 50px;
+  border: 1.5px solid #147a3f;
+  color: #147a3f;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.pd-brand-website-link:hover {
+  background: #147a3f;
+  color: #fff;
+}
+
+.pd-brand-info-body {
+  padding: 1.75rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 640px) {
+  .pd-brand-info-body {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+  .pd-brand-info-header {
+    padding: 1.25rem;
+  }
+}
+
+.pd-brand-description {
+  grid-column: 1 / -1;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: #555;
+}
+
+.pd-brand-contact-block,
+.pd-brand-social-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pd-brand-contact-block h4,
+.pd-brand-social-block h4 {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.25rem;
+}
+
+.pd-brand-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #444;
+  text-decoration: none;
+}
+
+.pd-brand-contact-row svg {
+  width: 15px;
+  height: 15px;
+  color: #147a3f;
+  flex-shrink: 0;
+}
+
+.pd-brand-contact-row:hover {
+  color: #147a3f;
+}
+
+.pd-brand-social-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.pd-brand-social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e5e5db;
+  color: #555;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  font-size: 0;
+}
+
+.pd-brand-social-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pd-brand-social-icon:hover {
+  background: #147a3f;
+  border-color: #147a3f;
+  color: #fff;
 }

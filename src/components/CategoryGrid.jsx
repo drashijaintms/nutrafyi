@@ -114,6 +114,7 @@ function CategoryGrid() {
                   description={category.description}
                   slug={category.slug}
                   productCount={count}
+                  altText={category.imageAltText}
                 />
               );
             })

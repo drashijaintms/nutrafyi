@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import { Leaf, ShieldCheck, Send, CheckCircle2, Headset, Package, MapPin, Clock, Mail, Phone, ChevronDown, ChevronRight } from "lucide-react";
 import contactHeroBg from "../assets/contact-hero-bg.png";
 import contactCtaPlants from "../assets/contact-cta-plants.png";
@@ -15,6 +16,8 @@ function Contact() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [activeFaq, setActiveFaq] = useState(null); // Only one FAQ open at a time
 
   const handleChange = (e) => {
@@ -22,13 +25,26 @@ function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      await axios.post("/api/contacts", formData);
+      setSubmitted(true);
       setFormData({ name: "", email: "", subject: "", message: "" });
-    }, 4000);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 5000);
+    } catch (err) {
+      console.error("Error submitting contact form:", err);
+      setErrorMsg(
+        err.response?.data?.message ||
+          "Failed to send your message. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleFaq = (index) => {
@@ -185,6 +201,11 @@ function Contact() {
                     </p>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
+                      {errorMsg && (
+                        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-[13px] rounded-lg font-['Poppins']">
+                          {errorMsg}
+                        </div>
+                      )}
                       {/* Name */}
                       <div>
                         <label 
@@ -265,9 +286,10 @@ function Contact() {
                       <div className="pt-2">
                         <button
                           type="submit"
-                          className="w-auto px-6 py-3 bg-[#0a3d24] hover:bg-[#062616] text-white font-bold rounded-lg text-[13.5px] transition flex items-center justify-center gap-2 cursor-pointer font-['Poppins'] shadow-xs"
+                          disabled={loading}
+                          className={`w-auto px-6 py-3 bg-[#0a3d24] hover:bg-[#062616] text-white font-bold rounded-lg text-[13.5px] transition flex items-center justify-center gap-2 cursor-pointer font-['Poppins'] shadow-xs ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                         >
-                          <span>Send Message</span>
+                          <span>{loading ? "Sending..." : "Send Message"}</span>
                           <Send className="w-3.5 h-3.5" />
                         </button>
                       </div>

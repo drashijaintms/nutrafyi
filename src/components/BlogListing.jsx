@@ -74,6 +74,7 @@ function BlogListing() {
             slug: b.slug,
             category: b.categories && b.categories.length > 0 ? b.categories[0] : "General",
             image: b.featuredImage || "", // do not add default feature image
+            featuredImageAltText: b.featuredImageAltText || "",
             date: new Date(b.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "2-digit",
@@ -206,6 +207,7 @@ const popularPosts = [
                     date={blog.date}
                     slug={blog.slug}
                     excerpt={blog.excerpt}
+                    altText={blog.featuredImageAltText}
                   />
                 ))}
               </div>

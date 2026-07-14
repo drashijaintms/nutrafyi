@@ -11,7 +11,11 @@ import { productImages } from "../data/productImages";
 import headingLeaf from "../assets/heading-leaf.png";
 
 const resolveProductImage = (img, slug) => {
-  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+  if (!img) return null;
+  if (img.trim().startsWith("<iframe") || img.trim().startsWith("<div") || img.includes("</iframe>")) {
+    return null;
+  }
+  if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/")) {
     return img;
   }
   return productImages[img] || productImages[slug] || img;
@@ -62,6 +66,10 @@ function CategoryDetail() {
 
   const selectedDietary = searchParams.get("dietary")
     ? searchParams.get("dietary").split(",")
+    : [];
+
+  const selectedBrands = searchParams.get("brand")
+    ? searchParams.get("brand").split(",")
     : [];
 
   const minPrice = searchParams.get("minPrice")
@@ -115,7 +123,22 @@ function CategoryDetail() {
       if (!selectedDietary.includes(diet)) return false;
     }
 
-    // 4. Price range filter
+    // 4. Brand filter
+    if (selectedBrands.length > 0) {
+      const productBrand = product.brand || "";
+      const matchesBrand = selectedBrands.some((b) => {
+        const searchVal = b.toLowerCase();
+        const pBrand = productBrand.toLowerCase();
+        return (
+          pBrand === searchVal ||
+          pBrand.replace(/\s+/g, "-") === searchVal ||
+          searchVal.replace(/\s+/g, "-") === pBrand
+        );
+      });
+      if (!matchesBrand) return false;
+    }
+
+    // 5. Price range filter
     const priceNum = toNum(product.regularPrice || product.price);
     if (priceNum < minPrice || priceNum > maxPrice) return false;
 
@@ -166,10 +189,10 @@ if (sortBy === "z-a") {
       <section className="py-10">
         <div className="max-w-7xl mx-auto px-4">
 
-          <div className="flex gap-8">
+          <div className="flex flex-col lg:flex-row gap-8">
 
             {/* Sidebar */}
-            <div className="w-[280px] shrink-0">
+            <div className="w-full lg:w-[280px] shrink-0">
               <CategorySidebar />
             </div>
 
@@ -255,6 +278,7 @@ if (sortBy === "z-a") {
       key={product._id}
       id={product._id}
       image={resolveProductImage(product.image, product.slug)}
+      imageAltText={product.imageAltText}
       name={product.title}
       price={product.price}
       regularPrice={product.regularPrice}

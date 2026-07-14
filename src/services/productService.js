@@ -17,9 +17,9 @@ export const getProducts = async () => {
 // GET SINGLE PRODUCT
 export const getProduct = async (slug) => {
   try {
-    const response = await axios.get(
-      `${API_URL}/${slug}`
-    );
+    const isPreview = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("preview") === "true";
+    const url = isPreview ? `${API_URL}/${slug}?preview=true` : `${API_URL}/${slug}`;
+    const response = await axios.get(url);
 
     return response.data;
   } catch (error) {

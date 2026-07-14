@@ -42,7 +42,9 @@ function BlogDetail() {
     const loadBlogAndTrackView = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`/api/blogs/${slug}`);
+        const isPreview = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("preview") === "true";
+        const url = isPreview ? `/api/blogs/${slug}?preview=true` : `/api/blogs/${slug}`;
+        const res = await axios.get(url);
         setBlog(res.data);
         setLoading(false);
 
@@ -330,7 +332,7 @@ function BlogDetail() {
               <div className="w-full overflow-hidden rounded-[24px] border border-slate-100 shadow-xs">
                 <img
                   src={blog.featuredImage}
-                  alt={blog.title}
+                  alt={blog.featuredImageAltText || blog.title}
                   className="w-full h-auto object-cover max-h-[480px]"
                 />
               </div>
@@ -727,7 +729,7 @@ function BlogDetail() {
                         {popBlog.featuredImage ? (
                           <img
                             src={popBlog.featuredImage}
-                            alt={popBlog.title}
+                            alt={popBlog.featuredImageAltText || popBlog.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-250"
                           />
                         ) : (

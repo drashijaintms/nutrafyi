@@ -6,6 +6,7 @@ function CategoryCard({
   description,
   slug,
   productCount = 0,
+  altText,
 }) {
   return (
    <Link
@@ -26,7 +27,7 @@ function CategoryCard({
       {/* Image */}
       <img
         src={image}
-        alt={title}
+        alt={altText || title}
         className="
           w-full
           h-[180px]

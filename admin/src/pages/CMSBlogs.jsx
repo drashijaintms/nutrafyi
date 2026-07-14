@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import API from "../services/api";
 import Loader from "../components/Loader";
@@ -38,6 +38,10 @@ import {
   ResponsiveContainer
 } from "recharts";
 
+const getStorefrontUrl = (path) => {
+  return `${window.location.origin}${path}`;
+};
+
 export default function CMSBlogs() {
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -75,6 +79,7 @@ export default function CMSBlogs() {
   const [slug, setSlug] = useState("");
   const [content, setContent] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
+  const [featuredImageAltText, setFeaturedImageAltText] = useState("");
   const [selectedCategories, setSelectedCategories] = useState(["General"]);
   const [tagsInput, setTagsInput] = useState("");
   const [status, setStatus] = useState("Published");
@@ -112,7 +117,7 @@ export default function CMSBlogs() {
   const { data: blogs = [], isLoading } = useQuery({
     queryKey: ["cmsBlogs"],
     queryFn: async () => {
-      const res = await API.get("/blogs");
+      const res = await API.get("/blogs?admin=true");
       return res.data;
     },
   });
@@ -209,6 +214,7 @@ export default function CMSBlogs() {
     setSlug("");
     setContent("");
     setFeaturedImage("");
+    setFeaturedImageAltText("");
     setSelectedCategories(["General"]);
     setTagsInput("");
     setStatus("Published");
@@ -439,10 +445,19 @@ export default function CMSBlogs() {
                       } else {
                         editor.dom.setAttrib(anchorNode, "rel", null);
                       }
-                      anchorNode.textContent = textToDisplay;
+                      const containsImg = anchorNode.getElementsByTagName("img").length > 0 || anchorNode.getElementsByTagName("svg").length > 0;
+                      if (!containsImg) {
+                        anchorNode.textContent = textToDisplay;
+                      }
                     } else {
-                      const linkHtml = `<a href="${data.url}"${titleAttr}${targetAttr}${relString}>${textToDisplay}</a>`;
-                      editor.insertContent(linkHtml);
+                      const selectedHtml = editor.selection.getContent({ format: "html" }) || "";
+                      if (selectedHtml.includes("<img") || selectedHtml.includes("<svg")) {
+                        const linkHtml = `<a href="${data.url}"${titleAttr}${targetAttr}${relString}>${selectedHtml}</a>`;
+                        editor.insertContent(linkHtml);
+                      } else {
+                        const linkHtml = `<a href="${data.url}"${titleAttr}${targetAttr}${relString}>${textToDisplay}</a>`;
+                        editor.insertContent(linkHtml);
+                      }
                     }
                     api.close();
                   }
@@ -768,6 +783,7 @@ export default function CMSBlogs() {
     setSlug(b.slug);
     setContent(b.content || "");
     setFeaturedImage(b.featuredImage || "");
+    setFeaturedImageAltText(b.featuredImageAltText || "");
     setSelectedCategories(b.categories && b.categories.length > 0 ? b.categories : ["General"]);
     setTagsInput(b.tags?.join(", ") || "");
     setStatus(b.status || "Published");
@@ -834,6 +850,7 @@ export default function CMSBlogs() {
       slug: slug || undefined,
       content,
       featuredImage,
+      featuredImageAltText,
       categories: selectedCategories,
       tags: tagsInput.split(",").map((t) => t.trim()).filter(Boolean),
       status: targetStatus,
@@ -899,11 +916,37 @@ export default function CMSBlogs() {
     const success = await savePost(true);
     if (success) {
       toast.success("Opening preview...", { id: toastId });
-      window.open(`/blog/${slug}`, "_blank");
+      window.open(getStorefrontUrl(`/blog/${slug}?preview=true`), "_blank");
     } else {
       toast.error("Failed to prepare preview", { id: toastId });
     }
   };
+
+  const autosaveRef = useRef();
+
+  useEffect(() => {
+    autosaveRef.current = () => {
+      if (title.trim() && content.trim()) {
+        savePost(true).then(success => {
+          if (success) {
+            toast.success("Draft autosaved successfully", { id: "blog-autosave-toast", duration: 1500 });
+          }
+        });
+      }
+    };
+  });
+
+  useEffect(() => {
+    if (viewState !== "create" && viewState !== "edit") return;
+    
+    const interval = setInterval(() => {
+      if (autosaveRef.current) {
+        autosaveRef.current();
+      }
+    }, 2 * 60 * 1000); // 2 minutes
+
+    return () => clearInterval(interval);
+  }, [viewState]);
 
   // Toggle Category Selection checkbox
   const handleCategoryCheckboxChange = (catName) => {
@@ -2247,7 +2290,7 @@ export default function CMSBlogs() {
                   <FileText className="w-4 h-4 text-slate-400" /> Featured Image
                 </h3>
                 
-                <label className="block border-2 border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50/10 hover:bg-slate-50/40 hover:border-slate-300 transition-all cursor-pointer text-center relative min-h-[140px] flex flex-col items-center justify-center">
+                <label className="block border-2 border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50/10 hover:bg-slate-50/40 hover:border-slate-300 transition-all cursor-pointer text-center relative min-h-[140px] flex flex-col items-center justify-center mb-3">
                   <input
                     type="file"
                     accept="image/*"
@@ -2285,6 +2328,14 @@ export default function CMSBlogs() {
                     </div>
                   )}
                 </label>
+
+                <input
+                  type="text"
+                  value={featuredImageAltText}
+                  onChange={(e) => setFeaturedImageAltText(e.target.value)}
+                  placeholder="Featured Image Alt Text"
+                  className="w-full text-sm px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all"
+                />
               </div>
             </div>
           </div>

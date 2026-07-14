@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import Admins from "./pages/Admins";
 import TrashBin from "./pages/TrashBin";
 import ApprovalQueue from "./pages/ApprovalQueue";
+import Contacts from "./pages/Contacts";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -149,6 +150,14 @@ export default function App() {
           element={
             <ProtectedRoute resource="reviews">
               <Reviews />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute>
+              <Contacts />
             </ProtectedRoute>
           }
         />

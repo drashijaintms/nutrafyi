@@ -695,6 +695,11 @@ export default function ProductDetail() {
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVariation, setSelectedVariation] = useState(null);
+  const [activeFaqIndex, setActiveFaqIndex] = useState(null);
+
+  const toggleFaq = (idx) => {
+    setActiveFaqIndex(prev => prev === idx ? null : idx);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -749,7 +754,74 @@ export default function ProductDetail() {
         document.head.appendChild(canonicalLink);
       }
       canonicalLink.setAttribute('href', product.seo?.canonicalUrl || window.location.href);
+
+      // ── Schema Injection ──────────────────────────────────────────────
+      // Each schema type gets its own <script type="application/ld+json"> tag.
+      // They all COEXIST in the <head> — Google supports multiple JSON-LD blocks per page.
+      // We use [data-product-schema] to track every script we inject so we can
+      // cleanly remove them all on unmount / product change without touching
+      // any pre-existing schemas added by other parts of the app.
+
+      // 1. First remove any schemas we previously injected for this product page
+      document.querySelectorAll("script[data-product-schema]").forEach(el => el.remove());
+
+      const injectSchema = (type, payload) => {
+        const script = document.createElement("script");
+        script.setAttribute("type", "application/ld+json");
+        script.setAttribute("data-product-schema", type);   // track, not replace
+        script.textContent = typeof payload === "string" ? payload : JSON.stringify(payload);
+        document.head.appendChild(script);
+      };
+
+      // 2. FAQ Schema — auto-generated from product.faqs array
+      if (product.faqs && product.faqs.length > 0) {
+        injectSchema("faq", {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": product.faqs.map(f => ({
+            "@type": "Question",
+            "name": f.question,
+            "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+          }))
+        });
+      }
+
+      // 3. Brand Schema — auto-generated from product.brandInfo
+      if (product.brandInfo) {
+        const b = product.brandInfo;
+        const sameAs = [
+          b.socialLinks?.facebook,
+          b.socialLinks?.instagram,
+          b.socialLinks?.linkedin,
+          b.socialLinks?.twitter,
+        ].filter(Boolean);
+        injectSchema("brand", {
+          "@context": "https://schema.org",
+          "@type": "Brand",
+          "name": b.name,
+          ...(b.websiteUrl   && { "url": b.websiteUrl }),
+          ...(b.logo         && { "logo": b.logo }),
+          ...(b.description  && { "description": b.description }),
+          ...(b.contactEmail && { "email": b.contactEmail }),
+          ...(b.contactNumber && { "telephone": b.contactNumber }),
+          ...(sameAs.length  > 0 && { "sameAs": sameAs }),
+        });
+      }
+
+      // 4. Custom Schema Override — appended ALONGSIDE the auto-generated schemas,
+      //    not instead of them. The admin can paste any valid JSON-LD here
+      //    (e.g. a Product, Organization, or Review schema) and it will live
+      //    as its own separate <script> tag in the head.
+      if (product.schemaOverride && product.schemaOverride.trim()) {
+        injectSchema("custom-override", product.schemaOverride.trim());
+      }
     }
+
+    // Cleanup: remove all schemas we injected when the component unmounts
+    // or before the effect re-runs for a different product.
+    return () => {
+      document.querySelectorAll("script[data-product-schema]").forEach(el => el.remove());
+    };
   }, [product]);
 
   if (loading) {
@@ -940,7 +1012,147 @@ export default function ProductDetail() {
             </div>
           </section>
         )}
+
+        {/* ── FAQs Section ── */}
+        {product.faqs && product.faqs.length > 0 && (
+          <section className="pd-faq-section">
+            <div className="pd-faq-container">
+              <h2 className="pd-section-title">Frequently Asked Questions</h2>
+              <div className="pd-faq-accordion">
+                {product.faqs.map((faq, idx) => {
+                  const isOpen = activeFaqIndex === idx;
+                  return (
+                    <div key={idx} className="pd-faq-item">
+                      <button
+                        type="button"
+                        onClick={() => toggleFaq(idx)}
+                        aria-expanded={isOpen}
+                        className="pd-faq-trigger"
+                      >
+                        <span>{faq.question}</span>
+                        <span className="pd-faq-icon">{isOpen ? "−" : "+"}</span>
+                      </button>
+                      <div className={`pd-faq-content-wrapper ${isOpen ? "open" : ""}`}>
+                        <div className="pd-faq-content-inner">
+                          <div className="pd-faq-content">
+                            {faq.answer}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
       </div>
+
+      {/* ── Brand Information Section ── */}
+      {product.brandInfo && (
+        <section className="pd-brand-info-section">
+          <div className="pd-brand-info-container">
+            <h2 className="pd-section-title" style={{ marginBottom: "1.5rem" }}>About the Brand</h2>
+            <div className="pd-brand-info-card">
+              {/* Header: Logo + Name + Website */}
+              <div className="pd-brand-info-header">
+                {product.brandInfo.logo && (
+                  <div className="pd-brand-logo-wrap">
+                    <img
+                      src={product.brandInfo.logo}
+                      alt={product.brandInfo.logoAltText || product.brandInfo.name}
+                    />
+                  </div>
+                )}
+                <div className="pd-brand-info-name-wrap">
+                  <h3>{product.brandInfo.name}</h3>
+                  {product.brandInfo.websiteUrl && (
+                    <p>{new URL(product.brandInfo.websiteUrl).hostname}</p>
+                  )}
+                </div>
+                {product.brandInfo.websiteUrl && (
+                  <a
+                    href={product.brandInfo.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="pd-brand-website-link"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                    Visit Website
+                  </a>
+                )}
+                {/* Know More — opens dedicated brand page */}
+                {(product.brandInfo.slug || product.brandInfo.name) && (
+                  <Link
+                    to={`/brands/${product.brandInfo.slug || product.brandInfo.name.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w-]+/g, "")}`}
+                    className="pd-brand-website-link"
+                    style={{ borderColor: "#147a3f", color: "#147a3f", background: "transparent" }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    Know More
+                  </Link>
+                )}
+              </div>
+
+              {/* Body */}
+              <div className="pd-brand-info-body">
+                {product.brandInfo.description && (
+                  <p className="pd-brand-description">{product.brandInfo.description}</p>
+                )}
+
+                {/* Contact Info */}
+                {(product.brandInfo.contactEmail || product.brandInfo.contactNumber) && (
+                  <div className="pd-brand-contact-block">
+                    <h4>Contact</h4>
+                    {product.brandInfo.contactEmail && (
+                      <a href={`mailto:${product.brandInfo.contactEmail}`} className="pd-brand-contact-row">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        {product.brandInfo.contactEmail}
+                      </a>
+                    )}
+                    {product.brandInfo.contactNumber && (
+                      <a href={`tel:${product.brandInfo.contactNumber}`} className="pd-brand-contact-row">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12.1 19.79 19.79 0 0 1 1 3.38 2 2 0 0 1 2.96 1.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21 14.76z"/></svg>
+                        {product.brandInfo.contactNumber}
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Social Links */}
+                {(product.brandInfo.socialLinks?.facebook || product.brandInfo.socialLinks?.instagram ||
+                  product.brandInfo.socialLinks?.linkedin || product.brandInfo.socialLinks?.twitter) && (
+                  <div className="pd-brand-social-block">
+                    <h4>Follow Us</h4>
+                    <div className="pd-brand-social-icons">
+                      {product.brandInfo.socialLinks?.facebook && (
+                        <a href={product.brandInfo.socialLinks.facebook} target="_blank" rel="noreferrer" className="pd-brand-social-icon" title="Facebook">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        </a>
+                      )}
+                      {product.brandInfo.socialLinks?.instagram && (
+                        <a href={product.brandInfo.socialLinks.instagram} target="_blank" rel="noreferrer" className="pd-brand-social-icon" title="Instagram">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                        </a>
+                      )}
+                      {product.brandInfo.socialLinks?.linkedin && (
+                        <a href={product.brandInfo.socialLinks.linkedin} target="_blank" rel="noreferrer" className="pd-brand-social-icon" title="LinkedIn">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                        </a>
+                      )}
+                      {product.brandInfo.socialLinks?.twitter && (
+                        <a href={product.brandInfo.socialLinks.twitter} target="_blank" rel="noreferrer" className="pd-brand-social-icon" title="Twitter / X">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <Testimonials />
       <NewsletterSection />

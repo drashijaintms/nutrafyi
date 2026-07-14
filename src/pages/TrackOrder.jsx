@@ -5,7 +5,11 @@ import { Search, Package, CheckCircle2, Truck, Check, HelpCircle } from "lucide-
 import { productImages } from "../data/productImages";
 
 const resolveProductImage = (img, slug) => {
-  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+  if (!img) return null;
+  if (img.trim().startsWith("<iframe") || img.trim().startsWith("<div") || img.includes("</iframe>")) {
+    return null;
+  }
+  if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/")) {
     return img;
   }
   return productImages[img] || productImages[slug] || img;

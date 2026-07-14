@@ -12,10 +12,10 @@ function Category() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4">
 
-          <div className="flex gap-8">
+          <div className="flex flex-col lg:flex-row gap-8">
 
             {/* Left Sidebar */}
-            <div className="w-[280px]">
+            <div className="w-full lg:w-[280px] shrink-0">
               <CategorySidebar />
             </div>
 

@@ -5,7 +5,9 @@ const ProductSchema = new mongoose.Schema(
     title: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
     image: { type: String, default: "" }, // Featured image
+    imageAltText: { type: String, default: "" },
     gallery: [{ type: String }],          // Gallery images
+    galleryAltText: [{ type: String }],
     price: { type: String, default: "" }, // Standard price / regular price
     regularPrice: { type: String, default: "" },
     salePrice: { type: String, default: "" },
@@ -128,6 +130,17 @@ const ProductSchema = new mongoose.Schema(
     videoType: { type: String, enum: ["url", "iframe", ""], default: "" },
     videoUrl: { type: String, default: "" },
     videoIframe: { type: String, default: "" },
+
+    // FAQs Accordion List
+    faqs: [
+      {
+        question: { type: String, required: true },
+        answer: { type: String, required: true },
+      }
+    ],
+
+    // JSON-LD Schema Override
+    schemaOverride: { type: String, default: "" },
 
     // Vendor Approval Workflow
     approvalStatus: {

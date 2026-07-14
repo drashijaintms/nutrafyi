@@ -42,6 +42,20 @@ router.get("/admin/all", protect, async (req, res) => {
   }
 });
 
+// GET BRAND BY SLUG (Public storefront - only approved) — MUST be before /:id
+router.get("/slug/:slug", async (req, res) => {
+  try {
+    const brand = await Brand.findOne({
+      slug: req.params.slug,
+      approvalStatus: { $in: ["approved", null] }
+    });
+    if (!brand) return res.status(404).json({ message: "Brand not found" });
+    res.json(brand);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // GET BRAND BY ID
 router.get("/:id", async (req, res) => {
   try {

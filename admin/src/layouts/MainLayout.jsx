@@ -50,6 +50,7 @@ export default function MainLayout({ children }) {
     { label: "Customers", path: "/customers", icon: Users, resource: "users_view" },
     { label: "Coupons", path: "/coupons", icon: Tag, resource: "coupons" },
     { label: "Reviews", path: "/reviews", icon: MessageSquare, resource: "reviews" },
+    { label: "Contact Messages", path: "/contacts", icon: MessageSquare },
     { label: "Inventory", path: "/inventory", icon: PackageCheck, resource: "inventory" },
     { label: "CMS Pages", path: "/pages", icon: FileText, resource: "pages" },
     { label: "CMS Blogs", path: "/blogs", icon: FileText, resource: "blogs" },

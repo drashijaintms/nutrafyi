@@ -1,8 +1,27 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaGoogle } from "react-icons/fa";
 import footerLogo from "../assets/footer-logo.png";
+import axios from "axios";
 
 function Footer() {
+  const [cmsPages, setCmsPages] = useState([]);
+
+  useEffect(() => {
+    const fetchPages = async () => {
+      try {
+        const res = await axios.get("/api/pages");
+        if (res.data) {
+          const published = res.data.filter(p => p.status === "Published");
+          setCmsPages(published);
+        }
+      } catch (err) {
+        console.error("Error loading pages for footer:", err);
+      }
+    };
+    fetchPages();
+  }, []);
+
   return (
     <footer>
 
@@ -108,6 +127,14 @@ function Footer() {
                     Terms & Conditions
                   </Link>
                 </li>
+
+                {cmsPages.map((page) => (
+                  <li key={page._id}>
+                    <Link to={`/page/${page.slug}`} className="text-white/85 text-[13px] hover:text-white transition duration-200">
+                      {page.title}
+                    </Link>
+                  </li>
+                ))}
 
               </ul>
 

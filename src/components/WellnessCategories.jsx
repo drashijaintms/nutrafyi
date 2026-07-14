@@ -99,7 +99,7 @@ function WellnessCategories() {
 
                 <img
                   src={resolveCategoryImage(item.image, item.slug)}
-                  alt={item.title}
+                  alt={item.imageAltText || item.title}
                   className="w-full h-[170px] object-cover"
                 />
 

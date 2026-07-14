@@ -23,7 +23,7 @@ function BlogSliderCard({ blog, visibleCards }) {
       {!imgError && blog.featuredImage ? (
         <img
           src={blog.featuredImage}
-          alt={blog.title}
+          alt={blog.featuredImageAltText || blog.title}
           onError={() => setImgError(true)}
           className="w-full h-[150px] object-cover"
         />
@@ -37,16 +37,14 @@ function BlogSliderCard({ blog, visibleCards }) {
       
       <div className="p-5 flex flex-col flex-1">
         <h3 
-          className="text-[#137b3a] text-[16px] lg:text-[17px] font-bold mb-2.5 line-clamp-2 leading-snug"
-          style={{ fontFamily: "'Poppins', sans-serif" }}
+          className="font-poppins text-[#137b3a] text-[16px] lg:text-[17px] font-bold mb-2.5 line-clamp-2 leading-snug"
         >
           {blog.title}
         </h3>
         
         {blog.excerpt && (
           <p 
-            className="text-[#555555] text-[12px] leading-[18px] font-normal line-clamp-3 mb-0"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
+            className="font-poppins text-[#555555] text-[12px] leading-[18px] font-normal line-clamp-3 mb-0"
           >
             {blog.excerpt}
           </p>

@@ -23,6 +23,10 @@ const categorySchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    imageAltText: {
+      type: String,
+      default: "",
+    },
 
     description: {
       type: String,

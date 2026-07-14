@@ -70,7 +70,11 @@ const deleteBanner = async (req, res) => {
 
 const getBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find({ deleted: { $ne: true } }).sort({ createdAt: -1 });
+    let query = { deleted: { $ne: true } };
+    if (req.query.admin !== "true") {
+      query.status = { $ne: "Draft" };
+    }
+    const blogs = await Blog.find(query).sort({ createdAt: -1 });
     res.json(blogs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -196,7 +200,12 @@ const deletePage = async (req, res) => {
 
 const getBlogBySlug = async (req, res) => {
   try {
-    const blog = await Blog.findOne({ slug: req.params.slug, deleted: { $ne: true } });
+    const isPreview = req.query.preview === "true";
+    let query = { slug: req.params.slug, deleted: { $ne: true } };
+    if (!isPreview) {
+      query.status = { $ne: "Draft" };
+    }
+    const blog = await Blog.findOne(query);
     if (!blog) return res.status(404).json({ message: "Blog not found" });
     res.json(blog);
   } catch (error) {

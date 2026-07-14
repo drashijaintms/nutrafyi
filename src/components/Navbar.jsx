@@ -30,9 +30,9 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-12">
 
-          {/* Hamburger for mobile */}
+          {/* Hamburger for mobile/tablet */}
           <button
-            className="md:hidden text-white p-1"
+            className="lg:hidden text-white p-1"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
           >
@@ -40,7 +40,7 @@ function Navbar() {
           </button>
 
           {/* Desktop nav links - centered */}
-          <ul className="hidden md:flex flex-1 justify-center items-center gap-x-3.5 lg:gap-x-5 xl:gap-x-6" style={{ fontFamily: "'Taviraj', serif" }}>
+          <ul className="hidden lg:flex flex-1 justify-center items-center gap-x-3.5 lg:gap-x-5 xl:gap-x-6" style={{ fontFamily: "'Taviraj', serif" }}>
             {menuItems.map((item, index) => (
               <li key={index}>
                 <Link
@@ -75,9 +75,9 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile/Tablet menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-[#155c2c] border-t border-white/10">
+        <div className="lg:hidden bg-[#155c2c] border-t border-white/10">
           <ul className="flex flex-col py-2" style={{ fontFamily: "'Taviraj', serif" }}>
             {menuItems.map((item, index) => (
               <li key={index}>

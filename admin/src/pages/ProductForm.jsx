@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import API from "../services/api";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { ArrowLeft, Save, Plus, Trash, Image as ImageIcon, Edit, AlertCircle, Clock } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash, Image as ImageIcon, Edit, AlertCircle, Clock, Eye } from "lucide-react";
 import { resolveProductImage } from "../utils/resolveImage";
+
+const getYoutubeId = (url) => {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i);
+  return match ? match[1] : null;
+};
+
+const getStorefrontUrl = (path) => {
+  return `${window.location.origin}${path}`;
+};
 
 import RichTextEditor from "../components/RichTextEditor";
 
@@ -23,6 +33,7 @@ export default function ProductForm() {
   // Form States
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [tempId, setTempId] = useState(null);
   const [price, setPrice] = useState("");
   const [regularPrice, setRegularPrice] = useState("");
   const [salePrice, setSalePrice] = useState("");
@@ -31,7 +42,9 @@ export default function ProductForm() {
   const [description, setDescription] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [image, setImage] = useState("");
+  const [imageAltText, setImageAltText] = useState("");
   const [gallery, setGallery] = useState([]);
+  const [galleryAltText, setGalleryAltText] = useState([]);
   const [videoType, setVideoType] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [videoIframe, setVideoIframe] = useState("");
@@ -50,6 +63,12 @@ export default function ProductForm() {
   const [digitalFile, setDigitalFile] = useState("");
   const [status, setStatus] = useState("Published");
   const [showSaleSchedule, setShowSaleSchedule] = useState(false);
+  const [faqs, setFaqs] = useState([]);
+  const [schemaOverride, setSchemaOverride] = useState("");
+  const [faqEditingIndex, setFaqEditingIndex] = useState(null);
+  const [faqQuestion, setFaqQuestion] = useState("");
+  const [faqAnswer, setFaqAnswer] = useState("");
+  const [faqDragOver, setFaqDragOver] = useState(null);
 
   const [availableForms, setAvailableForms] = useState([
     "Capsules", "Tablets", "Powder", "Gummies", "Liquid", "Serum"
@@ -282,7 +301,9 @@ export default function ProductForm() {
       setDescription(productData.description || "");
       setShortDescription(productData.shortDescription || "");
       setImage(productData.image || "");
+      setImageAltText(productData.imageAltText || "");
       setGallery(productData.gallery || []);
+      setGalleryAltText(productData.galleryAltText || []);
       setVideoType(productData.videoType || "");
       setVideoUrl(productData.videoUrl || "");
       setVideoIframe(productData.videoIframe || "");
@@ -316,9 +337,11 @@ export default function ProductForm() {
       setExternalUrl(productData.externalUrl || "");
       setButtonText(productData.buttonText || "");
       setDigitalFile(productData.digitalFile || "");
-        setStatus(productData.status || "Published");
-        setAttributes(productData.attributes || []);
-        setVariations(productData.variations || []);
+      setStatus(productData.status || "Published");
+      setFaqs(productData.faqs || []);
+      setSchemaOverride(productData.schemaOverride || "");
+      setAttributes(productData.attributes || []);
+      setVariations(productData.variations || []);
         if (productData.seo) {
           setMetaTitle(productData.seo.metaTitle || "");
           setMetaDescription(productData.seo.metaDescription || "");
@@ -535,11 +558,12 @@ export default function ProductForm() {
     setVariations((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    if (!title) return toast.error("Product name is required");
+  const saveProduct = async (isSilentPreview = false, overrideStatus = null) => {
+    if (!title) {
+      if (!isSilentPreview) toast.error("Product name is required");
+      return null;
+    }
 
-    // Strip any stray currency symbols ($, ₹, £ etc.) — store only the plain number
     const stripCurrency = (val) =>
       String(val || "").replace(/[^\d.]/g, "").trim();
 
@@ -573,9 +597,28 @@ export default function ProductForm() {
       ...(dietType ? [{ label: "DIET TYPE", value: dietType }] : [])
     ];
 
+    let finalSlug = slug;
+    if (!finalSlug && title) {
+      finalSlug = title.toLowerCase().replace(/\s+/g, "-").replace(/[^\w\-]+/g, "");
+    }
+
+    // Foolproof FAQ check
+    let finalFaqs = [...faqs];
+    const qEl = document.getElementById("new-faq-question");
+    const aEl = document.getElementById("new-faq-answer");
+    if (qEl && aEl) {
+      const question = qEl.value.trim();
+      const answer = aEl.value.trim();
+      if (question && answer) {
+        if (!finalFaqs.some(f => f.question === question && f.answer === answer)) {
+          finalFaqs.push({ question, answer });
+        }
+      }
+    }
+
     const payload = {
       title,
-      slug: slug || undefined,
+      slug: finalSlug,
       price:        cleanPrice,
       regularPrice: cleanRegularPrice,
       salePrice:    cleanSalePrice,
@@ -585,7 +628,9 @@ export default function ProductForm() {
       description,
       shortDescription,
       image,
+      imageAltText,
       gallery,
+      galleryAltText,
       category,
       categoryName,
       subcategory,
@@ -616,7 +661,9 @@ export default function ProductForm() {
       videoType,
       videoUrl,
       videoIframe,
-      status,
+      faqs: finalFaqs,
+      schemaOverride,
+      status: overrideStatus !== null ? overrideStatus : status,
       attributes,
       variations,
       specifications: finalSpecs,
@@ -629,12 +676,87 @@ export default function ProductForm() {
               const titleWords = title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
               return [...new Set([category, subcategory, brand, title, ...titleWords])].filter(Boolean);
             })(),
-        canonicalUrl: canonicalUrl.trim() || `https://nutrafyi.com/products/${slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        canonicalUrl: canonicalUrl.trim() || `https://nutrafyi.com/products/${finalSlug}`,
       },
     };
 
-saveMutation.mutate(payload);
+    try {
+      let res;
+      const targetId = id || tempId;
+      if (targetId) {
+        res = await API.put(`/products/${targetId}`, payload);
+      } else {
+        res = await API.post("/products", payload);
+      }
+
+      const saved = res.data;
+      if (saved && saved._id && !targetId) {
+        setTempId(saved._id);
+        window.history.replaceState(null, "", `/products/edit/${saved._id}`);
+      }
+
+      queryClient.invalidateQueries(["products"]);
+      if (!isSilentPreview) {
+        toast.success(isEdit ? "Product updated successfully" : "Product created successfully");
+        navigate("/products");
+      }
+      return saved;
+    } catch (err) {
+      if (!isSilentPreview) {
+        toast.error(err.response?.data?.message || "Failed to save product");
+      }
+      return null;
+    }
   };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    saveProduct(false);
+  };
+
+  const handlePreview = async () => {
+    let finalSlug = slug;
+    if (!finalSlug && title) {
+      finalSlug = title.toLowerCase().replace(/\s+/g, "-").replace(/[^\w\-]+/g, "");
+    }
+    if (!finalSlug) {
+      toast.error("Please enter a product title or slug first");
+      return;
+    }
+
+    const toastId = toast.loading("Saving draft for preview...");
+    const saved = await saveProduct(true, "Draft");
+    if (saved) {
+      toast.success("Opening preview...", { id: toastId });
+      window.open(getStorefrontUrl(`/product/${finalSlug}?preview=true`), "_blank");
+    } else {
+      toast.error("Failed to prepare preview", { id: toastId });
+    }
+  };
+
+  const autosaveRef = useRef();
+
+  useEffect(() => {
+    autosaveRef.current = () => {
+      if (title.trim()) {
+        saveProduct(true, "Draft").then(saved => {
+          if (saved) {
+            toast.success("Draft autosaved successfully", { id: "product-autosave-toast", duration: 1500 });
+          }
+        });
+      }
+    };
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (autosaveRef.current) {
+        autosaveRef.current();
+      }
+    }, 2 * 60 * 1000); // 2 minutes
+
+    return () => clearInterval(interval);
+  }, []);
 
   if (isEdit && isLoadingProduct) return <Loader size="lg" />;
 
@@ -660,14 +782,23 @@ saveMutation.mutate(payload);
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={saveMutation.isLoading}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all flex items-center gap-2"
-        >
-          <Save className="w-4.5 h-4.5" />
-          {isVendor ? (isEdit ? "Resubmit for Approval" : "Submit for Approval") : (isEdit ? "Update Product" : "Publish Product")}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handlePreview}
+            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold text-sm px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Eye className="w-4.5 h-4.5" />
+            Preview
+          </button>
+          <button
+            type="submit"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Save className="w-4.5 h-4.5" />
+            {isVendor ? (isEdit ? "Resubmit for Approval" : "Submit for Approval") : (isEdit ? "Update Product" : "Publish Product")}
+          </button>
+        </div>
       </div>
 
       {/* Vendor approval banner */}
@@ -1771,6 +1902,195 @@ saveMutation.mutate(payload);
             </div>
           </div>
 
+          {/* 3. FAQs Accordion Builder Block */}
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs space-y-5 animate-in fade-in duration-100">
+            <div className="border-b border-slate-100 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Product FAQs</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Drag to reorder • Click ✏️ to edit • Auto-generates FAQ schema for Google.</p>
+              </div>
+              {faqs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const schema = JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "FAQPage",
+                      "mainEntity": faqs.map(f => ({
+                        "@type": "Question",
+                        "name": f.question,
+                        "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+                      }))
+                    }, null, 2);
+                    navigator.clipboard?.writeText(schema);
+                    toast.success("FAQ Schema copied to clipboard!");
+                  }}
+                  className="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-all shrink-0 cursor-pointer"
+                >
+                  Auto-generate FAQ Schema
+                </button>
+              )}
+            </div>
+
+            {/* FAQ list with drag-and-drop reorder + edit */}
+            {faqs.length > 0 ? (
+              <div className="space-y-2">
+                {faqs.map((faq, index) => (
+                  <div
+                    key={index}
+                    draggable
+                    onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("faqIndex", index); }}
+                    onDragOver={(e) => { e.preventDefault(); setFaqDragOver(index); }}
+                    onDragLeave={() => setFaqDragOver(null)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const from = parseInt(e.dataTransfer.getData("faqIndex"), 10);
+                      const to = index;
+                      if (from === to) { setFaqDragOver(null); return; }
+                      const updated = [...faqs];
+                      const [moved] = updated.splice(from, 1);
+                      updated.splice(to, 0, moved);
+                      setFaqs(updated);
+                      setFaqDragOver(null);
+                    }}
+                    className={`border rounded-xl p-4 bg-slate-50/50 flex items-start gap-3 group cursor-grab active:cursor-grabbing transition-all ${
+                      faqDragOver === index ? "border-indigo-400 bg-indigo-50/30 shadow-sm" : "border-slate-200"
+                    }`}
+                  >
+                    {/* Drag handle */}
+                    <div className="text-slate-300 group-hover:text-slate-400 transition-colors pt-0.5 select-none shrink-0" title="Drag to reorder">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="text-xs font-bold text-slate-700 truncate">Q: {faq.question}</p>
+                      <p className="text-xs text-slate-500 line-clamp-2">A: {faq.answer}</p>
+                    </div>
+                    {/* Edit & Delete actions */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFaqEditingIndex(index);
+                          setFaqQuestion(faq.question);
+                          setFaqAnswer(faq.answer);
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-slate-200 text-indigo-600 transition-colors"
+                        title="Edit FAQ"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFaqs(prev => prev.filter((_, i) => i !== index))}
+                        className="p-1.5 rounded-lg hover:bg-slate-200 text-rose-500 transition-colors"
+                        title="Remove FAQ"
+                      >
+                        <Trash className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl bg-slate-50/20">
+                <span className="text-xl">❓</span>
+                <p className="text-xs font-bold text-slate-500 mt-1">No FAQs added yet</p>
+                <p className="text-[10px] text-slate-400">Use the form below to add product Q&amp;As. Drag to reorder after adding.</p>
+              </div>
+            )}
+
+            {/* Edit FAQ inline form */}
+            {faqEditingIndex !== null && (
+              <div className="border border-indigo-200 rounded-xl p-4 bg-indigo-50/30 space-y-3">
+                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Editing FAQ #{faqEditingIndex + 1}</p>
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Question</label>
+                  <input
+                    type="text"
+                    value={faqQuestion}
+                    onChange={(e) => setFaqQuestion(e.target.value)}
+                    className="w-full text-xs px-3 py-2 bg-white border border-indigo-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Answer</label>
+                  <textarea
+                    rows={3}
+                    value={faqAnswer}
+                    onChange={(e) => setFaqAnswer(e.target.value)}
+                    className="w-full text-xs px-3 py-2 bg-white border border-indigo-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none font-medium"
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button type="button" onClick={() => { setFaqEditingIndex(null); setFaqQuestion(""); setFaqAnswer(""); }}
+                    className="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-all cursor-pointer">
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const q = faqQuestion.trim();
+                      const a = faqAnswer.trim();
+                      if (!q || !a) return toast.error("Both fields required");
+                      setFaqs(prev => prev.map((f, i) => i === faqEditingIndex ? { question: q, answer: a } : f));
+                      setFaqEditingIndex(null); setFaqQuestion(""); setFaqAnswer("");
+                      toast.success("FAQ updated!");
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all cursor-pointer">
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Add new FAQ form */}
+            {faqEditingIndex === null && (
+              <div className="border-t border-slate-100 pt-4 space-y-3">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Add New Question</h4>
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Question</label>
+                  <input
+                    type="text"
+                    id="new-faq-question"
+                    placeholder="e.g. How should I take this supplement?"
+                    className="w-full text-xs px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Answer</label>
+                  <textarea
+                    id="new-faq-answer"
+                    rows={3}
+                    placeholder="e.g. Take 1 capsule daily with a meal and water."
+                    className="w-full text-xs px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all resize-none font-medium"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const qEl = document.getElementById("new-faq-question");
+                      const aEl = document.getElementById("new-faq-answer");
+                      if (qEl && aEl) {
+                        const question = qEl.value.trim();
+                        const answer = aEl.value.trim();
+                        if (!question || !answer) { toast.error("Both question and answer are required"); return; }
+                        setFaqs(prev => [...prev, { question, answer }]);
+                        qEl.value = ""; aEl.value = "";
+                        toast.success("FAQ added!");
+                      }
+                    }}
+                    className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 font-bold text-xs rounded-lg transition-all cursor-pointer border border-indigo-100"
+                  >
+                    + Add FAQ
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 4. SEO Settings Block (Always visible at the bottom of left column) */}
           <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs space-y-5 animate-in fade-in duration-100">
             <div className="border-b border-slate-100 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1858,6 +2178,38 @@ saveMutation.mutate(payload);
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  Additional JSON-LD Schema
+                </label>
+                <p className="text-[10px] text-slate-400 mb-2 leading-relaxed">
+                  This is injected <strong>alongside</strong> the auto-generated FAQ and Brand schemas — not instead of them.
+                  You can paste any extra schema here (e.g. <code>Product</code>, <code>Organization</code>, <code>Review</code>).
+                  Each schema lives as its own separate <code>&lt;script&gt;</code> tag in the page head.
+                </p>
+                <textarea
+                  value={schemaOverride}
+                  onChange={(e) => setSchemaOverride(e.target.value)}
+                  rows={5}
+                  placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "Product",\n  "name": "Vitamin C Serum"\n}'}
+                  className="w-full text-sm px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all font-mono text-xs"
+                />
+                <div className="mt-2 flex flex-wrap gap-4 text-[10px]">
+                  <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    FAQ Schema — auto-injected if FAQs exist
+                  </span>
+                  <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Brand Schema — auto-injected if brand has info
+                  </span>
+                  <span className="flex items-center gap-1 text-indigo-600 font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    Your schema — appended as a 3rd independent block
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1895,6 +2247,13 @@ saveMutation.mutate(payload);
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
                 placeholder="https://example.com/image.jpg"
+                className="w-full text-xs px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+              <input
+                type="text"
+                value={imageAltText}
+                onChange={(e) => setImageAltText(e.target.value)}
+                placeholder="Featured Image Alt Text"
                 className="w-full text-xs px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
               />
               <label className="w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 font-semibold text-xs py-2.5 rounded-xl cursor-pointer transition-all border border-indigo-100 flex items-center justify-center gap-2">
@@ -1962,24 +2321,72 @@ saveMutation.mutate(payload);
                 />
               </label>
               {gallery.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-3">
                   {gallery.map((imgUrl, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square border border-slate-100 rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center p-1 group shadow-xs"
-                    >
-                      <img
-                        src={resolveProductImage(imgUrl, `${slug}-${index}`)}
-                        alt={`Gallery ${index + 1}`}
-                        className="max-h-full max-w-full object-contain"
+                    <div key={index} className="flex flex-col gap-1.5 border border-slate-100 p-2 rounded-xl bg-slate-50/50 shadow-2xs">
+                      <div className="relative aspect-square border border-slate-100 rounded-lg overflow-hidden bg-slate-50 flex items-center justify-center p-1 group">
+                        {(() => {
+                          const trimmed = (imgUrl || "").trim();
+                          const isIframe = trimmed.startsWith("<iframe") || trimmed.includes("</iframe>");
+                          const isDirectVideo = trimmed.toLowerCase().endsWith(".mp4") || trimmed.toLowerCase().endsWith(".webm") || trimmed.toLowerCase().includes("video");
+
+                          if (isIframe || isDirectVideo) {
+                            const ytId = getYoutubeId(trimmed);
+                            if (ytId) {
+                              return (
+                                <div className="relative w-full h-full">
+                                  <img
+                                    src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
+                                    alt={`Gallery ${index + 1}`}
+                                    className="w-full h-full object-cover rounded-lg"
+                                  />
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+                                    <span className="text-white text-xs">▶</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div className="flex flex-col items-center justify-center text-slate-450 gap-1 text-center w-full h-full select-none bg-slate-100/50 rounded-lg p-1">
+                                <span className="text-sm font-bold text-slate-500">▶</span>
+                                <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400">
+                                  {isIframe ? "Iframe" : "Video"}
+                                </span>
+                              </div>
+                            );
+                          }
+
+                          // Otherwise render standard image
+                          return (
+                            <img
+                              src={resolveProductImage(imgUrl, `${slug}-${index}`)}
+                              alt={`Gallery ${index + 1}`}
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          );
+                        })()}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleRemoveGalleryImage(index);
+                            setGalleryAltText((prev) => prev.filter((_, idx) => idx !== index));
+                          }}
+                          className="absolute top-1 right-1 bg-rose-600/90 hover:bg-rose-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all hover:scale-105 shadow-md"
+                        >
+                          <Trash className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Alt text"
+                        value={galleryAltText[index] || ""}
+                        onChange={(e) => {
+                          const updated = [...galleryAltText];
+                          updated[index] = e.target.value;
+                          setGalleryAltText(updated);
+                        }}
+                        className="w-full text-[10px] px-2 py-1 border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 font-semibold"
                       />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveGalleryImage(index)}
-                        className="absolute top-1 right-1 bg-rose-600/90 hover:bg-rose-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all hover:scale-105 shadow-md"
-                      >
-                        <Trash className="w-3 h-3" />
-                      </button>
                     </div>
                   ))}
                 </div>

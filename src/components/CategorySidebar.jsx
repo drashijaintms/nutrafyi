@@ -3,10 +3,12 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import leafPattern from "../assets/leaf-pattern.png";
 import { getCategories } from "../services/categoryService";
 import { getProducts } from "../services/productService";
+import { getBrands } from "../services/brandService";
 
 function CategorySidebar() {
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
+  const [brands, setBrands] = useState([]);
   const { slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -19,21 +21,23 @@ function CategorySidebar() {
         console.error("Error fetching categories:", error);
       }
     };
-
     fetchCategories();
   }, []);
 
   useEffect(() => {
-    const fetchAllProducts = async () => {
+    const fetchAll = async () => {
       try {
-        const data = await getProducts();
-        setAllProducts(Array.isArray(data) ? data : []);
+        const [products, brandsData] = await Promise.all([
+          getProducts(),
+          getBrands(),
+        ]);
+        setAllProducts(Array.isArray(products) ? products : []);
+        setBrands(Array.isArray(brandsData) ? brandsData : []);
       } catch (error) {
-        console.error("Error fetching all products:", error);
+        console.error("Error fetching sidebar data:", error);
       }
     };
-
-    fetchAllProducts();
+    fetchAll();
   }, []);
 
   // Filter params from URL
@@ -43,6 +47,10 @@ function CategorySidebar() {
 
   const selectedDietary = searchParams.get("dietary")
     ? searchParams.get("dietary").split(",")
+    : [];
+
+  const selectedBrands = searchParams.get("brand")
+    ? searchParams.get("brand").split(",")
     : [];
 
   const minPrice = searchParams.get("minPrice")
@@ -102,6 +110,17 @@ function CategorySidebar() {
     }).length;
   };
 
+  // Helper: count products for a brand
+  const getBrandCount = (brand) => {
+    const brandName = (brand.name || "").toLowerCase();
+    const brandSlug = (brand.slug || "").toLowerCase();
+    return contextProducts.filter((p) => {
+      if (!p.brand) return false;
+      const pBrand = p.brand.toLowerCase();
+      return pBrand === brandName || pBrand === brandSlug;
+    }).length;
+  };
+
   const handleFormToggle = (formName) => {
     const updated = [...selectedForms];
     const index = updated.indexOf(formName);
@@ -132,6 +151,23 @@ function CategorySidebar() {
       newParams.set("dietary", updated.join(","));
     } else {
       newParams.delete("dietary");
+    }
+    setSearchParams(newParams);
+  };
+
+  const handleBrandToggle = (brandName) => {
+    const updated = [...selectedBrands];
+    const index = updated.indexOf(brandName);
+    if (index > -1) {
+      updated.splice(index, 1);
+    } else {
+      updated.push(brandName);
+    }
+    const newParams = new URLSearchParams(searchParams);
+    if (updated.length > 0) {
+      newParams.set("brand", updated.join(","));
+    } else {
+      newParams.delete("brand");
     }
     setSearchParams(newParams);
   };
@@ -327,6 +363,58 @@ function CategorySidebar() {
           ))}
         </div>
       </div>
+
+      {/* ── Shop by Brand ── */}
+      {brands.length > 0 && (
+        <div className="bg-[#f7f7f7] rounded-[20px] p-8 mt-6">
+          <h3 className="text-[#147a3f] text-[20px] font-bold mb-6">
+            Shop by Brand
+          </h3>
+
+          <div className="space-y-4">
+            {brands.map((brand) => {
+              const brandSlug = brand.slug ||
+                brand.name.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w-]+/g, "");
+              const count = getBrandCount(brand);
+              const isChecked = selectedBrands.includes(brandSlug);
+
+              return (
+                <div key={brand._id} className="flex items-center justify-between gap-2">
+                  <label className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleBrandToggle(brandSlug)}
+                      className="w-4 h-4 accent-[#147a3f] shrink-0"
+                    />
+                    <div className="flex items-center gap-2 min-w-0">
+                      {brand.logo && (
+                        <img
+                          src={brand.logo}
+                          alt={brand.logoAltText || brand.name}
+                          className="w-6 h-6 rounded-md object-contain bg-white border border-[#e5e5db] shrink-0"
+                        />
+                      )}
+                      <span className="truncate text-sm">{brand.name}</span>
+                    </div>
+                  </label>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm text-slate-400">{count}</span>
+                    <Link
+                      to={`/brands/${brandSlug}`}
+                      className="text-[11px] font-bold text-[#147a3f] hover:underline whitespace-nowrap"
+                      title={`Learn more about ${brand.name}`}
+                    >
+                      Know More
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
 {/* Need Help Choosing */}
 <div className="bg-[#f4f0df] rounded-[20px] p-8 mt-6 relative overflow-hidden">
 
@@ -340,8 +428,10 @@ function CategorySidebar() {
     Right Products.
   </p>
 
-  <button
+  <Link
+    to="/contact"
     className="
+      inline-block
       bg-[#147a3f]
       hover:bg-[#0f6630]
       text-white
@@ -351,10 +441,11 @@ function CategorySidebar() {
       py-3
       rounded-md
       transition
+      text-center
     "
   >
     CONTACT US
-  </button>
+  </Link>
 
   {/* Optional leaf image */}
   <img

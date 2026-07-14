@@ -24,6 +24,8 @@ import ShippingInfo from "./pages/ShippingInfo";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
+import PageDetail from "./pages/PageDetail";
+import BrandDetail from "./pages/BrandDetail";
 
 import Checkout from "./pages/Checkout";
 
@@ -57,6 +59,8 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />
+            <Route path="/page/:slug" element={<PageDetail />} />
+            <Route path="/brands/:slug" element={<BrandDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/account" element={<Account />} />
             <Route path="/track-order" element={<TrackOrder />} />

@@ -6,7 +6,11 @@ import { getProducts } from "../services/productService";
 import { productImages } from "../data/productImages";
 
 const resolveProductImage = (img, slug) => {
-  if (img && (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/"))) {
+  if (!img) return null;
+  if (img.trim().startsWith("<iframe") || img.trim().startsWith("<div") || img.includes("</iframe>")) {
+    return null;
+  }
+  if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:") || img.startsWith("/")) {
     return img;
   }
   return productImages[img] || productImages[slug] || img;
@@ -44,6 +48,10 @@ function ProductsGrid() {
 
   const selectedDietary = searchParams.get("dietary")
     ? searchParams.get("dietary").split(",")
+    : [];
+
+  const selectedBrands = searchParams.get("brand")
+    ? searchParams.get("brand").split(",")
     : [];
 
   const minPrice = searchParams.get("minPrice")
@@ -95,6 +103,21 @@ function ProductsGrid() {
     if (selectedDietary.length > 0) {
       const diet = getProductDietType(product);
       if (!selectedDietary.includes(diet)) return false;
+    }
+
+    // Brand filter
+    if (selectedBrands.length > 0) {
+      const productBrand = product.brand || "";
+      const matchesBrand = selectedBrands.some((b) => {
+        const searchVal = b.toLowerCase();
+        const pBrand = productBrand.toLowerCase();
+        return (
+          pBrand === searchVal ||
+          pBrand.replace(/\s+/g, "-") === searchVal ||
+          searchVal.replace(/\s+/g, "-") === pBrand
+        );
+      });
+      if (!matchesBrand) return false;
     }
 
     // 4. Price range filter
@@ -170,6 +193,7 @@ function ProductsGrid() {
                 key={product._id}
                 id={product._id}
                 image={resolveProductImage(product.image, product.slug)}
+                imageAltText={product.imageAltText}
                 name={product.title}
                 price={product.price}
                 regularPrice={product.regularPrice}

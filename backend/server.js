@@ -25,6 +25,7 @@ const roleRoutes = require("./routes/roles");
 const trashRoutes = require("./routes/trash");
 const newsletterRoutes = require("./routes/newsletter");
 const approvalRoutes = require("./routes/approvals");
+const contactRoutes = require("./routes/contacts");
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
@@ -62,6 +63,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/user", storefrontUserRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/approvals", approvalRoutes);
+app.use("/api/contacts", contactRoutes);
 
 // Serve admin panel static files
 app.use("/admin", express.static(path.join(__dirname, "../admin/dist")));

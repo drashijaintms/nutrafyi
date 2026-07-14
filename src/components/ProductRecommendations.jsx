@@ -33,6 +33,7 @@ function ProductRecommendations({
             key={product.slug}
             id={product._id || product.id}
             image={product.image}
+            imageAltText={product.imageAltText}
             name={product.name || product.title}
             price={product.price}
             regularPrice={product.regularPrice}

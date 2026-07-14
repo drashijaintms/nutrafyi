@@ -8,6 +8,7 @@ const toNum = (val) => parseFloat(String(val || "0").replace(/[^\d.]/g, "")) || 
 function ProductCard({
   id,
   image,
+  imageAltText,
   name,
   price,
   regularPrice,
@@ -263,7 +264,7 @@ function ProductCard({
         {image ? (
           <img
             src={image}
-            alt={name}
+            alt={imageAltText || name}
             className="max-h-full object-contain transition duration-300 group-hover:scale-105"
           />
         ) : (

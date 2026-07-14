@@ -34,14 +34,42 @@ router.get("/id/:id", getProductById);
 
 router.get("/:slug", async (req, res) => {
   try {
-    const product = await Product.findOne({
+    const isPreview = req.query.preview === "true";
+    let query = {
       slug: req.params.slug,
-      approvalStatus: { $in: ["approved", null] },
-      deleted: { $ne: true },
-    });
+      deleted: { $ne: true }
+    };
+    if (!isPreview) {
+      query.approvalStatus = { $in: ["approved", null] };
+      query.status = { $ne: "Draft" };
+    }
+    const product = await Product.findOne(query).lean();
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    // Auto-populate brand info if brand name exists
+    if (product.brand) {
+      const Brand = require("../models/Brand");
+      const brandSlug = product.brand
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]+/g, "")
+        .replace(/--+/g, "-");
+      const brandDoc = await Brand.findOne({
+        $or: [
+          { slug: brandSlug },
+          { name: new RegExp(`^${product.brand}$`, "i") }
+        ],
+        approvalStatus: { $in: ["approved", null] }
+      }).lean();
+      if (brandDoc) {
+        product.brandInfo = brandDoc;
+      }
+    }
+
     res.json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });

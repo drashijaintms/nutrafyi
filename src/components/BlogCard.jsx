@@ -9,6 +9,7 @@ function BlogCard({
   date,
   slug,
   excerpt,
+  altText,
 }) {
   const [imgError, setImgError] = useState(false);
 
@@ -34,7 +35,7 @@ function BlogCard({
       {image && !imgError ? (
         <img
           src={image}
-          alt={title}
+          alt={altText || title}
           onError={() => setImgError(true)}
           className="w-full h-[170px] object-cover"
         />
@@ -52,8 +53,7 @@ function BlogCard({
         {/* Category */}
         <div className="mb-4">
           <span 
-            className="text-[#137b3a] font-bold text-[13.5px] uppercase tracking-wider border-b-[2px] border-[#137b3a] pb-0.5 inline-block"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
+            className="font-poppins text-[#137b3a] font-bold text-[13.5px] uppercase tracking-wider border-b-[2px] border-[#137b3a] pb-0.5 inline-block"
           >
             {category}
           </span>
@@ -62,16 +62,14 @@ function BlogCard({
         {/* Title + Excerpt in a fixed-start block */}
         <div className="flex-1">
           <h4
-            className="text-[14px] sm:text-[14.5px] font-extrabold leading-[1.4] mb-3 uppercase text-[#111111]"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
+            className="font-poppins text-[14px] sm:text-[14.5px] font-semibold leading-[1.4] mb-3 uppercase text-[#111111]"
           >
             {title}
           </h4>
 
           {excerpt && (
             <p
-              className="text-[#555555] text-[11.5px] leading-[18px] font-medium uppercase tracking-wide line-clamp-3"
-              style={{ fontFamily: "'Poppins', sans-serif" }}
+              className="font-poppins text-[#555555] text-[11.5px] leading-[18px] font-normal uppercase tracking-wide line-clamp-3"
             >
               {excerpt}
             </p>
@@ -80,8 +78,7 @@ function BlogCard({
 
         {/* Date pinned at bottom — no border line */}
         <div 
-          className="mt-4 flex items-center gap-2 text-[11px] font-bold text-[#111111] uppercase tracking-wider"
-          style={{ fontFamily: "'Poppins', sans-serif" }}
+          className="font-poppins mt-4 flex items-center gap-2 text-[11px] font-medium text-[#111111] uppercase tracking-wider"
         >
           <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
           <span>{date}</span>

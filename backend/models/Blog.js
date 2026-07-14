@@ -32,6 +32,10 @@ const blogSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    featuredImageAltText: {
+      type: String,
+      default: "",
+    },
     author: {
       type: String,
       default: "Admin",
