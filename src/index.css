@@ -37,7 +37,7 @@ input[type="submit"],
 }
 
 .section-header-leaf {
-  width: clamp(20px, 3.5vw, 36px);
+  width: clamp(28px, 4.5vw, 48px);
   height: auto;
   flex-shrink: 0;
 }

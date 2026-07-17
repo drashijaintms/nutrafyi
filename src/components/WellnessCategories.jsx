@@ -62,16 +62,6 @@ function WellnessCategories() {
           </div>
         </div>
 
-        {/* View All Link below the heading, right-aligned */}
-        <div className="w-full text-right mb-6 px-3">
-          <Link
-            to="/category"
-            className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"
-          >
-            View All Categories &gt;
-          </Link>
-        </div>
-
         {/* Cards */}
         <div className="flex flex-wrap -mx-3">
 
@@ -109,7 +99,7 @@ function WellnessCategories() {
                     {item.title}
                   </h3>
 
-                  <button className="mt-4 bg-[#7BC043] hover:bg-[#6bb33a] text-white font-semibold px-6 py-3 rounded-md transition text-sm">
+                  <button className="mt-4 bg-[#7BC043] hover:bg-[#6bb33a] text-white font-semibold px-4 py-2 rounded-md transition text-xs">
                     SHOP NOW
                   </button>
 
@@ -119,6 +109,16 @@ function WellnessCategories() {
             </Link>
           ))}
 
+        </div>
+
+        {/* View All Link below the boxes */}
+        <div className="w-full text-center mt-8">
+          <Link
+            to="/category"
+            className="inline-block font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200 border-b-2 border-transparent hover:border-[#147a3f] pb-1"
+          >
+            View All Categories &gt;
+          </Link>
         </div>
 
       </div>

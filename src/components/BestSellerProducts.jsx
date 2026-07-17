@@ -100,141 +100,141 @@ function BestSellerProducts() {
           </div>
         </div>
 
-        {/* View All Link below the heading, right-aligned */}
-        <div className="w-full text-right mb-6">
-          <Link
-            to="/products"
-            className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"
-          >
-            View All Products &gt;
-          </Link>
-        </div>
-
         {/* Products */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
 
-  {bestSellerProducts.map((product) => (
-    <Link
-      key={product._id}
-      to={`/product/${product.slug}`}
-      className="
-        group
-        relative
-        block
-        w-full
-        bg-transparent
-        border
-        border-transparent
-        rounded-[20px]
-        overflow-hidden
-        transition-all
-        duration-300
-        hover:bg-white
-        hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)]
-        hover:scale-[1.03]
-      "
-    >
-      {/* Top Half: Image container — white box with borders by default */}
-      <div className="relative w-full h-[175px] bg-white border border-[#e5e5db] group-hover:border-transparent rounded-[16px] shadow-xs group-hover:shadow-none flex items-center justify-center p-4 transition-all duration-300">
-        {/* Best Seller Badge */}
-        {product.isBestSeller && (
-          <span className="absolute top-0 left-0 z-10 bg-[#d76611] text-white text-[10px] font-semibold px-3 py-1 rounded-br-md rounded-tl-[16px]">
-            Best Seller
-          </span>
-        )}
+          {bestSellerProducts.map((product) => (
+            <Link
+              key={product._id}
+              to={`/product/${product.slug}`}
+              className="
+                group
+                relative
+                block
+                w-full
+                bg-white
+                border
+                border-[#e5e5db]
+                rounded-[20px]
+                overflow-hidden
+                transition-all
+                duration-300
+                hover:border-transparent
+                hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)]
+                hover:scale-[1.05]
+              "
+            >
+              {/* Top Half: Image container — transparent bg, no nested borders */}
+              <div className="relative w-full h-[175px] flex items-center justify-center p-4">
+                {/* Best Seller Badge */}
+                {product.isBestSeller && (
+                  <span className="absolute top-0 left-0 z-10 bg-[#d76611] text-white text-[10px] font-semibold px-3 py-1 rounded-br-md rounded-tl-[20px]">
+                    Best Seller
+                  </span>
+                )}
 
-        {/* Sale Badge */}
-        {(product.badge === "Sale" || (product.salePrice && product.regularPrice && toNum(product.salePrice) > 0 && toNum(product.salePrice) !== toNum(product.regularPrice))) && (
-          <span className={`absolute top-0 z-10 bg-[#e53e3e] text-white text-[10px] font-bold px-3 py-1 rounded-br-md uppercase tracking-wider shadow-md ${product.isBestSeller ? "left-[75px] rounded-tl-none" : "left-0 rounded-tl-[16px]"}`}>
-            Sale
-          </span>
-        )}
+                {/* Sale Badge */}
+                {(product.badge === "Sale" || (product.salePrice && product.regularPrice && toNum(product.salePrice) > 0 && toNum(product.salePrice) !== toNum(product.regularPrice))) && (
+                  <span className={`absolute top-0 z-10 bg-[#e53e3e] text-white text-[10px] font-bold px-3 py-1 rounded-br-md uppercase tracking-wider shadow-md ${product.isBestSeller ? "left-[75px] rounded-tl-none" : "left-0 rounded-tl-[20px]"}`}>
+                    Sale
+                  </span>
+                )}
 
-        <img
-          src={resolveProductImage(product.image, product.slug)}
-          alt={product.title}
-          className="
-            max-h-[145px]
-            object-contain
-            transition
-            duration-300
-            group-hover:scale-105
-          "
-        />
-      </div>
+                <img
+                  src={resolveProductImage(product.image, product.slug)}
+                  alt={product.title}
+                  className="
+                    max-h-[145px]
+                    object-contain
+                    transition
+                    duration-300
+                    group-hover:scale-105
+                  "
+                />
+              </div>
 
-      {/* Bottom Half: Details container */}
-      <div className="px-4 pb-6 pt-4 text-center">
-        <div className="flex items-center justify-center gap-1.5 mb-2.5">
-          <span className="text-[#f5a300] text-[18px] leading-none">
-            {"★".repeat(product.rating || 5)}
-          </span>
-          <span className="text-[13px] text-slate-800 font-medium">
-            ({product.reviews || "2,415"})
-          </span>
+              {/* Bottom Half: Details container */}
+              <div className="px-4 pb-6 pt-4 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-2.5">
+                  <span className="text-[#f5a300] text-[18px] leading-none">
+                    {"★".repeat(product.rating || 5)}
+                  </span>
+                  <span className="text-[13px] text-slate-800 font-medium">
+                    ({product.reviews || "2,415"})
+                  </span>
+                </div>
+
+                <h3 className="font-bold text-[15px] leading-[20px] min-h-[40px] text-black">
+                  {product.title}
+                </h3>
+
+                {/* Pricing Block */}
+                {hasActiveSale(product) ? (
+                  <div className="flex items-baseline justify-center gap-2 mt-3 mb-4">
+                    <span className="font-extrabold text-[19px] text-[#dc2626]">
+                      {formatPrice(product.salePrice, product.currencyOverrides)}
+                    </span>
+                    <span className="text-[13px] line-through text-slate-400 font-semibold">
+                      {formatPrice(product.regularPrice || product.price, product.currencyOverrides, true)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="font-extrabold text-[19px] mt-3 mb-4 text-black">
+                    {formatPrice(product.regularPrice || product.price, product.currencyOverrides)}
+                  </div>
+                )}
+
+                {product.productType === "External" ? (
+                  <button
+                    onClick={(e) => handleBuyNow(e, product)}
+                    className="
+                      w-full
+                      bg-[#147a3f]
+                      hover:bg-[#106933]
+                      text-white
+                      text-[12px]
+                      font-bold
+                      uppercase
+                      py-[10px]
+                      rounded-[6px]
+                      transition
+                    "
+                  >
+                    {product.buttonText || "BUY NOW"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => handleAddToCart(e, product)}
+                    className="
+                      w-full
+                      bg-[#147a3f]
+                      hover:bg-[#106933]
+                      text-white
+                      text-[12px]
+                      font-bold
+                      uppercase
+                      py-[10px]
+                      rounded-[6px]
+                      transition
+                    "
+                  >
+                    ADD TO CART
+                  </button>
+                )}
+              </div>
+            </Link>
+          ))}
+
         </div>
 
-        <h3 className="font-bold text-[15px] leading-[20px] min-h-[40px] text-black">
-          {product.title}
-        </h3>
-
-        {/* Pricing Block */}
-        {hasActiveSale(product) ? (
-          <div className="flex items-baseline justify-center gap-2 mt-3 mb-4">
-            <span className="font-extrabold text-[19px] text-[#dc2626]">
-              {formatPrice(product.salePrice, product.currencyOverrides)}
-            </span>
-            <span className="text-[13px] line-through text-slate-400 font-semibold">
-              {formatPrice(product.regularPrice || product.price, product.currencyOverrides, true)}
-            </span>
-          </div>
-        ) : (
-          <div className="font-extrabold text-[19px] mt-3 mb-4 text-black">
-            {formatPrice(product.regularPrice || product.price, product.currencyOverrides)}
-          </div>
-        )}
-
-        {product.productType === "External" ? (
-          <button
-            onClick={(e) => handleBuyNow(e, product)}
-            className="
-              w-full
-              bg-[#147a3f]
-              hover:bg-[#106933]
-              text-white
-              text-[12px]
-              font-bold
-              uppercase
-              py-[10px]
-              rounded-[6px]
-              transition
-            "
+        {/* View All Link below the boxes */}
+        <div className="w-full text-center mt-10">
+          <Link
+            to="/products"
+            className="inline-block font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200 border-b-2 border-transparent hover:border-[#147a3f] pb-1"
           >
-            {product.buttonText || "BUY NOW"}
-          </button>
-        ) : (
-          <button
-            onClick={(e) => handleAddToCart(e, product)}
-            className="
-              w-full
-              bg-[#147a3f]
-              hover:bg-[#106933]
-              text-white
-              text-[12px]
-              font-bold
-              uppercase
-              py-[10px]
-              rounded-[6px]
-              transition
-            "
-          >
-            ADD TO CART
-          </button>
-        )}
-      </div>
-    </Link>
-  ))}
-
+            View All Products &gt;
+          </Link>
         </div>
 
         {toast.show && (
