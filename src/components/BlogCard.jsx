@@ -79,13 +79,13 @@ function BlogCard({
 
         {/* Date & Author pinned at bottom — no border line */}
         <div 
-          className="font-poppins mt-4 flex items-center justify-between text-[11px] font-medium text-[#111111] uppercase tracking-wider"
+          className="font-poppins mt-4 flex items-center justify-between text-[10px] font-medium text-[#111111] uppercase tracking-wide gap-2"
         >
-          <div className="flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
+          <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+            <Calendar className="w-3.5 h-3.5 text-[#137b3a] shrink-0" />
             <span>{date}</span>
           </div>
-          <span className="text-slate-500 font-semibold">
+          <span className="text-slate-500 font-semibold text-right whitespace-nowrap overflow-hidden text-ellipsis max-w-[130px]" title={(author && !["admin", "superadmin", "super-admin"].includes(author.toLowerCase().trim())) ? author : "Sophia Reynolds"}>
             By {(author && !["admin", "superadmin", "super-admin"].includes(author.toLowerCase().trim())) ? author : "Sophia Reynolds"}
           </span>
         </div>

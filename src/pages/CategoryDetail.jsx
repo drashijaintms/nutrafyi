@@ -238,6 +238,11 @@ if (sortBy === "z-a") {
   value={sortBy}
   onChange={(e) => setSortBy(e.target.value)}
   className="
+    appearance-none
+    bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M7%209l3%203%203-3%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')]
+    bg-[length:20px_20px]
+    bg-[right_12px_center]
+    bg-no-repeat
     border
     border-[#ddd]
     rounded-lg
@@ -245,6 +250,8 @@ if (sortBy === "z-a") {
     pr-10
     py-3
     min-w-[220px]
+    outline-none
+    focus:border-[#147a3f]
   "
 >
   <option value="best-selling">
