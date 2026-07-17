@@ -31,15 +31,15 @@ function Hero() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 bg-[#1a6b35] hover:bg-[#155c2c] text-white px-5 py-3 rounded-lg text-sm font-semibold transition-colors shadow-md"
+              className="inline-flex items-center gap-2 bg-[#1a6b35] hover:bg-[#155c2c] text-white px-5 py-3 rounded-lg text-sm font-semibold shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
             >
               <ShoppingCart size={15} />
-              Explore Wellness Blog
+              Shop Products
             </Link>
 
             <Link
               to="/blog"
-              className="inline-flex items-center gap-2 border border-[#bbb] bg-white/80 hover:bg-white text-[#333] px-5 py-3 rounded-lg text-sm font-semibold transition-colors"
+              className="inline-flex items-center gap-2 border border-[#bbb] bg-white/80 hover:bg-white text-[#333] px-5 py-3 rounded-lg text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
             >
               <Heart size={15} className="text-[#1a6b35]" />
               Explore Wellness Blog

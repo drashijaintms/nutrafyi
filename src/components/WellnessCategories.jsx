@@ -94,7 +94,7 @@ function WellnessCategories() {
 
                 <div className="p-5 text-center">
 
-                  <h3 className="text-[#137b3a] font-bold text-[17px] leading-[22px] uppercase min-h-[60px] flex items-center justify-center">
+                  <h3 className="text-[#137b3a] font-bold text-[19px] leading-[24px] uppercase min-h-[60px] flex items-center justify-center">
                     {item.title}
                   </h3>
 
@@ -111,7 +111,7 @@ function WellnessCategories() {
         </div>
 
         {/* View All Link - right-aligned at the bottom of the last card */}
-        <div className="w-full text-right mt-2 px-3">
+        <div className="w-full text-right px-3">
           <Link
             to="/category"
             className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"

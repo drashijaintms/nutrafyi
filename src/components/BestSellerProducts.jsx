@@ -228,7 +228,7 @@ function BestSellerProducts() {
         </div>
 
         {/* View All Link - right-aligned at the bottom of the last card */}
-        <div className="w-full text-right mt-2 px-3">
+        <div className="w-full text-right px-3">
           <Link
             to="/products"
             className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"
