@@ -241,7 +241,8 @@ if (sortBy === "z-a") {
     border
     border-[#ddd]
     rounded-lg
-    px-4
+    pl-4
+    pr-10
     py-3
     min-w-[220px]
   "

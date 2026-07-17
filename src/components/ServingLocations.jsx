@@ -15,7 +15,7 @@ function ServingLocations() {
             <img
               src={usaMap}
               alt="USA"
-              className="w-[110px] sm:w-[170px] md:w-[240px] opacity-100 object-contain"
+              className="w-[180px] sm:w-[260px] md:w-[350px] opacity-100 object-contain"
             />
           </div>
 
@@ -77,7 +77,7 @@ function ServingLocations() {
             <img
               src={europeMap}
               alt="Europe"
-              className="w-[90px] sm:w-[140px] md:w-[200px] opacity-100 object-contain"
+              className="w-[150px] sm:w-[220px] md:w-[300px] opacity-100 object-contain"
             />
           </div>
 

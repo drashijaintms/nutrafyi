@@ -82,7 +82,8 @@ function CategoryGrid() {
               border
               border-[#ddd]
               rounded-lg
-              px-4
+              pl-4
+              pr-10
               outline-none
               focus:border-[#147a3f]
             "

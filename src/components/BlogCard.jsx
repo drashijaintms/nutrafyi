@@ -10,6 +10,7 @@ function BlogCard({
   slug,
   excerpt,
   altText,
+  author,
 }) {
   const [imgError, setImgError] = useState(false);
 
@@ -76,12 +77,19 @@ function BlogCard({
           )}
         </div>
 
-        {/* Date pinned at bottom — no border line */}
+        {/* Date & Author pinned at bottom — no border line */}
         <div 
-          className="font-poppins mt-4 flex items-center gap-2 text-[11px] font-medium text-[#111111] uppercase tracking-wider"
+          className="font-poppins mt-4 flex items-center justify-between text-[11px] font-medium text-[#111111] uppercase tracking-wider"
         >
-          <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
-          <span>{date}</span>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
+            <span>{date}</span>
+          </div>
+          {author && (
+            <span className="text-slate-500 font-semibold">
+              By {author}
+            </span>
+          )}
         </div>
 
       </div>

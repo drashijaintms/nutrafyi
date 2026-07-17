@@ -171,7 +171,7 @@ function ProductsGrid() {
           <select
   value={sortBy}
   onChange={(e) => setSortBy(e.target.value)}
-  className="w-[220px] h-[48px] border border-[#ddd] rounded-lg px-4"
+  className="w-[220px] h-[48px] border border-[#ddd] rounded-lg pl-4 pr-10"
 >
             <option value="best-selling">Sort By: Best Selling</option>
             <option value="newest">Newest</option>

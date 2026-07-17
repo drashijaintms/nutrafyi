@@ -149,7 +149,8 @@ const popularPosts = [
                   border
                   border-[#ddd]
                   rounded-lg
-                  px-4
+                  pl-4
+                  pr-10
                   py-3
                   min-w-[180px]
                 "
@@ -208,6 +209,7 @@ const popularPosts = [
                     slug={blog.slug}
                     excerpt={blog.excerpt}
                     altText={blog.featuredImageAltText}
+                    author={blog.author}
                   />
                 ))}
               </div>
