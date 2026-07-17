@@ -4,7 +4,7 @@ import europeMap from "../assets/about/Europe-Map.png";
 
 function ServingLocations() {
   return (
-    <section className="bg-[#0e4a24] overflow-hidden py-16 md:py-24">
+    <section className="bg-[#0e4a24] overflow-hidden py-8 md:py-12">
 
       <div className="max-w-[1200px] mx-auto px-4">
 

@@ -467,7 +467,7 @@ function BlogDetail() {
                 <div>
                   <span className="block text-slate-400 text-[11px] uppercase font-bold tracking-wider">Author</span>
                   <span className="font-bold text-slate-800 text-sm">
-                    By {blog.author || "Sophia Reynolds"} • <span className="text-slate-500 font-medium">Nutrition Expert</span>
+                    By {(blog.author && !["admin", "superadmin", "super-admin"].includes(blog.author.toLowerCase().trim())) ? blog.author : "Sophia Reynolds"} • <span className="text-slate-500 font-medium">Nutrition Expert</span>
                   </span>
                 </div>
               </div>

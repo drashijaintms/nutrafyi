@@ -85,11 +85,9 @@ function BlogCard({
             <Calendar className="w-3.5 h-3.5 text-[#137b3a]" />
             <span>{date}</span>
           </div>
-          {author && (
-            <span className="text-slate-500 font-semibold">
-              By {author}
-            </span>
-          )}
+          <span className="text-slate-500 font-semibold">
+            By {(author && !["admin", "superadmin", "super-admin"].includes(author.toLowerCase().trim())) ? author : "Sophia Reynolds"}
+          </span>
         </div>
 
       </div>
