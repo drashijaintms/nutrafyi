@@ -100,16 +100,6 @@ function BestSellerProducts() {
           </div>
         </div>
 
-        {/* View All Link - right-aligned and close to the boxes */}
-        <div className="w-full text-right mb-2 px-3">
-          <Link
-            to="/products"
-            className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"
-          >
-            View All Products &gt;
-          </Link>
-        </div>
-
         {/* Products */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
 
@@ -235,6 +225,16 @@ function BestSellerProducts() {
             </Link>
           ))}
 
+        </div>
+
+        {/* View All Link - right-aligned at the bottom of the last card */}
+        <div className="w-full text-right mt-2 px-3">
+          <Link
+            to="/products"
+            className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"
+          >
+            View All Products &gt;
+          </Link>
         </div>
 
         {toast.show && (
