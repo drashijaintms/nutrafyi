@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCurrency } from "../context/CurrencyContext";
 import { Menu, X } from "lucide-react";
+import logo from "../assets/nutrafyi-logo.png";
 
 function Navbar() {
   const { currency, currencies, changeCurrency } = useCurrency();
@@ -26,28 +27,39 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-[#1a6b35] relative z-50">
+    <nav className="bg-[#1a6b35] relative z-50 py-1">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-16">
 
-          {/* Hamburger for mobile/tablet */}
-          <button
-            className="lg:hidden text-white p-1"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {/* Left side: Hamburger and Logo */}
+          <div className="flex items-center gap-3">
+            {/* Hamburger for mobile/tablet */}
+            <button
+              className="lg:hidden text-white p-1 hover:bg-white/10 rounded-md transition"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+
+            <Link to="/" className="flex items-center select-none py-1">
+              <img
+                src={logo}
+                alt="Nutrafyi"
+                className="h-10 md:h-12 object-contain bg-white rounded-md px-2 py-0.5"
+              />
+            </Link>
+          </div>
 
           {/* Desktop nav links - centered */}
-          <ul className="hidden lg:flex flex-1 justify-center items-center gap-x-3.5 lg:gap-x-5 xl:gap-x-6" style={{ fontFamily: "'Taviraj', serif" }}>
+          <ul className="hidden lg:flex flex-1 justify-center items-center gap-x-2.5 xl:gap-x-4" style={{ fontFamily: "'Taviraj', serif" }}>
             {menuItems.map((item, index) => (
               <li key={index}>
                 <Link
                   to={item.path}
-                  className={`text-[13.5px] font-medium transition-colors whitespace-nowrap ${
+                  className={`text-[13px] xl:text-[14px] font-medium transition-colors whitespace-nowrap ${
                     isActive(item.path)
-                      ? "text-white border-b-2 border-white pb-0.5"
+                      ? "text-white border-b-2 border-white pb-0.5 font-bold"
                       : "text-white/90 hover:text-white"
                   }`}
                 >
