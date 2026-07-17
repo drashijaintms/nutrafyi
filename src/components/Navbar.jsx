@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCurrency } from "../context/CurrencyContext";
 import { Menu, X } from "lucide-react";
-import logo from "../assets/nutrafyi-logo.png";
+import logo from "../assets/footer-logo.png";
 
 function Navbar() {
   const { currency, currencies, changeCurrency } = useCurrency();
@@ -46,7 +46,7 @@ function Navbar() {
               <img
                 src={logo}
                 alt="Nutrafyi"
-                className="h-10 md:h-12 object-contain bg-white rounded-md px-2 py-0.5"
+                className="h-10 md:h-12 object-contain"
               />
             </Link>
           </div>
