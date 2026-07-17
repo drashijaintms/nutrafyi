@@ -9,7 +9,10 @@ function AnimatedCounter({ target, suffix, start }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!start) return; // Wait to start the count-up until section is visible in viewport
+    if (!start) {
+      setCount(0); // Reset the count so it animates again when coming back into view
+      return;
+    }
 
     let startTime = null;
     const duration = 1800; // Smooth 1.8 second count-up animation
@@ -49,10 +52,7 @@ function ImpactNumbers() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect(); // Disconnect observer once triggered
-        }
+        setIsVisible(entry.isIntersecting); // Toggle visibility based on intersection state
       },
       {
         threshold: 0.1, // Trigger when 10% of the section is visible in viewport
