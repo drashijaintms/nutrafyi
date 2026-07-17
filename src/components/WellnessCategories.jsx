@@ -61,6 +61,15 @@ function WellnessCategories() {
             />
           </div>
         </div>
+        {/* View All Link - right-aligned and close to the boxes */}
+        <div className="w-full text-right mb-2 px-3">
+          <Link
+            to="/category"
+            className="font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200"
+          >
+            View All Categories &gt;
+          </Link>
+        </div>
 
         {/* Cards */}
         <div className="flex flex-wrap -mx-3">
@@ -109,16 +118,6 @@ function WellnessCategories() {
             </Link>
           ))}
 
-        </div>
-
-        {/* View All Link below the boxes */}
-        <div className="w-full text-center mt-8">
-          <Link
-            to="/category"
-            className="inline-block font-['Noto_Sans'] font-bold text-[13px] uppercase tracking-wider text-[#111111] hover:text-[#147a3f] transition-colors duration-200 border-b-2 border-transparent hover:border-[#147a3f] pb-1"
-          >
-            View All Categories &gt;
-          </Link>
         </div>
 
       </div>

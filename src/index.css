@@ -23,7 +23,7 @@ input[type="submit"],
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
   width: 100%;
 }
 
@@ -37,7 +37,7 @@ input[type="submit"],
 }
 
 .section-header-leaf {
-  width: clamp(28px, 4.5vw, 48px);
+  width: clamp(36px, 5.5vw, 64px);
   height: auto;
   flex-shrink: 0;
 }
