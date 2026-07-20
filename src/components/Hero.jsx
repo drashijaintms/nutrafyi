@@ -16,10 +16,8 @@ function Hero() {
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10 min-h-[573px] flex items-center">
         <div className="w-full lg:w-[58%]">
 
-          <h1 className="text-[2.6rem] md:text-[3.2rem] lg:text-[3.8rem] font-bold leading-[1.15] text-[#111] mb-5 tracking-tight">
-            Feel Your Best Every Day<br />
-            With Daily Wellness<br />
-            Supplements
+          <h1 className="text-[2.4rem] md:text-[3.4rem] font-bold leading-[1.2] text-[#111] mb-5 tracking-tight">
+            Feel Your Best Every Day With Daily Wellness Supplements
           </h1>
 
           <p className="text-[15px] md:text-[17px] text-gray-600 mb-8 leading-relaxed max-w-[520px]">
