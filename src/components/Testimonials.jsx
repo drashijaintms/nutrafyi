@@ -48,16 +48,14 @@ function Testimonials() {
   const [translateX, setTranslateX] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [animating, setAnimating] = useState(false);
-  const [visibleCards, setVisibleCards] = useState(3);
+  const [visibleCards, setVisibleCards] = useState(2);
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setVisibleCards(1);
-      } else if (window.innerWidth < 1024) {
-        setVisibleCards(2);
       } else {
-        setVisibleCards(3);
+        setVisibleCards(2);
       }
     };
     handleResize();
@@ -155,37 +153,33 @@ function Testimonials() {
                     border
                     border-[#e5e5db]/60
                     rounded-[28px]
-                    p-6
                     shadow-[0_10px_35px_rgba(0,0,0,0.03)]
                     relative
                     flex
-                    gap-6
                     w-full
                     md:w-[calc(50%-12px)]
-                    lg:w-[calc(33.3333%-16px)]
+                    lg:w-[calc(50%-12px)]
                     flex-shrink-0
-                    items-end
+                    items-stretch
                     text-left
-                    min-h-[195px]
+                    min-h-[220px]
+                    overflow-hidden
                   "
                 >
-                  {/* Left Avatar */}
+                  {/* Left Cover Image */}
                   <img
                     src={item.image}
                     alt={item.name}
                     className="
-                      w-[84px]
-                      h-[84px]
-                      rounded-[16px]
+                      w-[150px]
+                      sm:w-[170px]
                       object-cover
-                      border
-                      border-[#e5e5db]/50
                       flex-shrink-0
                     "
                   />
 
                   {/* Right Details */}
-                  <div className="flex-1 flex flex-col min-w-0 pr-6">
+                  <div className="flex-1 flex flex-col justify-center p-6 min-w-0 pr-10">
                     <div className="text-[#f4a000] text-[15px] leading-none mb-1.5 flex gap-0.5">
                       {"★".repeat(5)}
                     </div>
