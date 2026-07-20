@@ -6,6 +6,7 @@ import sarahImg from "../assets/testimonials/sarah-mitchell.png";
 import jamesImg from "../assets/testimonials/james-carter.png";
 import emilyImg from "../assets/testimonials/emily-johnson.png";
 import michaelImg from "../assets/testimonials/michael-brown.png";
+import quoteIcon from "../assets/testimonials/quote-icon.png";
 
 function Testimonials() {
   const testimonials = [
@@ -108,13 +109,13 @@ function Testimonials() {
   useEffect(() => {
     const timer = setInterval(() => {
       handleNext();
-    }, 3000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [animating, visibleCards]);
 
   return (
-    <section className="py-20 bg-transparent overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-[60px] bg-transparent overflow-hidden">
+      <div className="max-w-5xl mx-auto px-4">
         {/* Heading */}
         <div className="section-header-container mb-12">
           <div className="section-header-title-wrap">
@@ -153,35 +154,48 @@ function Testimonials() {
                     border
                     border-[#e5e5db]/60
                     rounded-[28px]
+                    p-4
                     shadow-[0_10px_35px_rgba(0,0,0,0.03)]
                     relative
                     flex
+                    gap-4
                     w-full
                     md:w-[calc(50%-12px)]
                     lg:w-[calc(50%-12px)]
                     flex-shrink-0
-                    items-stretch
+                    items-end
                     text-left
-                    min-h-[220px]
-                    overflow-hidden
+                    min-h-[170px]
                   "
                 >
-                  {/* Left Cover Image */}
+                  {/* Left Avatar */}
                   <img
                     src={item.image}
                     alt={item.name}
                     className="
-                      w-[150px]
-                      sm:w-[170px]
+                      w-[100px]
+                      h-[100px]
+                      rounded-[16px]
                       object-cover
+                      border
+                      border-[#e5e5db]/50
                       flex-shrink-0
                     "
                   />
 
                   {/* Right Details */}
-                  <div className="flex-1 flex flex-col justify-center p-6 min-w-0 pr-10">
-                    <div className="text-[#f4a000] text-[15px] leading-none mb-1.5 flex gap-0.5">
-                      {"★".repeat(5)}
+                  <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex items-center justify-between mb-1.5 pr-2">
+                      <div className="text-[#f4a000] text-[15px] leading-none flex gap-0.5">
+                        {"★".repeat(5)}
+                      </div>
+                      <div className="w-[36px] h-[36px] rounded-full border border-[#e5e5db]/50 bg-white flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                        <img
+                          src={quoteIcon}
+                          alt="Quote"
+                          className="w-[18px] h-[18px] object-contain"
+                        />
+                      </div>
                     </div>
 
                     <h3 className="font-['Noto_Sans'] font-bold text-[16px] text-black mb-1.5 leading-tight">
@@ -195,11 +209,6 @@ function Testimonials() {
                     <span className="font-['Poppins'] text-[13px] font-semibold text-[#137b3a]">
                       — {item.name}, {item.location}
                     </span>
-                  </div>
-
-                  {/* Quote Circle Icon (Top-Right) */}
-                  <div className="absolute top-5 right-5 w-[36px] h-[36px] rounded-full border border-[#e5e5db]/50 bg-white flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-                    <span className="text-[#137b3a] text-[24px] font-bold leading-none">”</span>
                   </div>
                 </div>
               ))}

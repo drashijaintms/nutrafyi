@@ -1,90 +1,32 @@
 import { Link } from "react-router-dom";
 import { ShoppingCart, Heart } from "lucide-react";
-import aboutHero from "../assets/about/about-hero.png";
 
 function AboutHero() {
   return (
-    <section className="relative overflow-hidden">
-      <div
-        className="
-          relative
-          min-h-[460px]
-          md:min-h-[520px]
-          lg:min-h-[580px]
-          flex
-          items-center
-        "
-      >
-        {/* Background Image */}
-        <img
-          src={aboutHero}
-          alt="NutraFYI"
-          className="
-            absolute
-            inset-0
-            w-full
-            h-full
-            object-cover
-            object-right
-          "
-        />
+    <section
+      className="relative bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url(/hero-bg.png?v=2)`,
+        minHeight: "450px",
+        imageRendering: "-webkit-optimize-contrast",
+      }}
+    >
+      {/* Content */}
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10 min-h-[450px] flex items-center">
+        <div className="w-full lg:w-[58%]">
 
-        {/* Content */}
-        <div className="relative z-10 max-w-[550px] w-full px-6 md:px-12 lg:px-20 py-16">
-
-          <h1
-            className="
-              font-['Noto_Sans']
-              text-[30px]
-              sm:text-[36px]
-              md:text-[42px]
-              lg:text-[48px]
-              font-bold
-              leading-[1.15]
-              text-[#111111]
-              mb-5
-            "
-          >
-            Supporting<br />
-            Healthier Living<br />
-            Every Day
+          <h1 className="text-[2.4rem] md:text-[3.4rem] font-bold leading-[1.2] text-[#111] mb-5 tracking-tight">
+            Supporting Healthier Living Every Day
           </h1>
 
-          <p
-            className="
-              font-['Poppins']
-              text-slate-600
-              text-[13.5px]
-              sm:text-[14px]
-              leading-relaxed
-              mb-8
-              max-w-[440px]
-            "
-          >
+          <p className="text-[15px] md:text-[17px] text-gray-600 mb-8 leading-relaxed max-w-[520px]">
             At NutraFYI, we believe wellness is not just about supplements—it's about empowering you to live your best life, naturally.
           </p>
 
           <div className="flex flex-wrap gap-3">
-
             <Link
               to="/products"
-              className="
-                inline-flex
-                items-center
-                gap-2
-                bg-[#137b3a]
-                hover:bg-[#0f6630]
-                text-white
-                px-5
-                py-3
-                rounded-lg
-                text-[13px]
-                font-semibold
-                font-['Poppins']
-                transition-all
-                duration-200
-                shadow-sm
-              "
+              className="inline-flex items-center gap-2 bg-[#1a6b35] hover:bg-[#155c2c] text-white px-5 py-3 rounded-lg text-sm font-semibold shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
             >
               <ShoppingCart size={15} />
               Explore Product
@@ -92,30 +34,11 @@ function AboutHero() {
 
             <Link
               to="/blog"
-              className="
-                inline-flex
-                items-center
-                gap-2
-                bg-white/90
-                border
-                border-slate-300
-                hover:border-[#137b3a]
-                text-slate-700
-                hover:text-slate-900
-                px-5
-                py-3
-                rounded-lg
-                text-[13px]
-                font-semibold
-                font-['Poppins']
-                transition-all
-                duration-200
-              "
+              className="inline-flex items-center gap-2 border border-[#bbb] bg-white/80 hover:bg-white text-[#333] px-5 py-3 rounded-lg text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg"
             >
-              <Heart size={15} className="text-[#137b3a]" />
+              <Heart size={15} className="text-[#1a6b35]" />
               Explore Wellness Blog
             </Link>
-
           </div>
 
         </div>

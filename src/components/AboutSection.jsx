@@ -2,7 +2,7 @@ import aboutImage from "../assets/about-nutrafyi.png";
 
 function AboutSection() {
   return (
-    <section className="py-24 bg-transparent">
+    <section className="py-[60px] bg-transparent">
       <div className="max-w-7xl mx-auto px-4">
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">

@@ -265,7 +265,7 @@ function BlogSection({ category }) {
   }
 
   return (
-    <section className="py-20 bg-[#f4f2e8] overflow-hidden">
+    <section className="py-[60px] bg-[#f4f2e8] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap items-center">
           

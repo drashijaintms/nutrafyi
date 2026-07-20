@@ -78,8 +78,8 @@ function BestSellerProducts() {
   };
 
   return (
-    <section className="py-16 bg-[#faf7e5]">
-      <div className="max-w-[1180px] mx-auto px-4">
+    <section className="py-[60px] bg-[#faf7e5]">
+      <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
         <div className="section-header-container mb-2">

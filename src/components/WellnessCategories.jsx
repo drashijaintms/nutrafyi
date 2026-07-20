@@ -40,7 +40,7 @@ function WellnessCategories() {
   }
 
   return (
-    <section className="py-20 bg-transparent">
+    <section className="py-[60px] bg-transparent">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
