@@ -8,21 +8,21 @@ function Hero() {
       style={{
         backgroundImage: `url(/hero-bg.png)`,
         minHeight: "573px",
+        imageRendering: "-webkit-optimize-contrast",
       }}
     >
 
       {/* Content */}
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10 min-h-[573px] flex items-center">
-        <div className="w-full lg:w-[44%]">
+        <div className="w-full lg:w-[58%]">
 
-          <h1 className="text-[2.4rem] md:text-[2.8rem] font-bold leading-[1.2] text-[#111] mb-5">
-            Feel Your Best<br />
-            Every Day with<br />
-            Daily Wellness<br />
+          <h1 className="text-[2.6rem] md:text-[3.2rem] lg:text-[3.8rem] font-bold leading-[1.15] text-[#111] mb-5 tracking-tight">
+            Feel Your Best Every Day<br />
+            With Daily Wellness<br />
             Supplements
           </h1>
 
-          <p className="text-[14px] text-gray-600 mb-8 leading-relaxed max-w-[320px]">
+          <p className="text-[15px] md:text-[17px] text-gray-600 mb-8 leading-relaxed max-w-[520px]">
             Daily wellness support for a healthier and more
             energized lifestyle, because feeling good should be
             part of every day.
